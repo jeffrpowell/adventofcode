@@ -1,5 +1,6 @@
-package com.jeffrpowell.aoc2018;
+package com.jeffrpowell.adventofcode.aoc2018;
 
+import com.jeffrpowell.adventofcode.Solution;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

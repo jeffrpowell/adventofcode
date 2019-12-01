@@ -1,4 +1,4 @@
-package com.jeffrpowell.aoc2018;
+package com.jeffrpowell.adventofcode;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -16,12 +16,12 @@ import java.util.stream.StreamSupport;
 
 //https://dzone.com/articles/implementing-a-sliding-window-streamspliterator-in
 public class SlidingWindowSpliterator<T> implements Spliterator<Stream<T>> {
-    static <T> Stream<Stream<T>> windowed(Collection<T> stream, int windowSize) {
+    public static <T> Stream<Stream<T>> windowed(Collection<T> stream, int windowSize) {
         return StreamSupport.stream(
             new SlidingWindowSpliterator<>(stream, windowSize), false);
     }
 
-    static <T> Stream<Stream<T>> windowed(Collection<T> stream, int windowSize, T pad) {
+    public static <T> Stream<Stream<T>> windowed(Collection<T> stream, int windowSize, T pad) {
         return StreamSupport.stream(
             new SlidingWindowSpliterator<>(stream, windowSize, pad), false);
     }

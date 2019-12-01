@@ -1,6 +1,7 @@
-package com.jeffrpowell.aoc2018;
+package com.jeffrpowell.adventofcode.aoc2018;
 
 import com.google.common.collect.Lists;
+import com.jeffrpowell.adventofcode.Solution;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.jeffrpowell.aoc2018;
+package com.jeffrpowell.adventofcode.aoc2018;
 
 import java.util.ArrayList;
 import java.util.List;
