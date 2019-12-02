@@ -1,4 +1,4 @@
-package com.jeffrpowell.adventofcode;
+package com.jeffrpowell.adventofcode.aoc2018.inputs;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;

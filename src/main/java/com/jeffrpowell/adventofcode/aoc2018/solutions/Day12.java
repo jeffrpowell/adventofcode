@@ -1,7 +1,6 @@
-package com.jeffrpowell.adventofcode.aoc2018;
+package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
 import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;
-import com.jeffrpowell.adventofcode.Solution;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

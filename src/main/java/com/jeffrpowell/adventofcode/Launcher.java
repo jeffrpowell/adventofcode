@@ -1,7 +1,7 @@
 package com.jeffrpowell.adventofcode;
 
-import com.jeffrpowell.adventofcode.aoc2018.Inputs;
-import com.jeffrpowell.adventofcode.aoc2018.Day25;
+import com.jeffrpowell.adventofcode.aoc2018.inputs.Inputs;
+import com.jeffrpowell.adventofcode.aoc2018.solutions.Day25;
 
 public class Launcher
 {

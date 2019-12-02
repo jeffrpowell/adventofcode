@@ -1,8 +1,7 @@
-package com.jeffrpowell.adventofcode.aoc2018;
+package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SortedSetMultimap;
-import com.jeffrpowell.adventofcode.Solution;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

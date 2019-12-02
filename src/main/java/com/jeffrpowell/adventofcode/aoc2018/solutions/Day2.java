@@ -1,6 +1,5 @@
-package com.jeffrpowell.adventofcode.aoc2018;
+package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
-import com.jeffrpowell.adventofcode.Solution;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

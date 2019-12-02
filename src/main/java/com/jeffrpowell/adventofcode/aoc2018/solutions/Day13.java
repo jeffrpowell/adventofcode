@@ -1,6 +1,5 @@
-package com.jeffrpowell.adventofcode.aoc2018;
+package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
-import com.jeffrpowell.adventofcode.Solution;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
