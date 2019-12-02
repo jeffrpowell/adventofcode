@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Set;
@@ -7,10 +9,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Day10 implements Solution<String>
+public class Day10 extends Solution2018<String>
 {
     private static final Pattern REGEX = Pattern.compile("position=<\\s*(-?\\d+),\\s*(-?\\d+)> velocity=<\\s*(-?\\d+),\\s*(-?\\d+)>");
-    @Override
+    
+	@Override
+	public int getDay()
+	{
+		return 10;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
+	
+	@Override
     public String part1(List<String> input) {
         List<PtFactory> pts = input.stream().map(REGEX::matcher).map(PtFactory::new).collect(Collectors.toList());
         Point2D lastWidth = getConvexHullWidth(pts);

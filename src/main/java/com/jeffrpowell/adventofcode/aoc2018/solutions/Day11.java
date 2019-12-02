@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 
-public class Day11 implements Solution<Integer>
+public class Day11 extends Solution2018<Integer>
 {
     private static final int GRID_SIZE = 300;
     private Map<Point2D, Long> summedAreaPowerGrid;
@@ -20,6 +22,18 @@ public class Day11 implements Solution<Integer>
     private int bestWindowSize;
     private int serial;
     
+	@Override
+	public int getDay()
+	{
+		return 11;
+	}
+	
+	@Override
+	public InputParser<Integer> getInputParser()
+	{
+		return InputParserFactory.getIntegerParser();
+	}
+	
     @Override
     public String part1(List<Integer> input) {
         serial = input.get(0);

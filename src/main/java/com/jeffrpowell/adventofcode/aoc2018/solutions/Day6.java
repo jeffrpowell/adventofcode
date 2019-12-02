@@ -2,6 +2,7 @@ package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
+import com.jeffrpowell.adventofcode.InputParser;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,7 +14,7 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
-public class Day6 implements Solution<Point2D>
+public class Day6 extends Solution2018<Point2D>
 {
     private final PriorityQueue<Seek> queue;
     private final SetMultimap<Point2D, Seek> ptToSeekIndex;
@@ -29,6 +30,18 @@ public class Day6 implements Solution<Point2D>
         this.rootsWithInfiniteArea = new HashSet<>();
     }
         
+	@Override
+	public int getDay()
+	{
+		return 6;
+	}
+	
+	@Override
+	public InputParser<Point2D> getInputParser()
+	{
+		return null; //Added this getInputParser architecture way after the fact, and haven't needed to write a Point2D parser yet
+	}
+	
     @Override
     public String part1(List<Point2D> input) {
         setGridBounds(input);

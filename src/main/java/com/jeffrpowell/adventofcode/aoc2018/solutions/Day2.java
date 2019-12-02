@@ -1,13 +1,28 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Day2 implements Solution<String>
+public class Day2 extends Solution2018<String>
 {
+	
+	@Override
+	public int getDay()
+	{
+		return 2;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
+	
     @Override
     public String part1(List<String> input) {
         List<Map<Character, Integer>> charMaps = input.stream().map(String::toCharArray).map(this::countChars).collect(Collectors.toList());

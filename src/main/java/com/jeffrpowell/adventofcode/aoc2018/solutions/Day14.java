@@ -1,13 +1,15 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
 import com.google.common.collect.Lists;
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Day14 implements Solution<Integer>{
+public class Day14 extends Solution2018<Integer>{
 
 	private Map<Integer, Integer> scores = new HashMap<>();
 	private List<Integer> answer = new ArrayList<>();
@@ -15,6 +17,18 @@ public class Day14 implements Solution<Integer>{
 	private int recipeCap;
 	private int currentIndex1;
 	private int currentIndex2;
+	
+	@Override
+	public int getDay()
+	{
+		return 14;
+	}
+	
+	@Override
+	public InputParser<Integer> getInputParser()
+	{
+		return InputParserFactory.getIntegerParser();
+	}
 	
 	@Override
 	public String part1(List<Integer> input)

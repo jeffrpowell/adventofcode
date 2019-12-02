@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-public class Day12 implements Solution<String>{
+public class Day12 extends Solution2018<String>{
 	private static final Pattern REGEX = Pattern.compile("(\\.|#)(\\.|#)(\\.|#)(\\.|#)(\\.|#) => (\\.|#)");
 	private static List<Pot> pots;
 	private static Map<List<Boolean>, Boolean> rules;
@@ -22,6 +24,18 @@ public class Day12 implements Solution<String>{
     private static boolean switchModes = false;
     private static long numInfinitePlants = 0;
     private static long score;
+	
+	@Override
+	public int getDay()
+	{
+		return 12;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
 	
 	@Override
 	public String part1(List<String> input)

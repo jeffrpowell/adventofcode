@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,11 +13,23 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Day13 implements Solution<String>
+public class Day13 extends Solution2018<String>
 {
     private final Map<Point2D, TrackType> tracks = new HashMap<>();
     private List<Cart> carts = new ArrayList<>();
     
+	@Override
+	public int getDay()
+	{
+		return 13;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
+	
     @Override
     public String part1(List<String> input) {
         setupState(input);

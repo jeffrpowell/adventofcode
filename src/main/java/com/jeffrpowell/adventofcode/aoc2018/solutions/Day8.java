@@ -1,12 +1,26 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class Day8 implements Solution<Integer>{
+public class Day8 extends Solution2018<Integer>{
 
+	@Override
+	public int getDay()
+	{
+		return 8;
+	}
+	
+	@Override
+	public InputParser<Integer> getInputParser()
+	{
+		return InputParserFactory.getIntegerParser();
+	}
+	
 	@Override
 	public String part1(List<Integer> input)
 	{

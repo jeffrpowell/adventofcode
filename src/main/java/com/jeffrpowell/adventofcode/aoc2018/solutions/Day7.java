@@ -2,6 +2,8 @@ package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SortedSetMultimap;
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Day7 implements Solution<String>{
+public class Day7 extends Solution2018<String>{
 
 	private static final Pattern REGEX = Pattern.compile("Step (.) must be finished before step (.) can begin\\.");
 	private final SortedSetMultimap<String, String> prereqs;
@@ -18,6 +20,18 @@ public class Day7 implements Solution<String>{
 	public Day7()
 	{
 		this.prereqs = MultimapBuilder.treeKeys().treeSetValues().build();
+	}
+	
+	@Override
+	public int getDay()
+	{
+		return 7;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
 	}
 	
 	@Override

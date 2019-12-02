@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +10,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Day3 implements Solution<String>
+public class Day3 extends Solution2018<String>
 {
     private static final Pattern REGEX = Pattern.compile("#(\\d+) @ (\\d+),(\\d+): (\\d+)x(\\d+)");
     
+	@Override
+	public int getDay()
+	{
+		return 3;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
+	
     @Override
     public String part1(List<String> input) {
         List<Point2D> pts = new ArrayList<>();

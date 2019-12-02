@@ -1,15 +1,30 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Day17 implements Solution<String>
+public class Day17 extends Solution2018<String>
 {
     private static final Point2D WATER_SPRING = new Point2D.Double(500, 0);
-    @Override
+    
+	@Override
+	public int getDay()
+	{
+		return 17;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
+	
+	@Override
     public String part1(List<String> input) {
         List<PointRange> clayPointRanges = input.stream().map(PointRange::parse).collect(Collectors.toList());
         Point2D topLeft = clayPointRanges.stream().map(PointRange::getStart).reduce(WATER_SPRING, (minPt, pt) -> {

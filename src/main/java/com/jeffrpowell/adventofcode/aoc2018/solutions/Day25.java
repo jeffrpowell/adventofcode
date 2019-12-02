@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,13 +12,25 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Day25 implements Solution<String>
+public class Day25 extends Solution2018<String>
 {
     List<Set<Point4>> constellations;
 
     public Day25() {
         this.constellations = new ArrayList<>();
     }
+
+	@Override
+	public int getDay()
+	{
+		return 25;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
     
     @Override
     public String part1(List<String> input) {

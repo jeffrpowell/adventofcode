@@ -1,13 +1,28 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class Day5 implements Solution<String>{
+public class Day5 extends Solution2018<String>{
 
 	private static final String REGEX = "aA|Aa|bB|Bb|cC|Cc|dD|Dd|eE|Ee|fF|Ff|gG|Gg|hH|Hh|iI|Ii|jJ|Jj|kK|Kk|lL|Ll|mM|Mm|nN|Nn|oO|Oo|pP|Pp|qQ|Qq|rR|Rr|sS|Ss|tT|Tt|uU|Uu|vV|Vv|wW|Ww|xX|Xx|yY|Yy|zZ|Zz";
+	
+	@Override
+	public int getDay()
+	{
+		return 5;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
+	
 	@Override
 	public String part1(List<String> input)
 	{

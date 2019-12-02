@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +18,7 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Day15 implements Solution<String>{
+public class Day15 extends Solution2018<String>{
 
 	private static final Comparator<Point2D> PT_COMPARATOR = (a, b) -> {
 		double ax = a.getX();
@@ -56,6 +58,18 @@ public class Day15 implements Solution<String>{
 	private List<Unit> goblins;
 	private List<Unit> elves;
 	private List<Unit> allUnits;
+	
+	@Override
+	public int getDay()
+	{
+		return 15;
+	}
+	
+	@Override
+	public InputParser<String> getInputParser()
+	{
+		return InputParserFactory.getStringParser();
+	}
 	
 	@Override
 	public String part1(List<String> input)

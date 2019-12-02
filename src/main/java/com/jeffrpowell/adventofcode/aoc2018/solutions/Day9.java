@@ -1,5 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.InputParserFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 
-public class Day9 implements Solution<Integer>{
+public class Day9 extends Solution2018<Integer>{
 
 	private final List<Integer> circle;
 	private final Set<Integer> multsOf23;
@@ -20,6 +22,17 @@ public class Day9 implements Solution<Integer>{
 		this.multsOf23 = new HashSet<>();
 	}
 	
+	@Override
+	public int getDay()
+	{
+		return 25;
+	}
+	
+	@Override
+	public InputParser<Integer> getInputParser()
+	{
+		return InputParserFactory.getIntegerParser();
+	}
 	
 	@Override
 	public String part1(List<Integer> input)
