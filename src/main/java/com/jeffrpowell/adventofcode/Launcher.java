@@ -1,6 +1,6 @@
 package com.jeffrpowell.adventofcode;
 
-import com.jeffrpowell.adventofcode.aoc2018.solutions.Day25;
+import com.jeffrpowell.adventofcode.aoc2019.Day1;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,20 +9,23 @@ import java.util.stream.Collectors;
 
 public class Launcher
 {
-	public static final Solution DAY = new Day25();
+	public static final Solution DAY = new Day1();
 	
     public static void main(String[] args) {
-		InputStream part1InputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(DAY, 1));
-		List<String> part1Input = inputStreamToStringList(part1InputStream);
-        System.out.println(DAY.parseAndRunPart1(part1Input));
-		
-		InputStream part2InputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(DAY, 2));
-		List<String> part2Input = inputStreamToStringList(part2InputStream);
-        System.out.println(DAY.parseAndRunPart2(part2Input));
+		InputStream puzzleInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(DAY));
+		if (puzzleInputStream == null) {
+			System.err.println("Missing input data; expected to find \"" + getInputFileName(DAY) + "\"");
+		}
+		else {
+			List<String> puzzleInput = inputStreamToStringList(puzzleInputStream);
+			
+			System.out.println(DAY.parseAndRunPart1(puzzleInput));
+			System.out.println(DAY.parseAndRunPart2(puzzleInput));
+		}
     }
 	
-	private static String getInputFileName(Solution day, int partNumber) {
-		return "/"+day.getYear()+"/day"+day.getDay()+"."+partNumber;
+	private static String getInputFileName(Solution day) {
+		return day.getYear()+"/day"+day.getDay();
 	}
 	
 	private static List<String> inputStreamToStringList(InputStream inputStream) {

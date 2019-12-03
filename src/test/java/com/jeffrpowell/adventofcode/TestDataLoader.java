@@ -10,13 +10,13 @@ public class TestDataLoader
 {
 	private TestDataLoader() {}
 	
-	public static List<String> getTestData(Solution day, int partNumber) {
-		InputStream partInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(day, partNumber));
-		return inputStreamToStringList(partInputStream);
+	public static List<String> getTestData(Solution day, int inputId) {
+		InputStream testDataInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(day, inputId));
+		return inputStreamToStringList(testDataInputStream);
 	}
 	
-	private static String getInputFileName(Solution day, int partNumber) {
-		return "/"+day.getYear()+"/day"+day.getDay()+"."+partNumber;
+	private static String getInputFileName(Solution day, int inputId) {
+		return day.getYear()+"/day"+day.getDay()+"."+inputId;
 	}
 	
 	private static List<String> inputStreamToStringList(InputStream inputStream) {
