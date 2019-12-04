@@ -91,7 +91,24 @@ public class Day2 extends Solution2019<Integer>{
 	@Override
 	protected String part2(List<Integer> input)
 	{
-		return "";
+		//part 1 asked you to manually change the day's input. 
+		input.set(1, 0); //I don't want to set multiple inputs for the day and I want part 1 to work out of the box
+		input.set(2, 0); //Manually setting things to how they originally were in code here
+		
+		String targetOutput = "19690720";
+		for (int noun = 0; noun < 100; noun++)
+		{
+			for (int verb = 0; verb < 100; verb++)
+			{
+				List<Integer> testInput = input.stream().collect(Collectors.toList());
+				testInput.set(1, noun);
+				testInput.set(2, verb);
+				if (part1(testInput).equals(targetOutput)) {
+					return Integer.toString(100 * noun + verb);
+				}
+			}
+		}
+		return "IDK!";
 	}
 
 }
