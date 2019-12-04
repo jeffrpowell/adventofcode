@@ -1,8 +1,8 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
 import com.google.common.collect.Lists;
-import com.jeffrpowell.adventofcode.InputParser;
-import com.jeffrpowell.adventofcode.InputParserFactory;
+import com.jeffrpowell.adventofcode.inputparser.InputParser;
+import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

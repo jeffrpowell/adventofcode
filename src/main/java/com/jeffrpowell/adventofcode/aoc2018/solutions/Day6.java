@@ -2,7 +2,7 @@ package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
-import com.jeffrpowell.adventofcode.InputParser;
+import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashSet;

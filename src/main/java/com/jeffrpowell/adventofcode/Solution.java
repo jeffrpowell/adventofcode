@@ -1,5 +1,6 @@
 package com.jeffrpowell.adventofcode;
 
+import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import java.util.List;
 
 public abstract class Solution<T>

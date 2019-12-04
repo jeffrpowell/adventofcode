@@ -1,7 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2019;
 
-import com.jeffrpowell.adventofcode.InputParser;
-import com.jeffrpowell.adventofcode.InputParserFactory;
+import com.jeffrpowell.adventofcode.inputparser.InputParser;
+import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.List;
 
 public class Day1 extends Solution2019<Integer>{
