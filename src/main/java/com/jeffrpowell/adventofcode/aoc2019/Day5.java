@@ -22,14 +22,14 @@ public class Day5 extends Solution2019<List<Integer>>{
 	protected String part1(List<List<Integer>> input)
 	{
 		IntCodeComputer computer = new IntCodeComputer(input.get(0));
-		computer.executeProgram();
+		computer.executeProgram(); // Input 1
 		return "";
 	}
 
 	@Override
 	protected String part2(List<List<Integer>> input)
 	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		return part1(input); //Input 5
 	}
 
 }

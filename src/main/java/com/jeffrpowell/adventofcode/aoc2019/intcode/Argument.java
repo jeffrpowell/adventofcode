@@ -28,13 +28,15 @@ public class Argument {
 	}
 	private final Mode parameterMode;
 	private final int value;
+	private final int argPosition;
 
-	public Argument(int parameterMode, int value)
+	public Argument(int parameterMode, int value, int argPosition)
 	{
 		this.parameterMode = Mode.fromModeCode(parameterMode);
 		this.value = value;
+		this.argPosition = argPosition;
 	}
-	
+
 	public int getValue(List<Integer> tape) {
 		return parameterMode.getValue(value, tape);
 	}
@@ -45,6 +47,11 @@ public class Argument {
 	 */
 	public int getValue() {
 		return value;
+	}
+
+	public int getArgPosition()
+	{
+		return argPosition;
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2019.intcode;
 
+import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Halt;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,39 +8,45 @@ import java.util.stream.Collectors;
 public class Instruction {
 	private final Opcode opcode;
 	private final List<Argument> args;
+	private OpcodeExecutionResponse opcodeExecutionResponse;
 
-	public Instruction(int opcodeAndParameterModes, int arg1Position, List<Integer> tape)
+	public Instruction(int opcodePosition, List<Integer> tape)
 	{
-		this.opcode = Opcode.fromCodeAndModes(opcodeAndParameterModes);
+		this.opcode = Opcode.fromCodeAndModes(tape.get(opcodePosition), opcodePosition);
 		this.args = new ArrayList<>();
-		initializeArgsList(opcodeAndParameterModes, arg1Position, tape);
+		initializeArgsList(opcodePosition, tape);
 	}
 	
-	private void initializeArgsList(int opcodeAndParameterModes, int arg1Position, List<Integer> tape) {
-		int parameterModes = opcodeAndParameterModes / 100;
-		for (int i = 0; i < this.opcode.getArgs(); i++)
+	private void initializeArgsList(int opcodePosition, List<Integer> tape) {
+		int parameterModes = tape.get(opcodePosition) / 100;
+		int currentArgPosition = opcodePosition + 1;
+		for (int i = 0; i < this.opcode.getNumArgs(); i++)
 		{
 			int parameterMode = parameterModes % 10;
-			int argumentValue = tape.get(arg1Position++);
-			args.add(new Argument(parameterMode, argumentValue));
+			int argumentValue = tape.get(currentArgPosition);
+			args.add(new Argument(parameterMode, argumentValue, currentArgPosition++));
 			parameterModes /= 10;
 		}
 	}
 
 	public boolean isHalt() {
-		return opcode == Opcode.HALT;
+		return opcode instanceof Halt;
 	}
 
-	public List<Integer> executeOperation(List<Integer> tape) {
-		return opcode.execute(args, tape);
+	public void executeOperation(List<Integer> tape) {
+		opcodeExecutionResponse = opcode.execute(args, tape);
 	}
 	
-	public int advancePositionHead(int currentPositionHead) {
-		return currentPositionHead + opcode.getArgs();
+	public List<Integer> getNewTape() {
+		return opcodeExecutionResponse.getTape();
+	}
+	
+	public int getNewInstructionHeadPosition() {
+		return opcodeExecutionResponse.getNewInstructionHeadPosition();
 	}
 	
 	@Override
 	public String toString() {
-		return opcode.name() + " " + args.stream().map(Argument::toString).collect(Collectors.joining(", "));
+		return opcode.getClass().getSimpleName() + " " + args.stream().map(Argument::toString).collect(Collectors.joining(", "));
 	}
 }

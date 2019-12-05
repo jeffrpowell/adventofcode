@@ -22,9 +22,10 @@ public class IntCodeComputer {
 		int i = 0;
 		Instruction instruction;
 		do {
-			instruction = new Instruction(outputTape.get(i++), i, outputTape);
-			outputTape = instruction.executeOperation(outputTape);
-			i = instruction.advancePositionHead(i);
+			instruction = new Instruction(i, outputTape);
+			instruction.executeOperation(outputTape);
+			outputTape = instruction.getNewTape();
+			i = instruction.getNewInstructionHeadPosition();
 		} while (!instruction.isHalt());
 		hasRun = true;
 	}
