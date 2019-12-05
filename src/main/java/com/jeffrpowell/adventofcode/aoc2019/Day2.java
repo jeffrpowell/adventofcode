@@ -22,10 +22,11 @@ public class Day2 extends Solution2019<List<Integer>>{
 	}
 
 	@Override
-	protected String part1(List<List<Integer>> inputWrapper)
+	protected String part1(List<List<Integer>> input)
 	{
-		List<Integer> input = inputWrapper.get(0);
-		return IntCodeComputer.executeProgram(input).toString();
+		IntCodeComputer computer = new IntCodeComputer(input.get(0));
+		computer.executeProgram();
+		return computer.getTapePosition(0).toString();
 	}
 	
 	@Override
