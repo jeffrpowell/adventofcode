@@ -1,8 +1,8 @@
 package com.jeffrpowell.adventofcode.aoc2019;
 
-import com.jeffrpowell.adventofcode.aoc2019.intcode.IntCodeComputer;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,9 +25,71 @@ public class Day2 extends Solution2019<List<Integer>>{
 	protected String part1(List<List<Integer>> inputWrapper)
 	{
 		List<Integer> input = inputWrapper.get(0);
-		return IntCodeComputer.executeProgram(input).toString();
+		int i = 0;
+		Instruction instruction;
+		do {
+			instruction = new Instruction(input.get(i++), getOrNull(input, i++), getOrNull(input, i++), getOrNull(input, i++));
+			input = instruction.executeOperation(input);
+		} while (!instruction.isHalt());
+		return input.get(0).toString();
 	}
 	
+	private static Integer getOrNull(List<Integer> tape, int i) {
+		if (i > tape.size() ) {
+			return 0;
+		}
+		else {
+			return tape.get(i);
+		}
+	}
+	
+	private static class Instruction {
+		private enum Opcode {
+			ADD(1), MULTIPLY(2), HALT(99);
+			
+			private final int code;
+			Opcode(int code) {
+				this.code = code;
+			}
+			
+			private static Opcode fromCode(int code) {
+				return Arrays.stream(values()).filter(opcode -> opcode.code == code).findAny().orElse(null);
+			}
+		}
+		private final Opcode opcode;
+		private final Integer arg1Pointer;
+		private final Integer arg2Pointer;
+		private final Integer targetPointer;
+
+		public Instruction(int opcode, Integer arg1Pointer, Integer arg2Pointer, Integer targetPointer)
+		{
+			this.opcode = Opcode.fromCode(opcode);
+			this.arg1Pointer = arg1Pointer;
+			this.arg2Pointer = arg2Pointer;
+			this.targetPointer = targetPointer;
+		}
+		
+		public boolean isHalt() {
+			return opcode == Opcode.HALT;
+		}
+		
+		public List<Integer> executeOperation(List<Integer> tape) {
+			if (isHalt()) {
+				return tape;
+			}
+			List<Integer> newTape = tape.stream().collect(Collectors.toList());
+			int arg1 = newTape.get(arg1Pointer);
+			int arg2 = newTape.get(arg2Pointer);
+			if (opcode == Opcode.ADD) {
+				newTape.set(targetPointer, arg1 + arg2);
+			}
+			if (opcode == Opcode.MULTIPLY) {
+				newTape.set(targetPointer, arg1 * arg2);
+			}
+			return newTape;
+		}
+	}
+
 	@Override
 	protected String part2(List<List<Integer>> inputWrapper)
 	{
