@@ -1,20 +1,29 @@
 package com.jeffrpowell.adventofcode.aoc2019.intcode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Instruction {
 	private final Opcode opcode;
-	private final Integer arg1Pointer;
-	private final Integer arg2Pointer;
-	private final Integer targetPointer;
+	private final List<Argument> args;
 
-	public Instruction(int opcode, Integer arg1Pointer, Integer arg2Pointer, Integer targetPointer)
+	public Instruction(int opcodeAndParameterModes, int arg1Position, List<Integer> tape)
 	{
-		this.opcode = Opcode.fromCode(opcode);
-		this.arg1Pointer = arg1Pointer;
-		this.arg2Pointer = arg2Pointer;
-		this.targetPointer = targetPointer;
+		this.opcode = Opcode.fromCodeAndModes(opcodeAndParameterModes);
+		this.args = new ArrayList<>();
+		initializeArgsList(opcodeAndParameterModes, arg1Position, tape);
+	}
+	
+	private void initializeArgsList(int opcodeAndParameterModes, int arg1Position, List<Integer> tape) {
+		int parameterModes = opcodeAndParameterModes / 100;
+		for (int i = 0; i < this.opcode.getArgs(); i++)
+		{
+			int parameterMode = parameterModes % 10;
+			int argumentValue = tape.get(arg1Position++);
+			args.add(new Argument(parameterMode, argumentValue));
+			parameterModes /= 10;
+		}
 	}
 
 	public boolean isHalt() {
@@ -22,18 +31,15 @@ public class Instruction {
 	}
 
 	public List<Integer> executeOperation(List<Integer> tape) {
-		if (isHalt()) {
-			return tape;
-		}
-		List<Integer> newTape = tape.stream().collect(Collectors.toList());
-		int arg1 = newTape.get(arg1Pointer);
-		int arg2 = newTape.get(arg2Pointer);
-		if (opcode == Opcode.ADD) {
-			newTape.set(targetPointer, arg1 + arg2);
-		}
-		if (opcode == Opcode.MULTIPLY) {
-			newTape.set(targetPointer, arg1 * arg2);
-		}
-		return newTape;
+		return opcode.execute(args, tape);
+	}
+	
+	public int advancePositionHead(int currentPositionHead) {
+		return currentPositionHead + opcode.getArgs();
+	}
+	
+	@Override
+	public String toString() {
+		return opcode.name() + " " + args.stream().map(Argument::toString).collect(Collectors.joining(", "));
 	}
 }

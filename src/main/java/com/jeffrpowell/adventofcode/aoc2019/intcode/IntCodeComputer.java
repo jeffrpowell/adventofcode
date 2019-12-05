@@ -10,18 +10,10 @@ public class IntCodeComputer {
 		int i = 0;
 		Instruction instruction;
 		do {
-			instruction = new Instruction(tape.get(i++), getOrNull(tape, i++), getOrNull(tape, i++), getOrNull(tape, i++));
+			instruction = new Instruction(tape.get(i++), i, tape);
 			tape = instruction.executeOperation(tape);
+			i = instruction.advancePositionHead(i);
 		} while (!instruction.isHalt());
 		return tape.get(0);
-	}
-	
-	private static Integer getOrNull(List<Integer> tape, int i) {
-		if (i > tape.size() ) {
-			return 0;
-		}
-		else {
-			return tape.get(i);
-		}
 	}
 }
