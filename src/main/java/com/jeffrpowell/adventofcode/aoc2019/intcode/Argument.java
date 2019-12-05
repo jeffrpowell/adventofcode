@@ -39,6 +39,14 @@ public class Argument {
 		return parameterMode.getValue(value, tape);
 	}
 	
+	/**
+	 * Override to allow for position-writing arguments to get the raw value, despite being in position mode
+	 * @return 
+	 */
+	public int getValue() {
+		return value;
+	}
+	
 	@Override
 	public String toString() {
 		return "["+parameterMode.modeCode+"]"+value;
