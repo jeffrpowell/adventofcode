@@ -12,6 +12,7 @@ import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Output;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 public abstract class Opcode {
@@ -80,11 +81,11 @@ public abstract class Opcode {
 		return opcodePosition;
 	}
 	
-	public OpcodeExecutionResponse execute(List<Argument> args, List<Integer> tape) {
+	public OpcodeExecutionResponse execute(List<Argument> args, List<Integer> tape, BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue) {
 		List<Integer> newTape = tape.stream().collect(Collectors.toList());
-		return performOperation(args, newTape);
+		return performOperation(args, newTape, inputQueue, outputQueue);
 	}
-	protected abstract OpcodeExecutionResponse performOperation(List<Argument> args, List<Integer> tape);
+	protected abstract OpcodeExecutionResponse performOperation(List<Argument> args, List<Integer> tape, BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue);
 	
 	@Override
 	public String toString() {

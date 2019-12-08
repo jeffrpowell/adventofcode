@@ -3,21 +3,25 @@ package com.jeffrpowell.adventofcode.aoc2019.intcode;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Halt;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 public class Instruction {
 	private final Opcode opcode;
 	private final List<Argument> args;
-	private OpcodeExecutionResponse opcodeExecutionResponse;
+	private final List<Integer> tape;
+	private final OpcodeExecutionResponse opcodeExecutionResponse;
 
-	public Instruction(int opcodePosition, List<Integer> tape)
+	public Instruction(int opcodePosition, List<Integer> tape, BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue)
 	{
 		this.opcode = Opcode.fromCodeAndModes(tape.get(opcodePosition), opcodePosition);
 		this.args = new ArrayList<>();
-		initializeArgsList(opcodePosition, tape);
+		this.tape = tape;
+		initializeArgsList(opcodePosition);
+		this.opcodeExecutionResponse = opcode.execute(args, tape, inputQueue, outputQueue);
 	}
 	
-	private void initializeArgsList(int opcodePosition, List<Integer> tape) {
+	private void initializeArgsList(int opcodePosition) {
 		int parameterModes = tape.get(opcodePosition) / 100;
 		int currentArgPosition = opcodePosition + 1;
 		for (int i = 0; i < this.opcode.getNumArgs(); i++)
@@ -33,10 +37,6 @@ public class Instruction {
 		return opcode instanceof Halt;
 	}
 
-	public void executeOperation(List<Integer> tape) {
-		opcodeExecutionResponse = opcode.execute(args, tape);
-	}
-	
 	public List<Integer> getNewTape() {
 		return opcodeExecutionResponse.getTape();
 	}

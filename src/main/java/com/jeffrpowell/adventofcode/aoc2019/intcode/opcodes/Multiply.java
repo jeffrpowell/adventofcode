@@ -4,6 +4,7 @@ import com.jeffrpowell.adventofcode.aoc2019.intcode.Argument;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.Opcode;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.OpcodeExecutionResponse;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 public class Multiply extends Opcode
 {
@@ -15,7 +16,7 @@ public class Multiply extends Opcode
 	}
 
 	@Override
-	protected OpcodeExecutionResponse performOperation(List<Argument> args, List<Integer> tape)
+	protected OpcodeExecutionResponse performOperation(List<Argument> args, List<Integer> tape, BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue)
 	{
 		tape.set(args.get(2).getValue(), getArgValue(args.get(0), tape) * getArgValue(args.get(1), tape));
 		return new OpcodeExecutionResponse(tape, args.get(2).getArgPosition() + 1);

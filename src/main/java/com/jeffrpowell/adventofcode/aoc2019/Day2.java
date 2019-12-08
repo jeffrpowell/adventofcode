@@ -5,6 +5,7 @@ import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
 public class Day2 extends Solution2019<List<Integer>>{
@@ -24,7 +25,7 @@ public class Day2 extends Solution2019<List<Integer>>{
 	@Override
 	protected String part1(List<List<Integer>> input)
 	{
-		IntCodeComputer computer = new IntCodeComputer(input.get(0));
+		IntCodeComputer computer = new IntCodeComputer(input.get(0), new LinkedBlockingDeque<>(), new LinkedBlockingDeque<>());
 		computer.executeProgram();
 		return computer.getTapePosition(0).toString();
 	}
