@@ -3,16 +3,29 @@ package com.jeffrpowell.adventofcode.aoc2019.intcode;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class IntCodeComputer {
 
+	private static final Supplier<BlockingQueue<BigInteger>> QUEUE_GENERATOR = LinkedBlockingDeque::new;
 	private final List<BigInteger> inputTape;
 	private final BlockingQueue<BigInteger> inputQueue;
 	private final BlockingQueue<BigInteger> outputQueue;
 	private List<BigInteger> outputTape;
 	private int relativeBase;
 	private boolean hasRun;
+	
+	public static BlockingQueue<BigInteger> generateDefaultBlockingQueue() {
+		return QUEUE_GENERATOR.get();
+	}
+	
+	public static BlockingQueue<BigInteger> generateDefaultBlockingQueue(BigInteger startingValue) {
+		BlockingQueue<BigInteger> queue = QUEUE_GENERATOR.get();
+		queue.add(startingValue);
+		return queue;
+	}
 	
 	public IntCodeComputer(List<BigInteger> tape, BlockingQueue<BigInteger> inputQueue, BlockingQueue<BigInteger> outputQueue) {
 		this.inputTape = tape;
