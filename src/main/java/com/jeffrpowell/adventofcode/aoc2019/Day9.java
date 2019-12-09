@@ -37,7 +37,12 @@ public class Day9 extends Solution2019<List<BigInteger>>{
 	@Override
 	protected String part2(List<List<BigInteger>> input)
 	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		BlockingQueue<BigInteger> outputQueue = IntCodeComputer.generateDefaultBlockingQueue();
+		IntCodeComputer computer = new IntCodeComputer(input.get(0), IntCodeComputer.generateDefaultBlockingQueue(BigInteger.TWO), outputQueue);
+		computer.executeProgram();
+		List<BigInteger> output = new ArrayList<>();
+		outputQueue.drainTo(output);
+		return output.stream().map(BigInteger::toString).collect(Collectors.joining("\n"));
 	}
 
 }

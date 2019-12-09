@@ -52,11 +52,11 @@ public class Argument {
 	}
 	
 	/**
-	 * Override to allow for position-writing arguments to get the raw value, despite being in position mode
+	 * Override to allow for position-writing arguments to get the raw value, despite being in position/relative mode
 	 * @return 
 	 */
 	public BigInteger getValue() {
-		return value;
+		return parameterMode == Mode.RELATIVE ? value.add(BigInteger.valueOf(relativeBase)) : value;
 	}
 
 	public int getArgPosition()
