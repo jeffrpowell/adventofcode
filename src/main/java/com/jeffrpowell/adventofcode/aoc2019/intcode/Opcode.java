@@ -1,6 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2019.intcode;
 
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Add;
+import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.AdjustRelativeBase;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Equals;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Halt;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Input;
@@ -9,11 +10,13 @@ import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.JumpIfTrue;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.LessThan;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Multiply;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.opcodes.Output;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class Opcode {
 	private static final Map<Integer, Class<? extends Opcode>> OPCODE_INDEX;
@@ -27,6 +30,7 @@ public abstract class Opcode {
 		OPCODE_INDEX.put(6, JumpIfFalse.class);
 		OPCODE_INDEX.put(7, LessThan.class);
 		OPCODE_INDEX.put(8, Equals.class);
+		OPCODE_INDEX.put(9, AdjustRelativeBase.class);
 		OPCODE_INDEX.put(99, Halt.class);
 	}
 			
@@ -67,8 +71,15 @@ public abstract class Opcode {
 		return fromCode(code, opcodePosition);
 	}
 	
-	protected static int getArgValue(Argument arg, List<Integer> tape) {
+	protected static BigInteger getArgValue(Argument arg, List<BigInteger> tape) {
 		return arg.getValue(tape);
+	}
+
+	protected static void writeIntToPosition(List<BigInteger> tape, int positionYouNeedToWriteTo, BigInteger valueToWrite) {
+		if (positionYouNeedToWriteTo >= tape.size()) {
+			Stream.generate(() -> BigInteger.ZERO).limit(positionYouNeedToWriteTo - tape.size() + 1).forEach(tape::add);
+		}
+		tape.set(positionYouNeedToWriteTo, valueToWrite);
 	}
 
 	public int getNumArgs()
@@ -81,11 +92,11 @@ public abstract class Opcode {
 		return opcodePosition;
 	}
 	
-	public OpcodeExecutionResponse execute(List<Argument> args, List<Integer> tape, BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue) {
-		List<Integer> newTape = tape.stream().collect(Collectors.toList());
-		return performOperation(args, newTape, inputQueue, outputQueue);
+	public OpcodeExecutionResponse execute(List<Argument> args, List<BigInteger> tape, int relativeBase, BlockingQueue<BigInteger> inputQueue, BlockingQueue<BigInteger> outputQueue) {
+		List<BigInteger> newTape = tape.stream().collect(Collectors.toList());
+		return performOperation(args, newTape, relativeBase, inputQueue, outputQueue);
 	}
-	protected abstract OpcodeExecutionResponse performOperation(List<Argument> args, List<Integer> tape, BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue);
+	protected abstract OpcodeExecutionResponse performOperation(List<Argument> args, List<BigInteger> tape, int relativeBase, BlockingQueue<BigInteger> inputQueue, BlockingQueue<BigInteger> outputQueue);
 	
 	@Override
 	public String toString() {

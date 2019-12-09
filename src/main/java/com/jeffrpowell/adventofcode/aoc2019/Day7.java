@@ -3,6 +3,7 @@ package com.jeffrpowell.adventofcode.aoc2019;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.IntCodeComputer;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,7 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
-public class Day7 extends Solution2019<List<Integer>>{
+public class Day7 extends Solution2019<List<BigInteger>>{
 
 	
 	@Override
@@ -24,26 +25,26 @@ public class Day7 extends Solution2019<List<Integer>>{
 	}
 
 	@Override
-	public InputParser<List<Integer>> getInputParser()
+	public InputParser<List<BigInteger>> getInputParser()
 	{
-		return InputParserFactory.getIntegerCSVParser();
+		return InputParserFactory.getBigIntegerCSVParser();
 	}
 
 	@Override
-	protected String part1(List<List<Integer>> input)
+	protected String part1(List<List<BigInteger>> input)
 	{
-		List<Integer> tape = input.get(0);
-		List<int[]> phasePermutations = generatePhasePermutations(new int[]{0,1,2,3,4});
-		return Integer.toString(phasePermutations.stream().map(permutation -> Day7.runSimulation(tape, permutation, false)).max(Integer::compare).get());
+		List<BigInteger> tape = input.get(0);
+		List<BigInteger[]> phasePermutations = generatePhasePermutations(new BigInteger[]{BigInteger.ZERO, BigInteger.ONE, BigInteger.TWO, BigInteger.valueOf(3), BigInteger.valueOf(4)});
+		return phasePermutations.stream().map(permutation -> Day7.runSimulation(tape, permutation, false)).max(BigInteger::compareTo).map(BigInteger::toString).get();
 	}
 	
-	private static int runSimulation(List<Integer> tape, int[] phasePermutation, boolean setupFeedbackLoop) {
+	private static BigInteger runSimulation(List<BigInteger> tape, BigInteger[] phasePermutation, boolean setupFeedbackLoop) {
 		ExecutorService executor = Executors.newFixedThreadPool(5);
 		List<Amplifier> amplifiers = new ArrayList<>();
-		BlockingDeque<Integer> priorOutputQueue = new LinkedBlockingDeque<>(Collections.singletonList(0)); //initial input of 0 to first amp
+		BlockingDeque<BigInteger> priorOutputQueue = new LinkedBlockingDeque<>(Collections.singletonList(BigInteger.ZERO)); //initial input of 0 to first amp
 		for (int i = 0; i < phasePermutation.length; i++)
 		{
-			int phaseInput = phasePermutation[i];
+			BigInteger phaseInput = phasePermutation[i];
 			Amplifier amp = new Amplifier(tape.stream().collect(Collectors.toList()), phaseInput, priorOutputQueue);
 			amplifiers.add(amp);
 			priorOutputQueue = amp.getOutputQueue();
@@ -61,20 +62,20 @@ public class Day7 extends Solution2019<List<Integer>>{
 			return amplifiers.get(4).getOutputQueue().take();
 		} catch (InterruptedException ex)
 		{
-			return -1;
+			return BigInteger.valueOf(-1);
 		}
 		finally {
 			executor.shutdown();
 		}
 	}
 	
-	private static List<int[]> generatePhasePermutations(int[] elements) {
-		List<int[]> permutations = new ArrayList<>();
+	private static List<BigInteger[]> generatePhasePermutations(BigInteger[] elements) {
+		List<BigInteger[]> permutations = new ArrayList<>();
 		perm(elements, elements.length, permutations);
 		return permutations;
 	}
 	
-	public static void perm(int[] list, int n, List<int[]> permutations)
+	public static void perm(BigInteger[] list, int n, List<BigInteger[]> permutations)
 	{
 		if(n == 1)
 		{
@@ -88,7 +89,7 @@ public class Day7 extends Solution2019<List<Integer>>{
 
 				int j = ( n % 2 == 0 ) ? i : 0; 
 
-				int t = list[n-1];              
+				BigInteger t = list[n-1];              
 				list[n-1] = list[j];
 				list[j] = t;                
 			}
@@ -97,20 +98,20 @@ public class Day7 extends Solution2019<List<Integer>>{
 	}
 	
 	@Override
-	protected String part2(List<List<Integer>> input)
+	protected String part2(List<List<BigInteger>> input)
 	{
-		List<Integer> tape = input.get(0);
-		List<int[]> phasePermutations = generatePhasePermutations(new int[]{5,6,7,8,9});
-		return Integer.toString(phasePermutations.stream().map(permutation -> Day7.runSimulation(tape, permutation, true)).max(Integer::compare).get());
+		List<BigInteger> tape = input.get(0);
+		List<BigInteger[]> phasePermutations = generatePhasePermutations(new BigInteger[]{BigInteger.valueOf(5), BigInteger.valueOf(6), BigInteger.valueOf(7), BigInteger.valueOf(8), BigInteger.valueOf(9)});
+		return phasePermutations.stream().map(permutation -> Day7.runSimulation(tape, permutation, true)).max(BigInteger::compareTo).map(BigInteger::toString).get();
 	}
 
 	private static class Amplifier implements Runnable{
 		private final CountDownLatch haltLatch;
-		private final List<Integer> tape;
-		private final BlockingDeque<Integer> inputQueue;
-		private BlockingDeque<Integer> outputQueue;
+		private final List<BigInteger> tape;
+		private final BlockingDeque<BigInteger> inputQueue;
+		private BlockingDeque<BigInteger> outputQueue;
 		
-		public Amplifier(List<Integer> tape, int phaseInput, BlockingDeque<Integer> inputQueue) {
+		public Amplifier(List<BigInteger> tape, BigInteger phaseInput, BlockingDeque<BigInteger> inputQueue) {
 			this.tape = tape;
 			this.inputQueue = inputQueue;
 			this.outputQueue = new LinkedBlockingDeque<>();
@@ -123,17 +124,17 @@ public class Day7 extends Solution2019<List<Integer>>{
 			}
 		}
 
-		public BlockingDeque<Integer> getInputQueue()
+		public BlockingDeque<BigInteger> getInputQueue()
 		{
 			return inputQueue;
 		}
 
-		public void setOutputQueue(BlockingDeque<Integer> outputQueue)
+		public void setOutputQueue(BlockingDeque<BigInteger> outputQueue)
 		{
 			this.outputQueue = outputQueue;
 		}
 		
-		public BlockingDeque<Integer> getOutputQueue() {
+		public BlockingDeque<BigInteger> getOutputQueue() {
 			return outputQueue;
 		}
 

@@ -16,7 +16,7 @@ public class IntegerCSVParser implements InputParser<List<Integer>>{
 			.collect(Collectors.toList());
 	}
 	
-	private static final List<Integer> stringToIntList(List<String> strings) {
+	private static List<Integer> stringToIntList(List<String> strings) {
 		return strings.stream().map(Integer::parseInt).collect(Collectors.toList());
 	}
 }

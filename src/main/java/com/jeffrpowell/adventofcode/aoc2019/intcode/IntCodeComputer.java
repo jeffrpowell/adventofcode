@@ -1,22 +1,25 @@
 package com.jeffrpowell.adventofcode.aoc2019.intcode;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 public class IntCodeComputer {
 
-	private final List<Integer> inputTape;
-	private final BlockingQueue<Integer> inputQueue;
-	private final BlockingQueue<Integer> outputQueue;
-	private List<Integer> outputTape;
+	private final List<BigInteger> inputTape;
+	private final BlockingQueue<BigInteger> inputQueue;
+	private final BlockingQueue<BigInteger> outputQueue;
+	private List<BigInteger> outputTape;
+	private int relativeBase;
 	private boolean hasRun;
 	
-	public IntCodeComputer(List<Integer> tape, BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue) {
+	public IntCodeComputer(List<BigInteger> tape, BlockingQueue<BigInteger> inputQueue, BlockingQueue<BigInteger> outputQueue) {
 		this.inputTape = tape;
 		this.inputQueue = inputQueue;
 		this.outputQueue = outputQueue;
 		this.outputTape = inputTape.stream().collect(Collectors.toList());
+		this.relativeBase = 0;
 		this.hasRun = false;
 	}
 	
@@ -27,18 +30,19 @@ public class IntCodeComputer {
 		int i = 0;
 		Instruction instruction;
 		do {
-			instruction = new Instruction(i, outputTape, inputQueue, outputQueue);
+			instruction = new Instruction(i, outputTape, relativeBase, inputQueue, outputQueue);
 			outputTape = instruction.getNewTape();
 			i = instruction.getNewInstructionHeadPosition();
+			relativeBase = instruction.getNewRelativeBase();
 		} while (!instruction.isHalt());
 		hasRun = true;
 	}
 	
-	public Integer getTapePosition(int position) {
+	public BigInteger getTapePosition(int position) {
 		return outputTape.get(position);
 	}
 	
-	public List<Integer> getOutputTape() {
+	public List<BigInteger> getOutputTape() {
 		return outputTape;
 	}
 }

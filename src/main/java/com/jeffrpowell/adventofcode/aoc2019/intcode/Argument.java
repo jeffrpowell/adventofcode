@@ -1,18 +1,26 @@
 package com.jeffrpowell.adventofcode.aoc2019.intcode;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
 
 public class Argument {
 	private enum Mode {
-		POSITION(0, (argValue, tape) -> tape.get(argValue)), 
-		IMMEDIATE(1, (argValue, tape) -> argValue);
+		POSITION(0, (argValue, tape, relativeBase) -> getValueFromTape(argValue.intValue(), tape)), 
+		IMMEDIATE(1, (argValue, tape, relativeBase) -> argValue),
+		RELATIVE(2, (argValue, tape, relativeBase) -> getValueFromTape(argValue.intValue() + relativeBase, tape));
+		
+		private static BigInteger getValueFromTape(int position, List<BigInteger> tape) {
+			if (position >= tape.size()) {
+				return BigInteger.ZERO;
+			}
+			return tape.get(position);
+		}
 		
 		private final int modeCode;
-		private final BiFunction<Integer, List<Integer>, Integer> howToGetValue;
+		private final ArgFetchFunction howToGetValue;
 
-		private Mode(int modeCode, BiFunction<Integer, List<Integer>, Integer> howToGetValue)
+		private Mode(int modeCode, ArgFetchFunction howToGetValue)
 		{
 			this.modeCode = modeCode;
 			this.howToGetValue = howToGetValue;
@@ -22,30 +30,32 @@ public class Argument {
 			return Arrays.stream(values()).filter(mode -> mode.modeCode == modeCode).findAny().orElse(null);
 		}
 		
-		public Integer getValue(int argValue, List<Integer> tape) {
-			return howToGetValue.apply(argValue, tape);
+		public BigInteger getValue(BigInteger argValue, List<BigInteger> tape, int relativeBase) {
+			return howToGetValue.apply(argValue, tape, relativeBase);
 		}
 	}
 	private final Mode parameterMode;
-	private final int value;
+	private final BigInteger value;
 	private final int argPosition;
+	private final int relativeBase;
 
-	public Argument(int parameterMode, int value, int argPosition)
+	public Argument(int parameterMode, BigInteger value, int argPosition, int relativeBase)
 	{
 		this.parameterMode = Mode.fromModeCode(parameterMode);
 		this.value = value;
 		this.argPosition = argPosition;
+		this.relativeBase = relativeBase;
 	}
 
-	public int getValue(List<Integer> tape) {
-		return parameterMode.getValue(value, tape);
+	public BigInteger getValue(List<BigInteger> tape) {
+		return parameterMode.getValue(value, tape, relativeBase);
 	}
 	
 	/**
 	 * Override to allow for position-writing arguments to get the raw value, despite being in position mode
 	 * @return 
 	 */
-	public int getValue() {
+	public BigInteger getValue() {
 		return value;
 	}
 
@@ -57,5 +67,10 @@ public class Argument {
 	@Override
 	public String toString() {
 		return "["+parameterMode.modeCode+"]"+value;
+	}
+	
+	@FunctionalInterface
+	private static interface ArgFetchFunction {
+		public BigInteger apply (BigInteger argValue, List<BigInteger> tape, int relativeBase);
 	}
 }

@@ -7,11 +7,11 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-public class LessThan extends Opcode
+public class AdjustRelativeBase extends Opcode
 {
-	private static final int NUM_ARGS = 3;
+	private static final int NUM_ARGS = 1;
 	
-	public LessThan(int opcodePosition)
+	public AdjustRelativeBase(int opcodePosition)
 	{
 		super(NUM_ARGS, opcodePosition);
 	}
@@ -19,7 +19,6 @@ public class LessThan extends Opcode
 	@Override
 	protected OpcodeExecutionResponse performOperation(List<Argument> args, List<BigInteger> tape, int relativeBase, BlockingQueue<BigInteger> inputQueue, BlockingQueue<BigInteger> outputQueue)
 	{
-		writeIntToPosition(tape, args.get(2).getValue().intValue(), getArgValue(args.get(0), tape).compareTo(getArgValue(args.get(1), tape)) < 0 ? BigInteger.ONE : BigInteger.ZERO);
-		return new OpcodeExecutionResponse(tape, args.get(2).getArgPosition() + 1, relativeBase);
+		return new OpcodeExecutionResponse(tape, args.get(0).getArgPosition() + 1, relativeBase + getArgValue(args.get(0), tape).intValue());
 	}
 }
