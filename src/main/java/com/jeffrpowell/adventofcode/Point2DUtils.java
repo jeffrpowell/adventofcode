@@ -30,4 +30,8 @@ public class Point2DUtils
 				y > topBoundary;
 		}
 	}
+	
+	public static double getSlope(Point2D pt1, Point2D pt2) {
+		return (pt1.getY() - pt2.getY()) / (pt1.getX() - pt2.getX());
+	}
 }

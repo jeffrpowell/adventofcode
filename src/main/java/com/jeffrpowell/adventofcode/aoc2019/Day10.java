@@ -55,7 +55,25 @@ public class Day10 extends Solution2019<List<String>>{
 	@Override
 	protected String part2(List<List<String>> input)
 	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		Set<Asteroid> asteroids = new HashSet<>();
+		Set<Point2D> asteroidLocations = new HashSet<>();
+		int height = input.size();
+		int width = input.get(0).size();
+		for (int y = 0; y < input.size(); y++)
+		{
+			List<String> row = input.get(y);
+			for (int x = 0; x < row.size(); x++)
+			{
+				if (row.get(x).equals("#")) {
+					Point2D asteroidPt = new Point2D.Double(x, y);
+					asteroids.add(new Asteroid(asteroidPt));
+					asteroidLocations.add(asteroidPt);
+				}
+			}
+		}
+		Grid grid = new Grid(asteroids, asteroidLocations, width, height);
+		Point2D winner = grid.findLucky200();
+		return Double.toString(winner.getX() * 100 + winner.getY());
 	}
 	
 	private static class Grid {
@@ -130,14 +148,14 @@ public class Day10 extends Solution2019<List<String>>{
 			}
 			while(!pointsToCheck.isEmpty()) {
 				Point2D seekPt = pointsToCheck.poll();
-				if (canSeeAsteroid(checkedPts, seekPt, transformLookup.get(seekPt), false)) {
+				if (canSeeAsteroid(asteroid, checkedPts, seekPt, transformLookup.get(seekPt), false)) {
 					asteroidsSeen++;
 				}
 			}
 			asteroid.setSeenAsteroids(asteroidsSeen);
 		}
 		
-		private boolean canSeeAsteroid(Set<Point2D> checkedPts, Point2D seekPt, PointTransform transformUsed, boolean alreadySawAsteroid) {
+		private boolean canSeeAsteroid(Asteroid originalAsteroid, Set<Point2D> checkedPts, Point2D seekPt, PointTransform transformUsed, boolean alreadySawAsteroid) {
 			if (checkedPts.contains(seekPt)) {
 				//don't double-count
 				return false;
@@ -147,13 +165,63 @@ public class Day10 extends Solution2019<List<String>>{
 			}
 			if (asteroidLocations.contains(seekPt) && !alreadySawAsteroid) {
 				alreadySawAsteroid = true;
+				originalAsteroid.registerSeenAsteroid(seekPt);
 			}
 			if (Point2DUtils.pointInsideBoundary(seekPt, true, topBoundary, rightBoundary, bottomBoundary, leftBoundary)) {
-				return canSeeAsteroid(checkedPts, transformUsed.apply(seekPt), transformUsed, alreadySawAsteroid);
+				return canSeeAsteroid(originalAsteroid, checkedPts, transformUsed.apply(seekPt), transformUsed, alreadySawAsteroid);
 			}
 			else {
 				return alreadySawAsteroid;
 			}
+		}
+		
+		public Point2D findLucky200() {
+			//My answer to part 1 was 263. So I know that I won't complete a full revolution before finding the answer.
+			//So work from the top and compare slopes, rotating left, until I count off the 64th asteroid in this sorted order
+			Asteroid center = findMostConnectedAsteroid();
+			Point2D centerPt = center.getPt();
+			Set<Point2D> visibleAsteroids = center.getAsteroidsICanSee();
+			//lop off the first three quadrants, the answer is in the top-left quadrant
+			Queue<Point2D> asteroidsInTopLeft = visibleAsteroids.stream()
+				.filter(pt -> pt.getX() < centerPt.getX() && pt.getY() < centerPt.getY())
+				.collect(() -> new PriorityQueue<Point2D>((pt1, pt2) -> 
+					Double.compare(
+						Point2DUtils.getSlope(centerPt, pt2),
+						Point2DUtils.getSlope(centerPt, pt1) //reverse sort to get the closest to top-center to come off first
+					)
+				), Queue::add, Queue::addAll);
+			for (int i = 0; i < 63; i++)
+			{
+				asteroidsInTopLeft.poll();
+			}
+			return asteroidsInTopLeft.poll();
+		}
+		
+		@Override
+		public String toString() {
+			Asteroid center = findMostConnectedAsteroid();
+			StringBuilder builder = new StringBuilder();
+			for (int y = 0; y < bottomBoundary; y++)
+			{
+				for (int x = 0; x < rightBoundary; x++)
+				{
+					Point2D pt = new Point2D.Double(x, y);
+					if (pt.equals(center.getPt())) {
+						builder.append("O");
+					}
+					else if (center.getAsteroidsICanSee().contains(pt)) {
+						builder.append("X");
+					}
+					else if (asteroidLocations.contains(pt)) {
+						builder.append("#");
+					}
+					else {
+						builder.append(".");
+					}
+				}
+				builder.append("\n");
+			}
+			return builder.toString();
 		}
 		
 	}
@@ -180,10 +248,21 @@ public class Day10 extends Solution2019<List<String>>{
 	private static class Asteroid {
 		private final Point2D pt;
 		private int seenAsteroids;
+		private final Set<Point2D> asteroidsICanSee;
 
 		public Asteroid(Point2D pt)
 		{
 			this.pt = pt;
+			this.asteroidsICanSee = new HashSet<>();
+		}
+		
+		public void registerSeenAsteroid(Point2D asteroidPt) {
+			asteroidsICanSee.add(asteroidPt);
+		}
+
+		public Set<Point2D> getAsteroidsICanSee()
+		{
+			return asteroidsICanSee;
 		}
 
 		public int getSeenAsteroids()
