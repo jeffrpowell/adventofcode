@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -100,7 +102,15 @@ public class Day10 extends Solution2019<List<String>>{
 		}
 		
 		private void setSeenAsteroids(Asteroid asteroid) {
+			Set<Point2D> checkedPts = new HashSet<>();
 			Point2D asteroidPt = asteroid.getPt();
+			Queue<Point2D> pointsToCheck = new PriorityQueue<>((pt1, pt2) ->
+				Double.compare(
+					Point2DUtils.getEuclideanDistance(asteroidPt, pt1),
+					Point2DUtils.getEuclideanDistance(asteroidPt, pt2)
+				)
+			);
+			Map<Point2D, PointTransform> transformLookup = new HashMap<>();
 			double distanceToLeft = asteroidPt.getX() - leftBoundary;
 			double distanceToTop = asteroidPt.getY() - topBoundary;
 			double distanceToRight = rightBoundary - asteroidPt.getX();
@@ -112,24 +122,37 @@ public class Day10 extends Solution2019<List<String>>{
 					if (x == 0 && y == 0) {
 						continue;
 					}
-					if (canSeeAsteroid(asteroidPt, x, y)) {
-						asteroidsSeen++;
-					}
+					PointTransform transform = transformCache.get(x).get(y);
+					Point2D seekPt = transform.apply(asteroidPt);
+					pointsToCheck.add(seekPt);
+					transformLookup.put(seekPt, transform);
+				}
+			}
+			while(!pointsToCheck.isEmpty()) {
+				Point2D seekPt = pointsToCheck.poll();
+				if (canSeeAsteroid(checkedPts, seekPt, transformLookup.get(seekPt), false)) {
+					asteroidsSeen++;
 				}
 			}
 			asteroid.setSeenAsteroids(asteroidsSeen);
 		}
 		
-		private boolean canSeeAsteroid(Point2D asteroidPt, double x, double y) {
-			Point2D seekPt = transformCache.get(x).get(y).apply(asteroidPt);
-			if (asteroidLocations.contains(seekPt)) {
-				return true;
-			}
-			else if (Point2DUtils.pointInsideBoundary(seekPt, true, topBoundary, rightBoundary, bottomBoundary, leftBoundary)) {
-				return canSeeAsteroid(seekPt, x, y);
+		private boolean canSeeAsteroid(Set<Point2D> checkedPts, Point2D seekPt, PointTransform transformUsed, boolean alreadySawAsteroid) {
+			if (checkedPts.contains(seekPt)) {
+				//don't double-count
+				return false;
 			}
 			else {
-				return false;
+				checkedPts.add(seekPt);
+			}
+			if (asteroidLocations.contains(seekPt) && !alreadySawAsteroid) {
+				alreadySawAsteroid = true;
+			}
+			if (Point2DUtils.pointInsideBoundary(seekPt, true, topBoundary, rightBoundary, bottomBoundary, leftBoundary)) {
+				return canSeeAsteroid(checkedPts, transformUsed.apply(seekPt), transformUsed, alreadySawAsteroid);
+			}
+			else {
+				return alreadySawAsteroid;
 			}
 		}
 		
