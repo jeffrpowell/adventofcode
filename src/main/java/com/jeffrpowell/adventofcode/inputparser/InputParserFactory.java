@@ -36,4 +36,8 @@ public class InputParserFactory
 	public static InputParser<List<String>> getTokenSVParser(String delimiter) {
 		return new TokenSVParser(delimiter);
 	}
+	
+	public static InputParser<List<Integer>> getIntegerTokenSVParser(String delimiter) {
+		return new IntegerTokenSVParser(delimiter);
+	}
 }
