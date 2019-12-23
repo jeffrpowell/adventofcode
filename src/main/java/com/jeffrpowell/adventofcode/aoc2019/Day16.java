@@ -5,6 +5,12 @@ import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Day16 extends Solution2019<List<Integer>>
 {
@@ -23,70 +29,76 @@ public class Day16 extends Solution2019<List<Integer>>
 	@Override
 	protected String part1(List<List<Integer>> input)
 	{
-		try
+		ExecutorService executor = Executors.newFixedThreadPool(8);
+		List<Integer> newInput = input.get(0);
+		for (int i = 0; i < 100; i++)
 		{
-			List<Integer> phase0Input = input.get(0);
-			Phase phase0 = new Phase(0, phase0Input);
-			Phase phase1 = new Phase(1, phase0Input);
-			Phase phase2 = new Phase(2, phase0Input);
-			Phase phase3 = new Phase(3, phase0Input);
-			Phase phase4 = new Phase(4, phase0Input);
-			Phase phase5 = new Phase(5, phase0Input);
-			Phase phase6 = new Phase(6, phase0Input);
-			Phase phase7 = new Phase(7, phase0Input);
-			List<Integer> newInput = new ArrayList<>();
-			for (int i = 0; i < 100; i++)
-			{
-				try
-				{
-					newInput.add(phase0.call());
-					newInput.add(phase1.call());
-					newInput.add(phase2.call());
-					newInput.add(phase3.call());
-					newInput.add(phase4.call());
-					newInput.add(phase5.call());
-					newInput.add(phase6.call());
-					newInput.add(phase7.call());
-					newInput.clear();
-					phase0 = new Phase(0, newInput);
-					phase1 = new Phase(1, newInput);
-					phase2 = new Phase(2, newInput);
-					phase3 = new Phase(3, newInput);
-					phase4 = new Phase(4, newInput);
-					phase5 = new Phase(5, newInput);
-					phase6 = new Phase(6, newInput);
-					phase7 = new Phase(7, newInput);
-				}
-				catch (Exception ex)
-				{
-				}
-			}
-			System.out.println(phase0.call());
-			System.out.println(phase1.call());
-			System.out.println(phase2.call());
-			System.out.println(phase3.call());
-			System.out.println(phase4.call());
-			System.out.println(phase5.call());
-			System.out.println(phase6.call());
-			System.out.println(phase7.call());
+			Phase phaseI = new Phase(newInput);
+			newInput = phaseI.execute(executor);
 		}
-		catch (Exception ex)
-		{
-		}
+		executor.shutdown();
+		return newInput.stream().limit(8).map(i -> i.toString()).collect(Collectors.joining(""));
 	}
 
 	@Override
 	protected String part2(List<List<Integer>> input)
 	{
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		ExecutorService executor = Executors.newFixedThreadPool(8);
+		List<Integer> input0 = input.get(0);
+		List<Integer> newInput = input.get(0);
+		for (int i = 1; i < 10000; i++)
+		{
+			newInput.addAll(input0);
+		}
+		for (int i = 0; i < 100; i++)
+		{
+			Phase phaseI = new Phase(newInput);
+			newInput = phaseI.execute(executor);
+		}
+		executor.shutdown();
+		return newInput.stream().skip(5972877).limit(8).map(i -> i.toString()).collect(Collectors.joining(""));
 	}
 	
-	private static class Phase implements Callable<Integer>{
+	private static class Phase {
+		private final List<PhaseDigit> outputDigits;
+
+		public Phase(List<Integer> input)
+		{
+			this.outputDigits = IntStream.range(0, input.size())
+				.mapToObj(i -> new PhaseDigit(i, input))
+				.collect(Collectors.toList());
+		}
+
+		public List<Integer> execute(ExecutorService executor) {
+			try
+			{
+				List<Future<Integer>> futureDigits = executor.invokeAll(outputDigits);
+				return futureDigits.stream().map(Phase::getFutureValue).collect(Collectors.toList());
+			}
+			catch (InterruptedException ex)
+			{
+			}
+			return outputDigits.stream().map(phaseDigit -> -1).collect(Collectors.toList());
+		}
+		
+		private static Integer getFutureValue(Future<Integer> future) {
+			try
+			{
+				return future.get();
+			}
+			catch (InterruptedException | ExecutionException ex)
+			{
+				return -1;
+			}
+		}
+	}
+	
+	private static class PhaseDigit implements Callable<Integer>{
 		private static final List<Integer> PATTERN = List.of(0, 1, 0, -1);
 		private final int outputId;
 		private final List<Integer> input;
 
-		public Phase(int outputId, List<Integer> input)
+		public PhaseDigit(int outputId, List<Integer> input)
 		{
 			this.outputId = outputId;
 			this.input = input;
@@ -97,16 +109,16 @@ public class Day16 extends Solution2019<List<Integer>>
 		{
 			List<Integer> output = new ArrayList<>();
 			List<Integer> patternList = createPatternList();
-			for (int i = 0; i < 8; i++)
+			for (int i = 0; i < input.size(); i++)
 			{
 				output.add(input.get(i) * patternList.get(i));
 			}
-			return output.stream().reduce(0, Integer::sum, Integer::sum) / 10_000_000;
+			return fetchOnesDigit(output.stream().reduce(0, Integer::sum, Integer::sum));
 		}
 
 		private List<Integer> createPatternList() {
 			List<Integer> patternList = new ArrayList<>();
-			while(patternList.size() < 8) {
+			while(patternList.size() < input.size() + 1) {
 				for (Integer patternElement : PATTERN)
 				{
 					for (int i = 0; i < outputId + 1; i++)
@@ -117,6 +129,11 @@ public class Day16 extends Solution2019<List<Integer>>
 			}
 			patternList.remove(0);
 			return patternList;
+		}
+		
+		private static Integer fetchOnesDigit(Integer i) {
+			String iStr = i.toString();
+			return Integer.parseInt(String.valueOf(iStr.charAt(iStr.length() - 1)));
 		}
 	}
 }
