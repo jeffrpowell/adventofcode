@@ -1,6 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2019.intcode;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -25,6 +26,12 @@ public class IntCodeComputer {
 		BlockingQueue<BigInteger> queue = QUEUE_GENERATOR.get();
 		queue.add(startingValue);
 		return queue;
+	}
+	
+	public List<Character> dumpOutputAsASCII() {
+		List<BigInteger> output = new ArrayList<>();
+		outputQueue.drainTo(output);
+		return output.stream().map(i -> (char)i.intValue()).collect(Collectors.toList());
 	}
 	
 	public IntCodeComputer(List<BigInteger> tape, BlockingQueue<BigInteger> inputQueue, BlockingQueue<BigInteger> outputQueue) {
