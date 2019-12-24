@@ -1,5 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.awt.geom.Point2D;
@@ -16,7 +17,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Day15 extends Solution2018<String>{
 
@@ -242,7 +242,7 @@ public class Day15 extends Solution2018<String>{
 		}
 		
 		public Set<Point2D> getOpenAdjacentPts(Point2D point) {
-			return getAdjacentPts(point).stream()
+			return Point2DUtils.getAdjacentPts(point).stream()
 				.filter(pt -> map.containsKey(pt))
 				.filter(pt -> map.get(pt) == CellType.BLANK)
 				.filter(pt -> pt.equals(location) || 
@@ -251,18 +251,8 @@ public class Day15 extends Solution2018<String>{
 				.collect(Collectors.toSet());
 		}
 		
-		public Set<Point2D> getAdjacentPts(Point2D point) {
-			double x = point.getX();
-			double y = point.getY();
-			return Stream.of(new Point2D.Double(x, y - 1),
-				new Point2D.Double(x - 1, y),
-				new Point2D.Double(x + 1, y),
-				new Point2D.Double(x, y + 1))
-				.collect(Collectors.toSet());
-		}
-		
 		public Optional<Unit> tryAttack(List<Unit> enemies) {
-			Set<Point2D> adjacentPts = getAdjacentPts(location);
+			Set<Point2D> adjacentPts = Point2DUtils.getAdjacentPts(location);
 			return enemies.stream()
 				.filter(e -> adjacentPts.contains(e.getLocation()))
 				.sorted((e1, e2) -> {
@@ -278,7 +268,7 @@ public class Day15 extends Solution2018<String>{
 		}
 		
 		public void tryMove(List<Unit> enemies, int currentTurn) {
-			Set<Point2D> adjacentPts = getAdjacentPts(location);
+			Set<Point2D> adjacentPts = Point2DUtils.getAdjacentPts(location);
 			if (enemies.stream().map(Unit::getLocation).anyMatch(adjacentPts::contains)) {
 				return;
 			}

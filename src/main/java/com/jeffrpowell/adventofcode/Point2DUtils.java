@@ -2,6 +2,9 @@ package com.jeffrpowell.adventofcode;
 
 import java.awt.geom.Point2D;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Point2DUtils
 {
@@ -34,6 +37,47 @@ public class Point2DUtils
 	
 	public static double getSlope(Point2D pt1, Point2D pt2) {
 		return (pt1.getY() - pt2.getY()) / (pt1.getX() - pt2.getX());
+	}
+	
+	/**
+	 * Defaults to cardinal (4) adjacent neighbors. Use getAdjacentPts(point, true) to get 8 diagonal neighbors.
+	 * @param point
+	 * @return 
+	 */
+	public static Set<Point2D> getAdjacentPts(Point2D point) {
+		return getAdjacentPts(point, false);
+	}
+	
+	public static Set<Point2D> getAdjacentPts(Point2D point, boolean includeDiagonalNeighbors) {
+		double x = point.getX();
+		double y = point.getY();
+		if (includeDiagonalNeighbors) {
+			return Stream.of(
+				new Point2D.Double(x, y - 1),
+				new Point2D.Double(x - 1, y - 1),
+				new Point2D.Double(x - 1, y),
+				new Point2D.Double(x - 1, y + 1),
+				new Point2D.Double(x, y + 1),
+				new Point2D.Double(x + 1, y + 1),
+				new Point2D.Double(x + 1, y),
+				new Point2D.Double(x + 1, y - 1))
+				.collect(Collectors.toSet());
+		}
+		else {
+			return Stream.of(
+				new Point2D.Double(x, y - 1),
+				new Point2D.Double(x - 1, y),
+				new Point2D.Double(x + 1, y),
+				new Point2D.Double(x, y + 1))
+				.collect(Collectors.toSet());
+		}
+	}
+	
+	public static Set<Point2D> getBoundedAdjacentPts(Point2D point, double topBoundary, double rightBoundary, double bottomBoundary, double leftBoundary, boolean inclusiveBoundary, boolean includeDiagonalNeighbors) {
+		Set<Point2D> adjacentPoints = getAdjacentPts(point, includeDiagonalNeighbors);
+		return adjacentPoints.stream()
+			.filter(pt -> Point2DUtils.pointInsideBoundary(pt, inclusiveBoundary, topBoundary, rightBoundary, bottomBoundary, leftBoundary))
+			.collect(Collectors.toSet());
 	}
 	
 	/**
