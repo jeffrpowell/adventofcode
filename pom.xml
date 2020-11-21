@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.jeffrpowell</groupId>
     <artifactId>adventofcode</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2019</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
