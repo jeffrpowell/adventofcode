@@ -3,12 +3,14 @@ package com.jeffrpowell.adventofcode.aoc2015;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
+import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 import java.awt.geom.Point2D;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
-public class Day6 extends Solution2015<List<String>>{
+public class Day6 extends Solution2015<Rule>{
 
     @Override
     public int getDay() {
@@ -16,18 +18,18 @@ public class Day6 extends Solution2015<List<String>>{
     }
 
     @Override
-    public InputParser getInputParser() {
-        return InputParserFactory.getTokenSVParser(" ");
+    public InputParser<Rule> getInputParser() {
+        String regex = "(turn on|turn off|toggle) (\\d+,\\d+) through (\\d+,\\d+)";
+        return InputParserFactory.getRuleParser(Pattern.compile(regex), "\n");
     }
 
     @Override
-    protected String part1(List<List<String>> input) {
-        List<Instruction> instructions = input.stream().map(Instruction::new).collect(Collectors.toList());
+    protected String part1(List<Rule> input) {
         int countOn = 0;
         for (int y = 0; y < 1000; y++) {
             for (int x = 0; x < 1000; x++) {
                 StatefulPt pt = new StatefulPt(new Point2D.Double(x, y));
-                instructions.stream().forEach(i -> i.actOnPt_part1(pt));
+                input.stream().forEach(i -> actOnPt_part1(i, pt));
                 if (pt.on) {
                     countOn++;
                 }
@@ -37,72 +39,53 @@ public class Day6 extends Solution2015<List<String>>{
     }
 
     @Override
-    protected String part2(List<List<String>> input) {
-        List<Instruction> instructions = input.stream().map(Instruction::new).collect(Collectors.toList());
+    protected String part2(List<Rule> input) {
         int brightness = 0;
         for (int y = 0; y < 1000; y++) {
             for (int x = 0; x < 1000; x++) {
                 StatefulPt pt = new StatefulPt(new Point2D.Double(x, y));
-                instructions.stream().forEach(i -> i.actOnPt_part2(pt));
+                input.stream().forEach(i -> actOnPt_part2(i, pt));
                 brightness += pt.brightness;
             }
         }
         return Integer.toString(brightness);
     }
     
-    private static class Instruction {
-        enum Type {
-            ON(b -> true, i -> i + 1), 
-            OFF(b -> false, i -> Math.max(i - 1, 0)), 
-            TOGGLE(b -> !b, i -> i + 2);
-            
-            public Function<Boolean, Boolean> onFn;
-            public Function<Integer, Integer> brightFn;
+    private void actOnPt_part1(Rule r, StatefulPt pt) {
+        Type type = r.getCustomType(0, Type::fromString);
+        Point2D start = r.getPoint2D(1);
+        Point2D finish = r.getPoint2D(2);
+        if (Point2DUtils.pointInsideBoundary(pt.pt, true, start.getY(), finish.getX(), finish.getY(), start.getX())) {
+            pt.on = type.onFn.apply(pt.on);
+        }
+    }
+    
+    private void actOnPt_part2(Rule r, StatefulPt pt) {
+        Type type = r.getCustomType(0, Type::fromString);
+        Point2D start = r.getPoint2D(1);
+        Point2D finish = r.getPoint2D(2);
+        if (Point2DUtils.pointInsideBoundary(pt.pt, true, start.getY(), finish.getX(), finish.getY(), start.getX())) {
+            pt.brightness = type.brightFn.apply(pt.brightness);
+        }
+    }
+    
+    private static enum Type {
+        ON("turn on", b -> true, i -> i + 1), 
+        OFF("turn off", b -> false, i -> Math.max(i - 1, 0)), 
+        TOGGLE("toggle", b -> !b, i -> i + 2);
 
-            private Type(Function<Boolean, Boolean> onFn, Function<Integer, Integer> brightFn) {
-                this.onFn = onFn;
-                this.brightFn = brightFn;
-            }
+        public String label;
+        public Function<Boolean, Boolean> onFn;
+        public Function<Integer, Integer> brightFn;
+
+        private Type(String label, Function<Boolean, Boolean> onFn, Function<Integer, Integer> brightFn) {
+            this.label = label;
+            this.onFn = onFn;
+            this.brightFn = brightFn;
         }
         
-        public Type type;
-        public Point2D start;
-        public Point2D finish;
-        
-        public Instruction(List<String> input) {
-            String type0 = input.get(0);
-            int startIndex = 1;
-            if (type0.equals("turn")) {
-                if (input.get(1).equals("on")) {
-                    this.type = Type.ON;
-                }
-                else {
-                    this.type = Type.OFF;
-                }
-                startIndex = 2;
-            }
-            else {
-                this.type = Type.TOGGLE;
-            }
-            this.start = csvToPoint(input.get(startIndex));
-            startIndex += 2; // skip "through"
-            this.finish = csvToPoint(input.get(startIndex));
-        }
-        
-        private static Point2D csvToPoint(String csv) {
-            String[] coords = csv.split(",");
-            return new Point2D.Double(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
-        }
-        
-        public void actOnPt_part1(StatefulPt pt) {
-            if (Point2DUtils.pointInsideBoundary(pt.pt, true, start.getY(), finish.getX(), finish.getY(), start.getX())) {
-                pt.on = type.onFn.apply(pt.on);
-            }
-        }
-        public void actOnPt_part2(StatefulPt pt) {
-            if (Point2DUtils.pointInsideBoundary(pt.pt, true, start.getY(), finish.getX(), finish.getY(), start.getX())) {
-                pt.brightness = type.brightFn.apply(pt.brightness);
-            }
+        public static Type fromString(String s) {
+            return Arrays.stream(values()).filter(t -> t.label.equals(s)).findAny().get();
         }
     }
     

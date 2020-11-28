@@ -1,7 +1,10 @@
 package com.jeffrpowell.adventofcode.inputparser;
 
+import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
+import com.jeffrpowell.adventofcode.inputparser.rule.RuleParser;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class InputParserFactory
 {
@@ -40,4 +43,8 @@ public class InputParserFactory
 	public static InputParser<List<Integer>> getIntegerTokenSVParser(String delimiter) {
 		return new IntegerTokenSVParser(delimiter);
 	}
+    
+    public static InputParser<Rule> getRuleParser(Pattern regex, String ruleDelimiter) {
+        return new RuleParser(regex, ruleDelimiter);
+    }
 }
