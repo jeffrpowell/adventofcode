@@ -4,6 +4,7 @@ import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 import com.jeffrpowell.adventofcode.inputparser.rule.RuleParser;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class InputParserFactory
@@ -44,7 +45,7 @@ public class InputParserFactory
 		return new IntegerTokenSVParser(delimiter);
 	}
     
-    public static InputParser<Rule> getRuleParser(Pattern regex, String ruleDelimiter) {
-        return new RuleParser(regex, ruleDelimiter);
+    public static InputParser<Rule> getRuleParser(String ruleDelimiter, Map<String, Pattern> namedRegexPatterns) {
+        return new RuleParser(ruleDelimiter, namedRegexPatterns);
     }
 }

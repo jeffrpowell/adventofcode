@@ -3,34 +3,57 @@ package com.jeffrpowell.adventofcode.inputparser.rule;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RuleParser implements InputParser<Rule>{
 
-    private final Pattern regex;
+    private static final Logger log = LogManager.getLogger(InputParser.class);
     private final String ruleDelimiter;
+    private final Map<String, Pattern> patterns;
 
-    public RuleParser(Pattern regex, String ruleDelimiter) {
-        this.regex = regex;
+    public RuleParser(String ruleDelimiter, Map<String, Pattern> patterns) {
         this.ruleDelimiter = ruleDelimiter;
-    }
-    
-    @Override
-    public List<Rule> parseInput(List<String> input) {
-        return input.stream()
-            .map(regex::matcher)
-            .filter(Matcher::find)
-            .map(m -> {
-                List<String> tokens = new ArrayList<>();
-                for (int i = 1; i < m.groupCount() + 1; i++) {
-                    tokens.add(m.group(i));
-                }
-                return new Rule(tokens);
-            })
-            .collect(Collectors.toList());
-        
+        this.patterns = patterns;
     }
 
+    @Override
+    public List<Rule> parseInput(List<String> inputs) {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        List<Future<Rule>> ruleJobs = new ArrayList<>();
+        int inlineCounter = 0;
+        for (String input: inputs) {
+            if (input.contains(ruleDelimiter)) {
+                String[] splitInputs = input.split(ruleDelimiter);
+                for (String splitInput : splitInputs) {
+                    ruleJobs.add(executor.submit(new RuleParserJob(inlineCounter++, splitInput, patterns)));
+                }
+            }
+            else {
+                ruleJobs.add(executor.submit(new RuleParserJob(inlineCounter++, input, patterns)));
+            }
+        }
+        List<Rule> rules = ruleJobs.stream().parallel()
+            .map(f -> {
+                try {
+                    return Optional.of(f.get());
+                } catch (InterruptedException | ExecutionException ex) {
+                    log.error("Problem while parsing inputs through rule parser", ex);
+                }
+                return Optional.<Rule>empty();
+            })
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
+        executor.shutdown();
+        return rules;
+    }
 }

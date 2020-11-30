@@ -7,6 +7,7 @@ import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -20,7 +21,7 @@ public class Day6 extends Solution2015<Rule>{
     @Override
     public InputParser<Rule> getInputParser() {
         String regex = "(turn on|turn off|toggle) (\\d+,\\d+) through (\\d+,\\d+)";
-        return InputParserFactory.getRuleParser(Pattern.compile(regex), "\n");
+        return InputParserFactory.getRuleParser("\n", Map.of("rule", Pattern.compile(regex)));
     }
 
     @Override

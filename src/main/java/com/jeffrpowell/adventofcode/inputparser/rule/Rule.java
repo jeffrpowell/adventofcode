@@ -12,6 +12,8 @@ public class Rule {
     private static final Pattern POINT_2D_PATTERN = Pattern.compile("(\\d(?:\\d*\\.?\\d*))\\s*,(\\d(?:\\d*\\.?\\d*))\\s*");
     private final List<String> tokens;
     private final Map<Integer, Object> cache;
+    private final String rulePatternKey;
+    private final Integer sortKey;
     
 // 6V8)T2J\n
 // R1009,
@@ -25,9 +27,19 @@ public class Rule {
 // [1518-10-13 00:03] Guard #2539 begins shift\n
 // ##.## => #\n
 
-    public Rule(List<String> tokens) {
+    public Rule(List<String> tokens, String rulePatternKey, Integer sortKey) {
         this.tokens = tokens;
         this.cache = new HashMap<>();
+        this.rulePatternKey = rulePatternKey;
+        this.sortKey = sortKey;
+    }
+
+    public String getRulePatternKey() {
+        return rulePatternKey;
+    }
+
+    public Integer getSortKey() {
+        return sortKey;
     }
     
     public <T> T getCustomType(int i, Function<String, T> fn) {
