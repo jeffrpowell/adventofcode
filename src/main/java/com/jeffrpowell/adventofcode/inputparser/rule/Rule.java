@@ -5,11 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Rule {
-    private static final Pattern POINT_2D_PATTERN = Pattern.compile("(\\d(?:\\d*\\.?\\d*))\\s*,(\\d(?:\\d*\\.?\\d*))\\s*");
     private final List<String> tokens;
     private final Map<Integer, Object> cache;
     private final String rulePatternKey;
@@ -68,8 +65,7 @@ public class Rule {
     }
     
     private Point2D parsePoint2D(String s) {
-        Matcher m = POINT_2D_PATTERN.matcher(s);
-        m.find();
-        return new Point2D.Double(Double.parseDouble(m.group(1)), Double.parseDouble(m.group(2)));
+        String[] coords = s.split(",");
+        return new Point2D.Double(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
     }
 }
