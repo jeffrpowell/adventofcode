@@ -59,6 +59,11 @@ public class Rule {
         return (Double) this.cache.get(i);
     }
     
+    public Character getChar(int i) {
+        this.cache.putIfAbsent(i, tokens.get(i).charAt(0));
+        return (Character) this.cache.get(i);
+    }
+    
     public Point2D getPoint2D(int i) {
         this.cache.putIfAbsent(i, parsePoint2D(tokens.get(i)));
         return (Point2D) this.cache.get(i);

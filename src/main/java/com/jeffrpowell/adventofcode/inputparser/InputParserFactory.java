@@ -45,6 +45,10 @@ public class InputParserFactory
 		return new IntegerTokenSVParser(delimiter);
 	}
     
+    public static InputParser<Rule> getRuleParser(String ruleDelimiter, Pattern singleRegexPattern) {
+        return new RuleParser(ruleDelimiter, Map.of("pattern", singleRegexPattern));
+    }
+    
     public static InputParser<Rule> getRuleParser(String ruleDelimiter, Map<String, Pattern> namedRegexPatterns) {
         return new RuleParser(ruleDelimiter, namedRegexPatterns);
     }
