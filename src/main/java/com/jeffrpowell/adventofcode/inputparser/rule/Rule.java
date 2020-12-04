@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Rule {
     private final List<String> tokens;
@@ -72,5 +73,10 @@ public class Rule {
     private Point2D parsePoint2D(String s) {
         String[] coords = s.split(",");
         return new Point2D.Double(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
+    }
+    
+    @Override
+    public String toString() {
+        return tokens.stream().collect(Collectors.joining(" "));
     }
 }
