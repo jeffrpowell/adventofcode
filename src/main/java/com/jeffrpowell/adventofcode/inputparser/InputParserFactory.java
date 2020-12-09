@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 public class InputParserFactory
 {
 	private static final InputParser<Integer> INTEGER_PARSER = new IntegerParser();
+	private static final InputParser<Long> LONG_PARSER = new LongParser();
 	private static final InputParser<String> STRING_PARSER = new StringParser();
 	private static final InputParser<List<Integer>> INT_CSV_PARSER = new IntegerCSVParser();
 	private static final InputParser<List<String>> CSV_PARSER = new TokenSVParser(",");
@@ -19,6 +20,10 @@ public class InputParserFactory
 	
 	public static InputParser<Integer> getIntegerParser() {
 		return INTEGER_PARSER;
+	}
+    
+	public static InputParser<Long> getLongParser() {
+		return LONG_PARSER;
 	}
 	
 	public static InputParser<String> getStringParser() {
