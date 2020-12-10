@@ -2,7 +2,6 @@ package com.jeffrpowell.adventofcode.aoc2020;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Day10 extends Solution2020<Integer>{
@@ -32,32 +31,29 @@ public class Day10 extends Solution2020<Integer>{
         }
         return Integer.toString(diff1 * diff3);
     }
-    /*
-    1
-    1,2  
-    */
+    
     @Override
     protected String part2(List<Integer> input) {
         input.sort(Integer::compare);
+        input.add(input.get(input.size() - 1) + 3);
         int lastJoltage = 0;
         int consecutiveDiff1 = 0;
-        List<Long> combos = new ArrayList<>();
+        long total = 1;
         for (Integer i : input) {
             switch (i - lastJoltage) {
                 case 1 -> consecutiveDiff1++;
                 case 3 -> {
                     switch (consecutiveDiff1) {
-                        case 2 -> combos.add(2L);
-                        case 3 -> combos.add(4L);
-                        case 4 -> combos.add(6L);
-                        case 5 -> combos.add(19L);
+                        case 2 -> total *= 2;
+                        case 3 -> total *= 4;
+                        case 4 -> total *= 7;
                     }
                     consecutiveDiff1 = 0;
                 }
             }
             lastJoltage = i;
         }
-        return Long.toString(combos.stream().reduce(1L, Math::multiplyExact));
+        return Long.toString(total);
     }
 
 }
