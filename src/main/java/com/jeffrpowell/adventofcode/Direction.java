@@ -5,17 +5,27 @@ import java.util.function.Function;
 
 public enum Direction
 {
-	LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY())),
-	RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY())),
-	UP(pt->new Point2D.Double(pt.getX(), pt.getY() - 1)),
-	DOWN(pt->new Point2D.Double(pt.getX(), pt.getY() + 1));
+	LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY()), true),
+	RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY()), true),
+	UP(pt->new Point2D.Double(pt.getX(), pt.getY() - 1), true),
+	DOWN(pt->new Point2D.Double(pt.getX(), pt.getY() + 1), true),
+    UP_LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY() - 1), false),
+    UP_RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY() - 1), false),
+    DOWN_LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY() + 1), false),
+    DOWN_RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY() + 1), false);
 	
 	private final Function<Point2D, Point2D> travelFn;
+    private final boolean cardinal;
 
-	private Direction(Function<Point2D, Point2D> travelFn)
+	private Direction(Function<Point2D, Point2D> travelFn, boolean cardinal)
 	{
 		this.travelFn = travelFn;
+        this.cardinal = cardinal;
 	}
+    
+    public boolean isCardinal() {
+        return cardinal;
+    }
 
 	public Point2D travelFrom(Point2D location)
 	{
@@ -34,6 +44,14 @@ public enum Direction
 				return LEFT;
 			case DOWN:
 				return RIGHT;
+			case UP_LEFT:
+				return DOWN_LEFT;
+			case UP_RIGHT:
+				return UP_LEFT;
+			case DOWN_LEFT:
+				return DOWN_RIGHT;
+			case DOWN_RIGHT:
+				return UP_RIGHT;
 		}
 		return null;
 	}
@@ -50,6 +68,14 @@ public enum Direction
 				return RIGHT;
 			case DOWN:
 				return LEFT;
+			case UP_LEFT:
+				return UP_RIGHT;
+			case UP_RIGHT:
+				return DOWN_RIGHT;
+			case DOWN_LEFT:
+				return UP_LEFT;
+			case DOWN_RIGHT:
+				return DOWN_LEFT;
 		}
 		return null;
 	}
@@ -66,6 +92,14 @@ public enum Direction
 				return DOWN;
 			case DOWN:
 				return UP;
+			case UP_LEFT:
+				return DOWN_RIGHT;
+			case UP_RIGHT:
+				return DOWN_LEFT;
+			case DOWN_LEFT:
+				return UP_RIGHT;
+			case DOWN_RIGHT:
+				return UP_LEFT;
 		}
 		return null;
 	}

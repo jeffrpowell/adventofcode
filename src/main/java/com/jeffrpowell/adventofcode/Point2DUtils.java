@@ -1,14 +1,28 @@
 package com.jeffrpowell.adventofcode;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Point2DUtils
 {
 	private Point2DUtils() {}
+    
+    public static Stream<Point2D> generateGrid(double leftBoundary, double topBoundary, double rightBoundary, double bottomBoundary) {
+        Stream.Builder<Point2D> pointStream = Stream.<Point2D>builder();
+        for (double row = topBoundary; row < bottomBoundary; row += 1.0) {
+            for (double col = leftBoundary; col < rightBoundary; col += 1.0) {
+                pointStream.accept(new Point2D.Double(col, row));
+            }
+        }
+        return pointStream.build();
+    }
 	
 	public static double getManhattenDistance(Point2D pt1, Point2D pt2) {
 		return Math.abs(pt1.getY() - pt2.getY()) + Math.abs(pt1.getX() - pt2.getX());
@@ -79,6 +93,23 @@ public class Point2DUtils
 			.filter(pt -> Point2DUtils.pointInsideBoundary(pt, inclusiveBoundary, topBoundary, rightBoundary, bottomBoundary, leftBoundary))
 			.collect(Collectors.toSet());
 	}
+    
+    public static Map<Direction, List<Point2D>> getPointsFromSource(Point2D point, double topBoundary, double rightBoundary, double bottomBoundary, double leftBoundary, boolean inclusiveBoundary, boolean includeDiagonalNeighbors) {
+        return Arrays.stream(Direction.values())
+            .filter(direction -> includeDiagonalNeighbors || direction.isCardinal())
+            .collect(Collectors.toMap(
+                Function.identity(),
+                direction -> {
+                    Point2D next = direction.travelFrom(point);
+                    List<Point2D> line = new ArrayList<>();
+                    while(pointInsideBoundary(next, inclusiveBoundary, topBoundary, rightBoundary, bottomBoundary, leftBoundary)) {
+                        line.add(next);
+                        next = direction.travelFrom(next);
+                    }
+                    return line;
+                }
+            ));
+    }
 	
 	/**
 	 * 
