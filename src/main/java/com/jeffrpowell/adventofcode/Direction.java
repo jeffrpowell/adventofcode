@@ -31,6 +31,14 @@ public enum Direction
 	{
 		return travelFn.apply(location);
 	}
+    
+	public Point2D travelFromNTimes(Point2D location, int n)
+	{
+		for (int i = 0; i < n; i++) {
+            location = travelFn.apply(location);
+        }
+        return location;
+	}
 
 	public Direction rotateLeft90()
 	{

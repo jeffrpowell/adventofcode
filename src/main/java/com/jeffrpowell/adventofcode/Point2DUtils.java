@@ -31,6 +31,10 @@ public class Point2DUtils
 	public static double getEuclideanDistance(Point2D pt1, Point2D pt2) {
 		return pt1.distance(pt2);
 	}
+    
+    public static Point2D applyVectorToPt(Point2D vector, Point2D pt) {
+        return new Point2D.Double(pt.getX() + vector.getX(), pt.getY() + vector.getY());
+    }
 	
 	public static boolean pointInsideBoundary(Point2D pt, boolean inclusive, double topBoundary, double rightBoundary, double bottomBoundary, double leftBoundary) {
 		double x = pt.getX();
@@ -109,6 +113,14 @@ public class Point2DUtils
                     return line;
                 }
             ));
+    }
+    
+    public static Point2D rotatePtRightDegreesAround0(Point2D pt, double degrees) {
+        double radians = degrees * Math.PI / 180.0;
+        return new Point2D.Double(
+            pt.getX() * Math.round(Math.cos(radians)) - pt.getY() * Math.round(Math.sin(radians)), 
+            pt.getX() * Math.round(Math.sin(radians)) + pt.getY() * Math.round(Math.cos(radians))
+        );
     }
 	
 	/**

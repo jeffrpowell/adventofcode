@@ -28,3 +28,6 @@ hs_err_pid*
 .project
 /.settings/
 /.vscode/
+
+nbactions.xml
+recording.jfr
