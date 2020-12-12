@@ -127,6 +127,9 @@ public class Point2DUtils
      * @return 
      */
     public static Point2D rotatePtRightDegreesAround0(Point2D pt, double degrees) {
+        if (degrees < 0) {
+            return rotatePtLeftDegreesAround0(pt, -degrees);
+        }
         double radians = degrees * Math.PI / 180.0;
         return new Point2D.Double(
             pt.getX() * Math.round(Math.cos(radians)) - pt.getY() * Math.round(Math.sin(radians)), 
@@ -142,6 +145,9 @@ public class Point2DUtils
      * @return 
      */
     public static Point2D rotatePtLeftDegreesAround0(Point2D pt, double degrees) {
+        if (degrees < 0) {
+            return rotatePtRightDegreesAround0(pt, -degrees);
+        }
         double radians = degrees * Math.PI / 180.0;
         return new Point2D.Double(
             pt.getX() * Math.round(Math.cos(radians)) + pt.getY() * Math.round(Math.sin(radians)), 
