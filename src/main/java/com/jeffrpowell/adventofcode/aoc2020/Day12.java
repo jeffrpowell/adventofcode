@@ -59,29 +59,13 @@ public class Day12 extends Solution2020<Rule>{
         Point2D wayPt = new Point2D.Double(10, -1);
         for (Rule rule : input) {
             switch (rule.getChar(0)) {
-                case 'F' -> {
-                    for (int i = 0; i < rule.getInt(1); i++) {
-                        boat = Point2DUtils.applyVectorToPt(wayPt, boat);
-                    }
-                }
+                case 'F' -> boat = Point2DUtils.applyVectorToPtNTimes(wayPt, boat, rule.getInt(1));
                 case 'N' -> wayPt.setLocation(wayPt.getX(), wayPt.getY() - rule.getInt(1));
                 case 'S' -> wayPt.setLocation(wayPt.getX(), wayPt.getY() + rule.getInt(1));
                 case 'E' -> wayPt.setLocation(wayPt.getX() + rule.getInt(1), wayPt.getY());
                 case 'W' -> wayPt.setLocation(wayPt.getX() - rule.getInt(1), wayPt.getY());
-                case 'L' -> {
-                    double angle = rule.getDouble(1);
-                    if (angle == 270) {
-                        angle = 90;
-                    }
-                    else if (angle == 90) {
-                        angle = 270;
-                    }
-                    wayPt = Point2DUtils.rotatePtRightDegreesAround0(wayPt, angle);
-                }
-                case 'R' -> {
-                    double angle = rule.getDouble(1);
-                    wayPt = Point2DUtils.rotatePtRightDegreesAround0(wayPt, angle);
-                }
+                case 'L' -> wayPt = Point2DUtils.rotatePtLeftDegreesAround0(wayPt, rule.getDouble(1));
+                case 'R' -> wayPt = Point2DUtils.rotatePtRightDegreesAround0(wayPt, rule.getDouble(1));
             }
         }
         return Double.toString(Point2DUtils.getManhattenDistance(new Point2D.Double(0, 0), boat));

@@ -35,6 +35,10 @@ public class Point2DUtils
     public static Point2D applyVectorToPt(Point2D vector, Point2D pt) {
         return new Point2D.Double(pt.getX() + vector.getX(), pt.getY() + vector.getY());
     }
+    
+    public static Point2D applyVectorToPtNTimes(Point2D vector, Point2D pt, int n) {
+        return new Point2D.Double(pt.getX() + vector.getX() * n, pt.getY() + vector.getY() * n);
+    }
 	
 	public static boolean pointInsideBoundary(Point2D pt, boolean inclusive, double topBoundary, double rightBoundary, double bottomBoundary, double leftBoundary) {
 		double x = pt.getX();
@@ -115,6 +119,13 @@ public class Point2DUtils
             ));
     }
     
+    /**
+     * This assumes a left-handed coordinate system, with positive-x going right and positive-y going down
+     * https://en.wikipedia.org/wiki/Rotation_matrix
+     * @param pt
+     * @param degrees
+     * @return 
+     */
     public static Point2D rotatePtRightDegreesAround0(Point2D pt, double degrees) {
         double radians = degrees * Math.PI / 180.0;
         return new Point2D.Double(
@@ -122,19 +133,19 @@ public class Point2DUtils
             pt.getX() * Math.round(Math.sin(radians)) + pt.getY() * Math.round(Math.cos(radians))
         );
     }
-	
-	/**
-	 * 
-	 * @param minXBar
-	 * @param minYBar
-	 * @param maxXBar
-	 * @param maxYBar
-	 * @return
-	 * @deprecated You can just use the static method directly on PointTransform
-	 */
-	@Deprecated
-	public static Map<Double, Map<Double, PointTransform>> createTransformFunctionCache(double minXBar, double minYBar, double maxXBar, double maxYBar) {
-		return PointTransform.createTransformFunctionCache(minXBar, minYBar, maxXBar, maxYBar);
-	}
-	
+    
+    /**
+     * This assumes a left-handed coordinate system, with positive-x going right and positive-y going down
+     * https://en.wikipedia.org/wiki/Rotation_matrix
+     * @param pt
+     * @param degrees
+     * @return 
+     */
+    public static Point2D rotatePtLeftDegreesAround0(Point2D pt, double degrees) {
+        double radians = degrees * Math.PI / 180.0;
+        return new Point2D.Double(
+            pt.getX() * Math.round(Math.cos(radians)) + pt.getY() * Math.round(Math.sin(radians)), 
+            pt.getY() * Math.round(Math.cos(radians)) - pt.getX() * Math.round(Math.sin(radians))
+        );
+    }	
 }
