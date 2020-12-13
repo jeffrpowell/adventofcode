@@ -4,6 +4,9 @@ import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 import com.jeffrpowell.adventofcode.inputparser.rule.RuleListUtil;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +42,34 @@ public class Day7 extends Solution2015<Rule>{
     @Override
     protected String part1(List<Rule> input) {
         Map<String, List<Rule>> groupedRules = RuleListUtil.groupByRulePatternKey(input);
+        Map<String, List<String>> upGraph = new HashMap<>();
+        Map<String, List<String>> downGraph = new HashMap<>();
         Map<String, BiFunction<Future<Integer>, Future<Integer>, Signal>> m = new HashMap<>();
+        Deque<Signal> q = new ArrayDeque<>();
         for (Rule rule : groupedRules.get("comparisons")) {
-            m.put(rule.getString(3), FnFactory.and(rule.getString(3)));
+            upGraph.put(rule.getString(3), List.of(rule.getString(0), rule.getString(2)));
+            downGraph.putIfAbsent(rule.getString(0), new ArrayList<>());
+            downGraph.putIfAbsent(rule.getString(2), new ArrayList<>());
+            downGraph.get(rule.getString(0)).add(rule.getString(3));
+            downGraph.get(rule.getString(2)).add(rule.getString(3));
+        }
+        for (Rule rule : groupedRules.get("shift")) {
+            upGraph.put(rule.getString(3), List.of(rule.getString(0)));
+            downGraph.putIfAbsent(rule.getString(0), new ArrayList<>());
+            downGraph.get(rule.getString(0)).add(rule.getString(3));
+        }
+        for (Rule rule : groupedRules.get("not")) {
+            upGraph.put(rule.getString(1), List.of(rule.getString(0)));
+            downGraph.putIfAbsent(rule.getString(0), new ArrayList<>());
+            downGraph.get(rule.getString(0)).add(rule.getString(1));
+        }
+        for (Rule rule : groupedRules.get("input")) {
+            upGraph.put(rule.getString(1), List.of());
+            q.add(new Signal(rule.getString(1), rule.getInt(0)));
+        }
+        while (!q.isEmpty()) {
+            Signal s = q.poll();
+            List<String> descendants = downGraph.get(s.wireName);
         }
         return "";
     }
@@ -60,57 +88,38 @@ public class Day7 extends Solution2015<Rule>{
             this.signal = signal;
         }
     }
-
-    private static class FnFactory {
-        private FnFactory(){}
+    
+    private static class Gate {
+        private final List<Integer> inputs;
+        private final Function<List<Integer>, Signal> gateFn;
         
-        public static BiFunction<Future<Integer>, Future<Integer>, Signal> and(String target) {
-            return (a, b) -> {
-                try {
-                    return new Signal(target, a.get() & b.get());
-                } catch (InterruptedException | ExecutionException ex) { }
-                return null;
-            };
+        public static Gate and(String target) {
+            return new Gate(inputs -> new Signal(target, inputs.get(0) & inputs.get(1)));
         }
         
-        public static BiFunction<Future<Integer>, Future<Integer>, Signal> or(String target) {
-            return (a, b) -> {
-                try {
-                    return new Signal(target, a.get() | b.get());
-                } catch (InterruptedException | ExecutionException ex) { }
-                return null;
-            };
+        public static Gate or(String target) {
+            return new Gate(inputs -> new Signal(target, inputs.get(0) | inputs.get(1)));
         }
         
-        public static BiFunction<Future<Integer>, Future<Integer>, Signal> lshift(String target) {
-            return (a, b) -> {
-                try {
-                    return new Signal(target, a.get() << b.get());
-                } catch (InterruptedException | ExecutionException ex) { }
-                return null;
-            };
+        public static Gate lshift(String target) {
+            return new Gate(inputs -> new Signal(target, inputs.get(0) << inputs.get(1)));
         }
         
-        public static BiFunction<Future<Integer>, Future<Integer>, Signal> rshift(String target) {
-            return (a, b) -> {
-                try {
-                    return new Signal(target, a.get() >> b.get());
-                } catch (InterruptedException | ExecutionException ex) { }
-                return null;
-            };
+        public static Gate rshift(String target) {
+            return new Gate(inputs -> new Signal(target, inputs.get(0) >> inputs.get(1)));
         }
         
-        public static Function<Future<Integer>, Signal> not(String target) {
-            return a -> {
-                try {
-                    return new Signal(target, ~(a.get()));
-                } catch (InterruptedException | ExecutionException ex) { }
-                return null;
-            };
+        public static Gate not(String target) {
+            return new Gate(inputs -> new Signal(target, ~inputs.get(0)));
         }
         
-        public static Function<Integer, Signal> input(String target) {
-            return a -> new Signal(target, a);
+        private Gate(Function<List<Integer>, Signal> gateFn) {
+            this.inputs = new ArrayList<>();   
+            this.gateFn = gateFn;
+        }
+    
+        public void acceptInput(int input) {
+            inputs.add(input);
         }
     }
 }
