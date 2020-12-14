@@ -55,6 +55,11 @@ public class Rule {
         return (Integer) this.cache.get(i);
     }
     
+    public Long getLong(int i) {
+        this.cache.putIfAbsent(i, Long.parseLong(tokens.get(i)));
+        return (Long) this.cache.get(i);
+    }
+    
     public Double getDouble(int i) {
         this.cache.putIfAbsent(i, Double.parseDouble(tokens.get(i)));
         return (Double) this.cache.get(i);
