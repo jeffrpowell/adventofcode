@@ -1,13 +1,17 @@
 package com.jeffrpowell.adventofcode.aoc2020;
 
+import com.google.common.collect.Sets;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,7 +91,7 @@ public class Day16 extends Solution2020<Day16.CompositeInput>{
 	protected String part1(List<Day16.CompositeInput> input)
 	{
 		CompositeInput i = input.get(0);
-		return Integer.toString(i.nearbyTickets.stream()
+		return Long.toString(i.nearbyTickets.stream()
 			.map(intList -> 
 				intList.stream().filter(value -> 
 					i.rules.values().stream().noneMatch(p -> 
@@ -96,7 +100,7 @@ public class Day16 extends Solution2020<Day16.CompositeInput>{
 				).findAny())
 			.filter(Optional::isPresent)
 			.map(Optional::get)
-			.reduce(0, Math::addExact));
+			.count());
 	}
 
 	@Override
@@ -111,20 +115,33 @@ public class Day16 extends Solution2020<Day16.CompositeInput>{
 					)
 				))
 			.collect(Collectors.toList());
-		Map<String, Integer> rulePositions = new HashMap<>();
+		Map<String, List<Integer>> possibleRulePositions = new HashMap<>();
 		for (Map.Entry<String, Predicate<Integer>> ruleEntry : i.rules.entrySet())
 		{
+            String name = ruleEntry.getKey();
+            List<Integer> possiblePositions = new ArrayList<>();
 			for (int position = 0; position < i.myTicket.size(); position++)
 			{
 				if (allTicketsMatchRule(validTickets, position, ruleEntry.getValue())) {
-					rulePositions.put(ruleEntry.getKey(), position);
-					break;
+                    possiblePositions.add(position);
 				}
 			}
+            possibleRulePositions.put(name, possiblePositions);
 		}
-		return Long.toString(rulePositions.entrySet().stream()
-			.filter(entry -> entry.getKey().startsWith("departure"))
-			.map(entry -> i.myTicket.get(entry.getValue()))
+        Map<Integer, String> positionClaimed = new HashMap<>();
+        possibleRulePositions.entrySet().stream()
+            .sorted(Comparator.comparing(entry -> entry.getValue().size()))
+            .forEachOrdered(entry -> {
+                if (entry.getValue().size() == 1) {
+                    positionClaimed.put(entry.getValue().get(0), entry.getKey());
+                    return;
+                }
+                Set<Integer> possiblePositions = new HashSet<>(entry.getValue());
+                positionClaimed.put(Sets.difference(possiblePositions, positionClaimed.keySet()).stream().findAny().get(), entry.getKey());
+            });
+		return Long.toString(positionClaimed.entrySet().stream()
+			.filter(entry -> entry.getValue().startsWith("departure"))
+			.map(entry -> i.myTicket.get(entry.getKey()))
 			.reduce(1L, Math::multiplyExact));
 	}
 	
