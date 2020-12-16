@@ -100,7 +100,7 @@ public class Day16 extends Solution2020<Day16.CompositeInput>{
 				).findAny())
 			.filter(Optional::isPresent)
 			.map(Optional::get)
-			.count());
+			.reduce(0, Math::addExact));
 	}
 
 	@Override
