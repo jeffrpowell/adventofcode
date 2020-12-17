@@ -90,7 +90,7 @@ public class Point3DUtils
 				new Point3D(x + 1, y + 1, z - 1),
 				new Point3D(x + 1, y, z - 1),
 				new Point3D(x + 1, y - 1, z - 1),
-				new Point3D(x, y, z - 1),
+				new Point3D(x, y, z + 1),
 				new Point3D(x, y - 1, z + 1),
 				new Point3D(x - 1, y - 1, z + 1),
 				new Point3D(x - 1, y, z + 1),

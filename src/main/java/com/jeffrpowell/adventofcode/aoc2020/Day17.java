@@ -1,6 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2020;
 
-import com.jeffrpowell.adventofcode.Point3DUtils;
+import com.jeffrpowell.adventofcode.PointND;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.Collection;
@@ -8,17 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import javafx.geometry.Point3D;
+import java.util.stream.IntStream;
 
 public class Day17 extends Solution2020<List<String>>{
-    double minX;
-    double minY;
-    double minZ;
-    double maxX;
-    double maxY;
-    double maxZ;
-    
+
     @Override
     public int getDay() {
         return 17;
@@ -31,40 +26,44 @@ public class Day17 extends Solution2020<List<String>>{
 
     @Override
     protected String part1(List<List<String>> input) {
-        final Map<Point3D, Cube> finalPocket = new HashMap<>();
+        final Map<PointND, Cube> finalPocket = new HashMap<>();
         for (int rowI = 0; rowI < input.size(); rowI++) {
             List<String> row = input.get(rowI);
             for (int col = 0; col < row.size(); col++) {
-                Point3D pt = new Point3D(col, rowI, 0);
+                PointND pt = new PointND(col, rowI, 0);
                 Cube cube = new Cube(row.get(col));
                 finalPocket.put(pt, cube);
                 if (cube.isActive()) {
-                    Point3DUtils.getAdjacentPts(pt, true).stream()
+                    pt.getAdjacentPts(true).stream()
                         .forEach(p -> finalPocket.putIfAbsent(p, new Cube(false)));
                 }
             }
         }
-        Map<Point3D, Cube> pocket = finalPocket;
-        printPocket(pocket);
+        Map<PointND, Cube> pocket = finalPocket;
+//        printPocket(pocket);
         for (int i = 0; i < 6; i++) {
             pocket = cycle(pocket);
-            printPocket(pocket);
+//            printPocket(pocket);
         }
         return Long.toString(pocket.values().stream()
             .filter(Cube::isActive)
             .count());
     }
     
-    private static Map<Point3D, Cube> cycle(Map<Point3D, Cube> pocket) {
-        Map<Point3D, Cube> newPocket = new HashMap<>();
+    private static Map<PointND, Cube> cycle(Map<PointND, Cube> pocket) {
+        Map<PointND, Cube> newPocket = new HashMap<>();
         
-        for (Map.Entry<Point3D, Cube> entry : pocket.entrySet()) {
-            Set<Point3D> neighbors = Point3DUtils.getAdjacentPts(entry.getKey(), true);
-            boolean cyclesToActive = entry.getValue().cyclesToActive(neighbors.stream()
-                .map(pt -> pocket.getOrDefault(pt, new Cube(false))).collect(Collectors.toList()));
+        for (Map.Entry<PointND, Cube> entry : pocket.entrySet()) {
+            Set<PointND> neighborPts = entry.getKey().getAdjacentPts(true);
+            Map<PointND, Cube> neighbors = neighborPts.stream()
+                .collect(Collectors.toMap(
+                    Function.identity(),
+                    pt -> pocket.getOrDefault(pt, new Cube(false))
+                ));
+            boolean cyclesToActive = entry.getValue().cyclesToActive(neighbors.values());
             newPocket.put(entry.getKey(), new Cube(cyclesToActive));
             if (cyclesToActive) {
-                neighbors.stream().forEach(p -> newPocket.putIfAbsent(p, new Cube(false)));
+                neighborPts.stream().forEach(p -> newPocket.putIfAbsent(p, new Cube(false)));
             }
         }
         return newPocket;
@@ -72,28 +71,59 @@ public class Day17 extends Solution2020<List<String>>{
 
     @Override
     protected String part2(List<List<String>> input) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        final Map<PointND, Cube> finalPocket = new HashMap<>();
+        for (int rowI = 0; rowI < input.size(); rowI++) {
+            List<String> row = input.get(rowI);
+            for (int col = 0; col < row.size(); col++) {
+                PointND pt = new PointND(col, rowI, 0, 0);
+                Cube cube = new Cube(row.get(col));
+                finalPocket.put(pt, cube);
+                if (cube.isActive()) {
+                    pt.getAdjacentPts(true).stream()
+                        .forEach(p -> finalPocket.putIfAbsent(p, new Cube(false)));
+                }
+            }
+        }
+        Map<PointND, Cube> pocket = finalPocket;
+//        printPocket(pocket);
+        for (int i = 0; i < 6; i++) {
+            pocket = cycle(pocket);
+//            printPocket(pocket);
+        }
+        return Long.toString(pocket.values().stream()
+            .filter(Cube::isActive)
+            .count());
     }
     
-    private static void printPocket(Map<Point3D, Cube> pocket) {
-        double minX = pocket.keySet().stream().map(Point3D::getX).min(Double::compare).get();
-        double maxX = pocket.keySet().stream().map(Point3D::getX).max(Double::compare).get();
-        double minY = pocket.keySet().stream().map(Point3D::getY).min(Double::compare).get();
-        double maxY = pocket.keySet().stream().map(Point3D::getY).max(Double::compare).get();
-        double minZ = pocket.keySet().stream().map(Point3D::getZ).min(Double::compare).get();
-        double maxZ = pocket.keySet().stream().map(Point3D::getZ).max(Double::compare).get();
+    private static void printPocket(Map<PointND, Cube> pocket) {
+        double minX = pocket.keySet().stream().map(pt -> pt.getDimensionN(0)).min(Double::compare).get();
+        double maxX = pocket.keySet().stream().map(pt -> pt.getDimensionN(0)).max(Double::compare).get();
+        double minY = pocket.keySet().stream().map(pt -> pt.getDimensionN(1)).min(Double::compare).get();
+        double maxY = pocket.keySet().stream().map(pt -> pt.getDimensionN(1)).max(Double::compare).get();
+        double minZ = pocket.keySet().stream().map(pt -> pt.getDimensionN(2)).min(Double::compare).get();
+        double maxZ = pocket.keySet().stream().map(pt -> pt.getDimensionN(2)).max(Double::compare).get();
         System.out.println("\n\n###########################################");
         System.out.println("#           THE POCKET DIMENSION          #");
         System.out.println("###########################################\n\n");
         for (double z = minZ; z <= maxZ; z += 1.0) {
             System.out.println("z = " + z);
             for (double y = minY; y <= maxY; y += 1.0) {
+                if (Math.abs(y - 0.0) < 0.0001) {
+                    IntStream.rangeClosed(Double.valueOf(minX).intValue(), Double.valueOf(maxX).intValue())
+                        .mapToObj(i -> "-")
+                        .forEach(System.out::print);
+                    System.out.println("-");
+                }
                 for (double x = minX; x <= maxX; x += 1.0) {
-                    Cube c = pocket.getOrDefault(new Point3D(x, y, z), new Cube(false));
+                    Cube c = pocket.getOrDefault(new PointND(x, y, z), new Cube(false));
+                    if (Math.abs(x - 0.0) < 0.0001) {
+                        System.out.print("|");
+                    }
                     System.out.print(c.isActive() ? "#" : ".");
                 }
                 System.out.println("");
             }
+            System.out.println("");
         }
     }
 
@@ -115,6 +145,11 @@ public class Day17 extends Solution2020<List<String>>{
         public boolean cyclesToActive(Collection<Cube> neighbors) {
             long activeNeighbors = neighbors.stream().filter(Cube::isActive).count();
             return active && (activeNeighbors == 2 || activeNeighbors == 3) || !active && activeNeighbors == 3;
+        }
+
+        @Override
+        public String toString() {
+            return "active=" + active;
         }
     }
 }
