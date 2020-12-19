@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Day19 extends Solution2020<Rule>{
 
+    boolean loopOn = false;
+    
     @Override
     public int getDay() {
         return 19;
@@ -109,7 +112,13 @@ public class Day19 extends Solution2020<Rule>{
                 rules.put(8, message -> {
                     Function<String, String> plain = rules.get(42);
                     Function<String, String> loop = rules.get(8);
-                    String tryLoop = loop.apply(plain.apply(message));
+                    if (message.contains("x")) {
+                        return "";
+                    }
+                    String tryLoop = !loopOn ? "x" : loop.apply(plain.apply(message));
+                    if (tryLoop.isEmpty()) {
+                        return message;
+                    }
                     if (!tryLoop.contains("x")) {
                         return tryLoop;
                     }
@@ -144,7 +153,13 @@ public class Day19 extends Solution2020<Rule>{
                     Function<String, String> left = rules.get(42);
                     Function<String, String> loop = rules.get(11);
                     Function<String, String> right = rules.get(31);
-                    String tryLoop = right.apply(loop.apply(left.apply(message)));
+                    if (message.contains("x")) {
+                        return "";
+                    }
+                    String tryLoop = !loopOn ? "x" : right.apply(loop.apply(left.apply(message)));
+                    if (tryLoop.isEmpty()) {
+                        return message;
+                    }
                     if (!tryLoop.contains("x")) {
                         return tryLoop;
                     }
@@ -194,10 +209,17 @@ public class Day19 extends Solution2020<Rule>{
                 return "x";
             });
         }
-        return Long.toString(groupedRules.get("message").stream()
-            .map(rule -> rules.get(0).apply(rule.getString(0)).isEmpty())
+        List<String> possibleLoopingMessages = groupedRules.get("message").stream()
+            .map(rule -> rule.getString(0))
+            .filter(message -> !rules.get(0).apply(message).isEmpty())
+//            .peek(System.out::println)
+            .collect(Collectors.toList());
+        long matchedSoFar = groupedRules.get("message").size() - possibleLoopingMessages.size();
+        loopOn = true;
+        return Long.toString(possibleLoopingMessages.stream()
+            .map(message -> rules.get(0).apply(message).isEmpty())
             .filter(b -> b)
-            .count());
+            .count() + matchedSoFar);
     }
 
 }
