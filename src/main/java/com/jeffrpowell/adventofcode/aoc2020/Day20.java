@@ -27,6 +27,21 @@ public class Day20 extends Solution2020<String>{
 
     @Override
     protected String part1(List<String> input) {
+        List<Tile> tiles = parseTiles(input);
+        Map<Tile.Location, List<Tile>> classifiedTiles = classifyTiles(tiles);
+        return Long.toString(classifiedTiles.get(Tile.Location.CORNER).stream()
+            .map(Tile::getId)
+            .reduce(1L, Math::multiplyExact));
+    }
+
+    @Override
+    protected String part2(List<String> input) {
+        List<Tile> tiles = parseTiles(input);
+        Map<Tile.Location, List<Tile>> classifiedTiles = classifyTiles(tiles);
+        return "";
+    }
+    
+    private List<Tile> parseTiles(List<String> input) {
         List<Tile> tiles = new ArrayList<>();
         Tile tile = new Tile(-1);
         for (String string : input) {
@@ -40,6 +55,10 @@ public class Day20 extends Solution2020<String>{
                 tile.addLine(string);
             }
         }
+        return tiles;
+    }
+    
+    private Map<Tile.Location, List<Tile>> classifyTiles(List<Tile> tiles) {
         tiles.stream().forEach(Tile::calculateHashes);
         Map<Integer, List<Tile>> tilesByHash = new HashMap<>();
         for (Tile t : tiles) {
@@ -48,34 +67,47 @@ public class Day20 extends Solution2020<String>{
                 tilesByHash.get(h).add(t);
             }
         }
-        Map<Integer, List<Tile>> tileDuplicates = tilesByHash.values().stream()
+        Map<Long, List<Tile>> tilesWithUniqueEdges = tilesByHash.values().stream()
             .filter(tileList -> tileList.size() < 2)
             .flatMap(List::stream)
-            .collect(Collectors.groupingBy(t -> t.id));
-        return Long.toString(tileDuplicates.entrySet().stream()
+            .collect(Collectors.groupingBy(Tile::getId));
+        tilesWithUniqueEdges.entrySet().stream()
+            .filter(entry -> entry.getValue().size() < 3)
+            .forEach(entry -> entry.getValue().get(0).setLocation(Tile.Location.EDGE));
+        tilesWithUniqueEdges.entrySet().stream()
             .filter(entry -> entry.getValue().size() > 2)
-            .map(entry -> (long) entry.getKey())
-            .reduce(1L, Math::multiplyExact));
+            .forEach(entry -> entry.getValue().get(0).setLocation(Tile.Location.CORNER));
+        return tiles.stream().collect(Collectors.groupingBy(Tile::getLocation));
     }
-
-    @Override
-    protected String part2(List<String> input) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    
     private static class Tile {
+        enum Location {CORNER, EDGE, MIDDLE}
         List<String> raw;
-        int id;
+        long id;
         Set<Integer> hashes;
+        Location location;
         
-        public Tile(int id) {
+        public Tile(long id) {
             this.id = id;
             this.raw = new ArrayList<>();
             this.hashes = new HashSet<>();
+            this.location = Location.MIDDLE;
         }
         
         public void addLine(String line) {
             raw.add(line);
+        }
+        
+        public void setLocation(Location l) {
+            location = l;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public Location getLocation() {
+            return location;
         }
         
         public void calculateHashes() {
@@ -117,7 +149,7 @@ public class Day20 extends Solution2020<String>{
         
         @Override
         public String toString() {
-            return Integer.toString(id);
+            return Long.toString(id);
         }
     }
 }
