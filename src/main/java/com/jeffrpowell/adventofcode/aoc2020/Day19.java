@@ -9,12 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Day19 extends Solution2020<Rule>{
 
-    boolean loopOn = false;
-    
     @Override
     public int getDay() {
         return 19;
@@ -102,29 +99,26 @@ public class Day19 extends Solution2020<Rule>{
     @Override
     protected String part2(List<Rule> input) {
         Map<String, List<Rule>> groupedRules = RuleListUtil.groupByRulePatternKey(input);
-        Map<Integer, Function<String, String>> rules = new HashMap<>();
+        Map<Integer, Function<String, List<String>>> rules = new HashMap<>();
         for (Rule rule : groupedRules.get("letter")) {
-            rules.put(rule.getInt(0), message -> message.startsWith(rule.getString(1)) ? message.substring(1) : "x");
+            rules.put(rule.getInt(0), message -> message.startsWith(rule.getString(1)) ? List.of(message.substring(1)) : List.of("x"));
         }
         for (Rule rule : groupedRules.get("baton")) {
             if (rule.getInt(0) == 8) {
                 //hard-coded to 8: 42 | 42 8
                 rules.put(8, message -> {
-                    Function<String, String> plain = rules.get(42);
-                    Function<String, String> loop = rules.get(8);
-                    if (message.contains("x")) {
-                        return "";
-                    }
-                    String tryLoop = !loopOn ? "x" : loop.apply(plain.apply(message));
-                    if (tryLoop.isEmpty()) {
-                        return message;
-                    }
-                    if (!tryLoop.contains("x")) {
-                        return tryLoop;
-                    }
-                    String endLoop = plain.apply(message);
-                    if (!endLoop.contains("x")) {
-                        return endLoop;
+                    Function<String, List<String>> plain = rules.get(42);
+                    String lastMessage = plain.apply(message);
+                    int limit = 50;
+                    while(!lastMessage.contains("x") && limit > 0) {
+                        String nextMessage = plain.apply(lastMessage);
+                        if (nextMessage.contains("x")) {
+                            return lastMessage;
+                        }
+                        else {
+                            lastMessage = nextMessage;
+                        }
+                        limit--;
                     }
                     return "x";
                 });
@@ -151,21 +145,18 @@ public class Day19 extends Solution2020<Rule>{
                 //hard-coded to 11: 42 31 | 42 11 31
                 rules.put(11, message -> {
                     Function<String, String> left = rules.get(42);
-                    Function<String, String> loop = rules.get(11);
                     Function<String, String> right = rules.get(31);
-                    if (message.contains("x")) {
-                        return "";
-                    }
-                    String tryLoop = !loopOn ? "x" : right.apply(loop.apply(left.apply(message)));
-                    if (tryLoop.isEmpty()) {
-                        return message;
-                    }
-                    if (!tryLoop.contains("x")) {
-                        return tryLoop;
-                    }
-                    String endLoop = right.apply(left.apply(message));
-                    if (!endLoop.contains("x")) {
-                        return endLoop;
+                    for (int i = 1; i <= 50; i++) {
+                        String newMessage = message;
+                        for (int j = 0; j < i; j++) {
+                            newMessage = left.apply(newMessage);
+                        }
+                        for (int j = 0; j < i; j++) {
+                            newMessage = right.apply(newMessage);
+                        }
+                        if (!newMessage.contains("x")) {
+                            return newMessage;
+                        }
                     }
                     return "x";
                 });
@@ -209,17 +200,10 @@ public class Day19 extends Solution2020<Rule>{
                 return "x";
             });
         }
-        List<String> possibleLoopingMessages = groupedRules.get("message").stream()
-            .map(rule -> rule.getString(0))
-            .filter(message -> !rules.get(0).apply(message).isEmpty())
-//            .peek(System.out::println)
-            .collect(Collectors.toList());
-        long matchedSoFar = groupedRules.get("message").size() - possibleLoopingMessages.size();
-        loopOn = true;
-        return Long.toString(possibleLoopingMessages.stream()
-            .map(message -> rules.get(0).apply(message).isEmpty())
+        return Long.toString(groupedRules.get("message").stream()
+            .map(rule -> rules.get(0).apply(rule.getString(0)).isEmpty())
             .filter(b -> b)
-            .count() + matchedSoFar);
+            .count());
     }
 
 }
