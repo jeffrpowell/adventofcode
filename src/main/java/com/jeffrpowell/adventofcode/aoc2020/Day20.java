@@ -3,11 +3,14 @@ package com.jeffrpowell.adventofcode.aoc2020;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Day20 extends Solution2020<String>{
     static final Pattern TILE_ID_PATTERN = Pattern.compile("Tile (\\d+):");
@@ -38,7 +41,21 @@ public class Day20 extends Solution2020<String>{
             }
         }
         tiles.stream().forEach(Tile::calculateHashes);
-        return "";
+        Map<Integer, List<Tile>> tilesByHash = new HashMap<>();
+        for (Tile t : tiles) {
+            for (Integer h : t.hashes) {
+                tilesByHash.putIfAbsent(h, new ArrayList<>());
+                tilesByHash.get(h).add(t);
+            }
+        }
+        Map<Integer, List<Tile>> tileDuplicates = tilesByHash.values().stream()
+            .filter(tileList -> tileList.size() < 2)
+            .flatMap(List::stream)
+            .collect(Collectors.groupingBy(t -> t.id));
+        return Long.toString(tileDuplicates.entrySet().stream()
+            .filter(entry -> entry.getValue().size() > 2)
+            .map(entry -> (long) entry.getKey())
+            .reduce(1L, Math::multiplyExact));
     }
 
     @Override
@@ -96,6 +113,11 @@ public class Day20 extends Solution2020<String>{
                 rotatedTile.add(new String(ret[i]));
             }
             return rotatedTile;
+        }
+        
+        @Override
+        public String toString() {
+            return Integer.toString(id);
         }
     }
 }
