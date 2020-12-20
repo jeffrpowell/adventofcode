@@ -4,14 +4,17 @@ import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/*
+                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   
+*/
 public class Day20 extends Solution2020<String>{
     static final Pattern TILE_ID_PATTERN = Pattern.compile("Tile (\\d+):");
     
@@ -62,7 +65,11 @@ public class Day20 extends Solution2020<String>{
         tiles.stream().forEach(Tile::calculateHashes);
         Map<Integer, List<Tile>> tilesByHash = new HashMap<>();
         for (Tile t : tiles) {
-            for (Integer h : t.hashes) {
+            for (Integer h : t.hashCircle) {
+                tilesByHash.putIfAbsent(h, new ArrayList<>());
+                tilesByHash.get(h).add(t);
+            }
+            for (Integer h : t.hashCircleFlipped) {
                 tilesByHash.putIfAbsent(h, new ArrayList<>());
                 tilesByHash.get(h).add(t);
             }
@@ -84,14 +91,18 @@ public class Day20 extends Solution2020<String>{
         enum Location {CORNER, EDGE, MIDDLE}
         List<String> raw;
         long id;
-        Set<Integer> hashes;
+        List<Integer> hashCircle;
+        List<Integer> hashCircleFlipped;
+        boolean usingFlippedHashCircle;
         Location location;
         
         public Tile(long id) {
             this.id = id;
             this.raw = new ArrayList<>();
-            this.hashes = new HashSet<>();
             this.location = Location.MIDDLE;
+            this.hashCircle = new ArrayList<>();
+            this.hashCircleFlipped = new ArrayList<>();
+            this.usingFlippedHashCircle = false;
         }
         
         public void addLine(String line) {
@@ -111,22 +122,22 @@ public class Day20 extends Solution2020<String>{
         }
         
         public void calculateHashes() {
-            hashes.add(raw.get(0).hashCode());
-            hashes.add(raw.get(raw.size() - 1).hashCode());
-            hashes.add(reverseString(raw.get(0)).hashCode());
-            hashes.add(reverseString(raw.get(raw.size() - 1)).hashCode());
-            List<String> rotatedRaw = rotateTile();
-            hashes.add(rotatedRaw.get(0).hashCode());
-            hashes.add(rotatedRaw.get(rotatedRaw.size() - 1).hashCode());
-            hashes.add(reverseString(rotatedRaw.get(0)).hashCode());
-            hashes.add(reverseString(rotatedRaw.get(rotatedRaw.size() - 1)).hashCode());
+            List<String> rotatedRaw = rotateTileCW();
+            hashCircle.add(raw.get(0).hashCode());
+            hashCircle.add(reverseString(rotatedRaw.get(rotatedRaw.size() - 1)).hashCode());
+            hashCircle.add(reverseString(raw.get(raw.size() - 1)).hashCode());
+            hashCircle.add(rotatedRaw.get(0).hashCode());
+            hashCircleFlipped.add(reverseString(raw.get(0)).hashCode());
+            hashCircleFlipped.add(reverseString(rotatedRaw.get(0)).hashCode());
+            hashCircleFlipped.add(raw.get(raw.size() - 1).hashCode());
+            hashCircleFlipped.add(rotatedRaw.get(rotatedRaw.size() - 1).hashCode());
         }
         
         private static String reverseString(String s) {
             return new StringBuilder(s).reverse().toString();
         }
         
-        private List<String> rotateTile() {
+        private List<String> rotateTileCW() {
             char[][] mat = new char[raw.size()][];
             for (int i = 0; i < raw.size(); i++) {
                 mat[i] = raw.get(i).toCharArray();
