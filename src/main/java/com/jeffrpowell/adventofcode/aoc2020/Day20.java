@@ -2,7 +2,11 @@ package com.jeffrpowell.adventofcode.aoc2020;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
+import java.awt.geom.Point2D;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,29 +34,36 @@ public class Day20 extends Solution2020<String>{
 
     @Override
     protected String part1(List<String> input) {
-        List<Tile> tiles = parseTiles(input);
-        Map<Tile.Location, List<Tile>> classifiedTiles = classifyTiles(tiles);
+        Map<Long, Tile> tiles = parseTiles(input);
+        Map<Tile.Location, List<Long>> classifiedTiles = classifyTiles(tiles.values());
         return Long.toString(classifiedTiles.get(Tile.Location.CORNER).stream()
-            .map(Tile::getId)
             .reduce(1L, Math::multiplyExact));
     }
 
     @Override
     protected String part2(List<String> input) {
-        List<Tile> tiles = parseTiles(input);
-        Map<Tile.Location, List<Tile>> classifiedTiles = classifyTiles(tiles);
+        Map<Long, Tile> tiles = parseTiles(input);
+        Map<Tile.Location, List<Long>> classifiedTiles = classifyTiles(tiles.values());
+        Deque<SearchAttempt> searchSpace = new ArrayDeque<>();
+        for (Long cornerId : classifiedTiles.get(Tile.Location.CORNER)) {
+            search(new SearchAttempt(new Point2D.Double(0, 0), cornerId));
+        }
         return "";
     }
     
-    private List<Tile> parseTiles(List<String> input) {
-        List<Tile> tiles = new ArrayList<>();
+    private void search(SearchAttempt attempt) {
+        
+    }
+    
+    private Map<Long, Tile> parseTiles(List<String> input) {
+        Map<Long, Tile> tiles = new HashMap<>();
         Tile tile = new Tile(-1);
         for (String string : input) {
             if (string.endsWith(":")) {
                 Matcher m = TILE_ID_PATTERN.matcher(string);
                 m.matches();
                 tile = new Tile(Integer.parseInt(m.group(1)));
-                tiles.add(tile);
+                tiles.put(tile.getId(), tile);
             }
             else if (!string.isBlank()) {
                 tile.addLine(string);
@@ -61,7 +72,7 @@ public class Day20 extends Solution2020<String>{
         return tiles;
     }
     
-    private Map<Tile.Location, List<Tile>> classifyTiles(List<Tile> tiles) {
+    private Map<Tile.Location, List<Long>> classifyTiles(Collection<Tile> tiles) {
         tiles.stream().forEach(Tile::calculateHashes);
         Map<Integer, List<Tile>> tilesByHash = new HashMap<>();
         for (Tile t : tiles) {
@@ -84,12 +95,13 @@ public class Day20 extends Solution2020<String>{
         tilesWithUniqueEdges.entrySet().stream()
             .filter(entry -> entry.getValue().size() > 2)
             .forEach(entry -> entry.getValue().get(0).setLocation(Tile.Location.CORNER));
-        return tiles.stream().collect(Collectors.groupingBy(Tile::getLocation));
+        return tiles.stream().collect(Collectors.groupingBy(Tile::getLocation, Collectors.mapping(Tile::getId, Collectors.toList())));
     }
     
     private static class Tile {
         enum Location {CORNER, EDGE, MIDDLE}
         List<String> raw;
+        List<String> rawRotatedCW;
         long id;
         List<Integer> hashCircle;
         List<Integer> hashCircleFlipped;
@@ -122,15 +134,15 @@ public class Day20 extends Solution2020<String>{
         }
         
         public void calculateHashes() {
-            List<String> rotatedRaw = rotateTileCW();
+            rawRotatedCW = rotateTileCW();
             hashCircle.add(raw.get(0).hashCode());
-            hashCircle.add(reverseString(rotatedRaw.get(rotatedRaw.size() - 1)).hashCode());
+            hashCircle.add(reverseString(rawRotatedCW.get(rawRotatedCW.size() - 1)).hashCode());
             hashCircle.add(reverseString(raw.get(raw.size() - 1)).hashCode());
-            hashCircle.add(rotatedRaw.get(0).hashCode());
+            hashCircle.add(rawRotatedCW.get(0).hashCode());
             hashCircleFlipped.add(reverseString(raw.get(0)).hashCode());
-            hashCircleFlipped.add(reverseString(rotatedRaw.get(0)).hashCode());
+            hashCircleFlipped.add(reverseString(rawRotatedCW.get(0)).hashCode());
             hashCircleFlipped.add(raw.get(raw.size() - 1).hashCode());
-            hashCircleFlipped.add(rotatedRaw.get(rotatedRaw.size() - 1).hashCode());
+            hashCircleFlipped.add(rawRotatedCW.get(rawRotatedCW.size() - 1).hashCode());
         }
         
         private static String reverseString(String s) {
@@ -162,5 +174,25 @@ public class Day20 extends Solution2020<String>{
         public String toString() {
             return Long.toString(id);
         }
+    }
+    
+    private static class SearchAttempt {
+        Point2D pt;
+        Long tile;
+
+        public SearchAttempt(Point2D pt, Long tile) {
+            this.pt = pt;
+            this.tile = tile;
+        }
+        
+    }
+    
+    private static class PuzzleMat {
+        Map<Point2D, Long> placedTiles;
+    }
+    
+    private static class Generator {
+        Map<Long, Tile> tiles;
+        Map<Tile.Location, List<Long>> classifiedTiles;
     }
 }
