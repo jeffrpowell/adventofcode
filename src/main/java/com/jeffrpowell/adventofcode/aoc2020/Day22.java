@@ -3,7 +3,6 @@ package com.jeffrpowell.adventofcode.aoc2020;
 import com.google.common.collect.Lists;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +50,7 @@ public class Day22 extends Solution2020<Integer>{
     }
     
     private GameResult playGame(List<Integer> deck1, List<Integer> deck2) {
-        Set<BigInteger> previousStates = new HashSet<>();
+        Set<Integer> previousStates = new HashSet<>();
         boolean infiniteGameTermination = false;
         while(!deck1.isEmpty() && !deck2.isEmpty()) {
             if (!previousStates.add(stateHash(deck1, deck2))) {
@@ -75,8 +74,8 @@ public class Day22 extends Solution2020<Integer>{
         }
     }
     
-    private BigInteger stateHash(List<Integer> deck1, List<Integer> deck2) {
-        return new BigInteger(Stream.concat(deck1.stream(), deck2.stream()).map(i -> i.toString()).collect(Collectors.joining()));
+    private int stateHash(List<Integer> deck1, List<Integer> deck2) {
+        return deck1.hashCode() + 7 * deck2.hashCode();
     }
     
     private boolean player1Wins(int play1, int play2, List<Integer> deck1, List<Integer> deck2) {
