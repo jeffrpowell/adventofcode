@@ -1,12 +1,11 @@
 package com.jeffrpowell.adventofcode.aoc2020;
 
+import com.jeffrpowell.adventofcode.Direction;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.awt.geom.Point2D;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,8 @@ public class Day20 extends Solution2020<String>{
     @Override
     protected String part1(List<String> input) {
         Map<Long, Tile> tiles = parseTiles(input);
-        Map<Tile.Location, List<Long>> classifiedTiles = classifyTiles(tiles.values());
+        Map<Integer, List<Tile>> tilesByHash = buildTilesByHash(tiles.values());
+        Map<Tile.Location, List<Long>> classifiedTiles = classifyTiles(tiles.values(), tilesByHash);
         return Long.toString(classifiedTiles.get(Tile.Location.CORNER).stream()
             .reduce(1L, Math::multiplyExact));
     }
@@ -43,16 +43,19 @@ public class Day20 extends Solution2020<String>{
     @Override
     protected String part2(List<String> input) {
         Map<Long, Tile> tiles = parseTiles(input);
-        Map<Tile.Location, List<Long>> classifiedTiles = classifyTiles(tiles.values());
-        Deque<SearchAttempt> searchSpace = new ArrayDeque<>();
-        for (Long cornerId : classifiedTiles.get(Tile.Location.CORNER)) {
-            search(new SearchAttempt(new Point2D.Double(0, 0), cornerId));
+        Map<Integer, List<Tile>> tilesByHash = buildTilesByHash(tiles.values());
+        Map<Tile.Location, List<Long>> classifiedTiles = classifyTiles(tiles.values(), tilesByHash);
+        Map<Point2D, Long> placedTiles = new HashMap<>();
+        Long firstTile = classifiedTiles.get(Tile.Location.CORNER).get(0);
+        placedTiles.put(new Point2D.Double(0, 0), firstTile);
+        for (Integer hash : tiles.get(firstTile).hashCircle) {
+            List<Tile> matchingTiles = tilesByHash.get(hash);
+            if (matchingTiles.size() > 1) {
+                Tile nextTile = matchingTiles.stream().filter(t -> t.id != firstTile).findAny().get();
+                placedTiles.put(new Point2D.Double(1, 0), nextTile.id);
+            }
         }
         return "";
-    }
-    
-    private void search(SearchAttempt attempt) {
-        
     }
     
     private Map<Long, Tile> parseTiles(List<String> input) {
@@ -72,7 +75,7 @@ public class Day20 extends Solution2020<String>{
         return tiles;
     }
     
-    private Map<Tile.Location, List<Long>> classifyTiles(Collection<Tile> tiles) {
+    private Map<Integer, List<Tile>> buildTilesByHash(Collection<Tile> tiles) {
         tiles.stream().forEach(Tile::calculateHashes);
         Map<Integer, List<Tile>> tilesByHash = new HashMap<>();
         for (Tile t : tiles) {
@@ -85,6 +88,10 @@ public class Day20 extends Solution2020<String>{
                 tilesByHash.get(h).add(t);
             }
         }
+        return tilesByHash;
+    }
+    
+    private Map<Tile.Location, List<Long>> classifyTiles(Collection<Tile> tiles, Map<Integer, List<Tile>> tilesByHash) {
         Map<Long, List<Tile>> tilesWithUniqueEdges = tilesByHash.values().stream()
             .filter(tileList -> tileList.size() < 2)
             .flatMap(List::stream)
@@ -132,6 +139,29 @@ public class Day20 extends Solution2020<String>{
         public Location getLocation() {
             return location;
         }
+        
+        public void setOrientation(Direction d, int hash) {
+            List<Integer> hashes;
+            if (hashCircleFlipped.contains(hash)) {
+                usingFlippedHashCircle = true;
+                hashes = hashCircleFlipped;
+            }
+            else {
+                hashes = hashCircle;
+            }
+//            switch (d) {
+//                case LEFT -> {
+//                    
+//                };
+//                default -> {
+//                    
+//                };
+//            }
+        }
+        
+//        public int getNextHash(Direction d) {
+//            
+//        }
         
         public void calculateHashes() {
             rawRotatedCW = rotateTileCW();
