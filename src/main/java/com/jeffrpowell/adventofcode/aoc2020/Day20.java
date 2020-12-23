@@ -6,6 +6,7 @@ import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,21 +148,34 @@ public class Day20 extends Solution2020<String>{
                 hashes = hashCircleFlipped;
             }
             else {
+                usingFlippedHashCircle = false;
                 hashes = hashCircle;
             }
-//            switch (d) {
-//                case LEFT -> {
-//                    
-//                };
-//                default -> {
-//                    
-//                };
-//            }
+            int hashPosition = hashes.indexOf(hash);
+            switch (d) {
+                case LEFT -> Collections.rotate(hashes, -hashPosition);
+                case UP -> Collections.rotate(hashes, -hashPosition + 1);
+                case RIGHT -> Collections.rotate(hashes, -hashPosition + 2);
+                case DOWN -> Collections.rotate(hashes, -hashPosition + 3);
+            }
         }
         
-//        public int getNextHash(Direction d) {
-//            
-//        }
+        public int getNextHash(Direction d) {
+            List<Integer> hashes;
+            if (usingFlippedHashCircle) {
+                hashes = hashCircleFlipped;
+            }
+            else {
+                hashes = hashCircle;
+            }
+            return switch (d) {
+                case LEFT -> hashes.get(0);
+                case UP -> hashes.get(1);
+                case RIGHT -> hashes.get(2);
+                case DOWN -> hashes.get(3);
+                default -> hashes.get(0);
+            };
+        }
         
         public void calculateHashes() {
             rawRotatedCW = rotateTileCW();
