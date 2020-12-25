@@ -4,6 +4,7 @@ import com.jeffrpowell.adventofcode.Direction;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.awt.geom.Point2D;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
                   # 
@@ -52,8 +55,11 @@ public class Day20 extends Solution2020<String>{
         for (Integer hash : tiles.get(firstTile).hashCircle) {
             List<Tile> matchingTiles = tilesByHash.get(hash);
             if (matchingTiles.size() > 1) {
+                tiles.get(firstTile).setOrientation(Direction.RIGHT, hash);
                 Tile nextTile = matchingTiles.stream().filter(t -> t.id != firstTile).findAny().get();
+                nextTile.setOrientation(Direction.LEFT, hash);
                 placedTiles.put(new Point2D.Double(1, 0), nextTile.id);
+                break;
             }
         }
         return "";
@@ -106,10 +112,11 @@ public class Day20 extends Solution2020<String>{
         return tiles.stream().collect(Collectors.groupingBy(Tile::getLocation, Collectors.mapping(Tile::getId, Collectors.toList())));
     }
     
-    private static class Tile {
-        enum Location {CORNER, EDGE, MIDDLE}
+    public static class Tile {
+        public enum Location {CORNER, EDGE, MIDDLE}
         List<String> raw;
         List<String> rawRotatedCW;
+        List<String> finalOrientation;
         long id;
         List<Integer> hashCircle;
         List<Integer> hashCircleFlipped;
@@ -160,6 +167,38 @@ public class Day20 extends Solution2020<String>{
             }
         }
         
+        private void setFinalOrientation(int rotationDistance) {
+            if (usingFlippedHashCircle) {
+                finalOrientation = switch (rotationDistance) {
+                    case 0 -> raw;
+                    case 1 -> rawRotatedCW;
+                    case 2 -> reverseStream(raw.stream()).map(Tile::reverseString).collect(Collectors.toList());
+                    case 3 -> reverseStream(rawRotatedCW.stream()).map(Tile::reverseString).collect(Collectors.toList());
+                    default -> raw;
+                };
+            }
+            else {
+                finalOrientation = switch (rotationDistance) {
+                    case 0 -> raw.stream().map(Tile::reverseString).collect(Collectors.toList());
+                    case 1 -> reverseStream(rawRotatedCW.stream()).collect(Collectors.toList());
+                    case 2 -> reverseStream(raw.stream()).collect(Collectors.toList());
+                    case 3 -> rawRotatedCW.stream().map(Tile::reverseString).collect(Collectors.toList());
+                    default -> raw;
+                };
+            }
+        }
+        
+        private static <T> Stream<T> reverseStream(Stream<T> s) {
+            //https://stackoverflow.com/a/24011264
+            return s.collect(Collector.of(
+                ArrayDeque<T>::new,
+                (deq, t) -> deq.addFirst(t),
+                (d1, d2) -> { 
+                    d2.addAll(d1); 
+                    return d2; 
+                })).stream();
+        }
+        
         public int getNextHash(Direction d) {
             List<Integer> hashes;
             if (usingFlippedHashCircle) {
@@ -179,14 +218,14 @@ public class Day20 extends Solution2020<String>{
         
         public void calculateHashes() {
             rawRotatedCW = rotateTileCW();
+            hashCircle.add(rawRotatedCW.get(0).hashCode());
             hashCircle.add(raw.get(0).hashCode());
             hashCircle.add(reverseString(rawRotatedCW.get(rawRotatedCW.size() - 1)).hashCode());
             hashCircle.add(reverseString(raw.get(raw.size() - 1)).hashCode());
-            hashCircle.add(rawRotatedCW.get(0).hashCode());
+            hashCircleFlipped.add(rawRotatedCW.get(rawRotatedCW.size() - 1).hashCode());
             hashCircleFlipped.add(reverseString(raw.get(0)).hashCode());
             hashCircleFlipped.add(reverseString(rawRotatedCW.get(0)).hashCode());
             hashCircleFlipped.add(raw.get(raw.size() - 1).hashCode());
-            hashCircleFlipped.add(rawRotatedCW.get(rawRotatedCW.size() - 1).hashCode());
         }
         
         private static String reverseString(String s) {
