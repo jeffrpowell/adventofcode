@@ -49,18 +49,114 @@ public class Day20 extends Solution2020<String>{
         Map<Long, Tile> tiles = parseTiles(input);
         Map<Integer, List<Tile>> tilesByHash = buildTilesByHash(tiles.values());
         Map<Tile.Location, List<Long>> classifiedTiles = classifyTiles(tiles.values(), tilesByHash);
-        Map<Point2D, Long> placedTiles = new HashMap<>();
+        Map<Point2D, Tile> placedTiles = new HashMap<>();
+        
+        //Set the top-left corner piece
         Long firstTile = classifiedTiles.get(Tile.Location.CORNER).get(0);
-        placedTiles.put(new Point2D.Double(0, 0), firstTile);
+        placedTiles.put(new Point2D.Double(0, 0), tiles.get(firstTile));
+        System.out.println(tiles.get(firstTile).raw.stream().collect(Collectors.joining("\n")));
+        System.out.println();
         for (Integer hash : tiles.get(firstTile).hashCircle) {
             List<Tile> matchingTiles = tilesByHash.get(hash);
             if (matchingTiles.size() > 1) {
                 tiles.get(firstTile).setOrientation(Direction.RIGHT, hash);
-                Tile nextTile = matchingTiles.stream().filter(t -> t.id != firstTile).findAny().get();
-                nextTile.setOrientation(Direction.LEFT, hash);
-                placedTiles.put(new Point2D.Double(1, 0), nextTile.id);
+                System.out.println(tiles.get(firstTile).finalOrientation.stream().collect(Collectors.joining("\n")));
+                System.out.println();
                 break;
             }
+        }
+        Tile lastPlacedTile = tiles.get(firstTile);
+        
+        // Set the top edge pieces
+        boolean done = false;
+        int column = 0;
+        while (!done) {
+            int hash = lastPlacedTile.getNextHash(Direction.RIGHT); //traveling along the top edge pieces, left-to-right; so reference the last piece's right hash
+            final long lastId = lastPlacedTile.id;
+            List<Tile> matchingTiles = tilesByHash.get(hash); 
+            if (matchingTiles.size() == 1) {
+                done = true;
+            }
+            else {
+                column++;
+                Tile nextTile = matchingTiles.stream().filter(t -> t.id != lastId).findAny().get();
+                System.out.println(nextTile.raw.stream().collect(Collectors.joining("\n")));
+                System.out.println();
+                nextTile.setOrientation(Direction.LEFT, hash);
+                System.out.println(nextTile.finalOrientation.stream().collect(Collectors.joining("\n")));
+                System.out.println();
+                placedTiles.put(new Point2D.Double(column, 0), nextTile);
+                lastPlacedTile = nextTile;
+            }
+        }
+        
+        // Set the right edge pieces
+        done = false;
+        int row = 0;
+        while (!done) {
+            int hash = lastPlacedTile.getNextHash(Direction.UP);
+            final long lastId = lastPlacedTile.id;
+            List<Tile> matchingTiles = tilesByHash.get(hash);
+            if (matchingTiles.size() == 1) {
+                done = true;
+            }
+            else {
+                row++;
+                Tile nextTile = matchingTiles.stream().filter(t -> t.id != lastId).findAny().get();
+                nextTile.setOrientation(Direction.DOWN, hash);
+                placedTiles.put(new Point2D.Double(column, row), nextTile);
+                lastPlacedTile = nextTile;
+            }
+        }
+        
+        // Set the bottom edge pieces
+        done = false;
+        while (!done) {
+            int hash = lastPlacedTile.getNextHash(Direction.RIGHT);
+            final long lastId = lastPlacedTile.id;
+            List<Tile> matchingTiles = tilesByHash.get(hash);
+            if (matchingTiles.size() == 1) {
+                done = true;
+            }
+            else {
+                column--;
+                Tile nextTile = matchingTiles.stream().filter(t -> t.id != lastId).findAny().get();
+                nextTile.setOrientation(Direction.LEFT, hash);
+                placedTiles.put(new Point2D.Double(column, row), nextTile);
+                lastPlacedTile = nextTile;
+            }
+        }
+        
+        // Set the right edge pieces
+        done = false;
+        while (!done) {
+            int hash = lastPlacedTile.getNextHash(Direction.UP);
+            final long lastId = lastPlacedTile.id;
+            List<Tile> matchingTiles = tilesByHash.get(hash);
+            if (matchingTiles.size() == 1) {
+                done = true;
+            }
+            else {
+                row--;
+                Tile nextTile = matchingTiles.stream().filter(t -> t.id != lastId).findAny().get();
+                nextTile.setOrientation(Direction.DOWN, hash);
+                placedTiles.put(new Point2D.Double(column, row), nextTile);
+                lastPlacedTile = nextTile;
+            }
+        }
+        
+        System.out.println("\n\n-------------FINAL----------------");
+        Tile def = new Tile(-1);
+        def.finalOrientation = Stream.generate(() -> "..........").limit(10).collect(Collectors.toList());
+        for (row = 0; row < 12; row++) {
+            for (int line = 0; line < 10; line++) {
+                for (int col = 0; col < 12; col++) {
+                    Tile t = placedTiles.getOrDefault(new Point2D.Double(col, row), def);
+                    System.out.print(" " + t.finalOrientation.get(line) + " ");
+                }
+                System.out.println();
+            }
+            System.out.println();
         }
         return "";
     }
@@ -130,6 +226,7 @@ public class Day20 extends Solution2020<String>{
             this.hashCircle = new ArrayList<>();
             this.hashCircleFlipped = new ArrayList<>();
             this.usingFlippedHashCircle = false;
+            this.finalOrientation = null;
         }
         
         public void addLine(String line) {
@@ -238,6 +335,9 @@ public class Day20 extends Solution2020<String>{
             hashCircleFlipped.add(reverseString(raw.get(0)).hashCode());
             hashCircleFlipped.add(reverseString(rawRotatedCW.get(0)).hashCode());
             hashCircleFlipped.add(raw.get(raw.size() - 1).hashCode());
+            if (Stream.concat(hashCircle.stream(), hashCircleFlipped.stream()).distinct().count() < 8L) {
+                System.out.println(this.id + " has duplicate edge hashes!");
+            }
         }
         
         private static String reverseString(String s) {
@@ -267,27 +367,12 @@ public class Day20 extends Solution2020<String>{
         
         @Override
         public String toString() {
-            return Long.toString(id);
+            if (finalOrientation == null) {
+                return Long.toString(id);
+            }
+            else {
+                return finalOrientation.stream().map(s -> " " + s + " ").collect(Collectors.joining("\n"));
+            }
         }
-    }
-    
-    private static class SearchAttempt {
-        Point2D pt;
-        Long tile;
-
-        public SearchAttempt(Point2D pt, Long tile) {
-            this.pt = pt;
-            this.tile = tile;
-        }
-        
-    }
-    
-    private static class PuzzleMat {
-        Map<Point2D, Long> placedTiles;
-    }
-    
-    private static class Generator {
-        Map<Long, Tile> tiles;
-        Map<Tile.Location, List<Long>> classifiedTiles;
     }
 }
