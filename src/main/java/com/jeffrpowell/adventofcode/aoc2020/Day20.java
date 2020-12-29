@@ -160,29 +160,41 @@ public class Day20 extends Solution2020<String>{
             }
             int hashPosition = hashes.indexOf(hash);
             switch (d) {
-                case LEFT -> Collections.rotate(hashes, -hashPosition);
-                case UP -> Collections.rotate(hashes, -hashPosition + 1);
-                case RIGHT -> Collections.rotate(hashes, -hashPosition + 2);
-                case DOWN -> Collections.rotate(hashes, -hashPosition + 3);
+                case LEFT -> {
+                    Collections.rotate(hashes, -hashPosition);
+                    setFinalOrientation(-hashPosition);
+                }
+                case UP -> {
+                    Collections.rotate(hashes, -hashPosition + 1);
+                    setFinalOrientation(-hashPosition + 1);
+                }
+                case RIGHT -> {
+                    Collections.rotate(hashes, -hashPosition + 2);
+                    setFinalOrientation(-hashPosition + 2);
+                }
+                case DOWN -> {
+                    Collections.rotate(hashes, -hashPosition + 3);
+                    setFinalOrientation(-hashPosition + 3);
+                }
             }
         }
         
         private void setFinalOrientation(int rotationDistance) {
             if (usingFlippedHashCircle) {
                 finalOrientation = switch (rotationDistance) {
-                    case 0 -> raw;
-                    case 1 -> rawRotatedCW;
-                    case 2 -> reverseStream(raw.stream()).map(Tile::reverseString).collect(Collectors.toList());
-                    case 3 -> reverseStream(rawRotatedCW.stream()).map(Tile::reverseString).collect(Collectors.toList());
+                    case 0, 4, -4 -> raw.stream().map(Tile::reverseString).collect(Collectors.toList());
+                    case 1, -3 -> reverseStream(rawRotatedCW.stream()).collect(Collectors.toList());
+                    case 2, -2 -> reverseStream(raw.stream()).collect(Collectors.toList());
+                    case 3, -1 -> rawRotatedCW.stream().map(Tile::reverseString).collect(Collectors.toList());
                     default -> raw;
                 };
             }
             else {
                 finalOrientation = switch (rotationDistance) {
-                    case 0 -> raw.stream().map(Tile::reverseString).collect(Collectors.toList());
-                    case 1 -> reverseStream(rawRotatedCW.stream()).collect(Collectors.toList());
-                    case 2 -> reverseStream(raw.stream()).collect(Collectors.toList());
-                    case 3 -> rawRotatedCW.stream().map(Tile::reverseString).collect(Collectors.toList());
+                    case 0, 4, -4 -> raw;
+                    case 1, -3 -> rawRotatedCW;
+                    case 2, -2 -> reverseStream(raw.stream()).map(Tile::reverseString).collect(Collectors.toList());
+                    case 3, -1 -> reverseStream(rawRotatedCW.stream()).map(Tile::reverseString).collect(Collectors.toList());
                     default -> raw;
                 };
             }

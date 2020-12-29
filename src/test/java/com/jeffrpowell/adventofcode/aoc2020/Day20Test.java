@@ -259,6 +259,9 @@ public class Day20Test
     }
     //</editor-fold>
     
+    //<editor-fold defaultstate="collapsed" desc="setOrientation final">
+    
+    @Test
     public void testSetOrientation_final_left_to_left() {
         int hash = ".#.#".hashCode();
         tile.setOrientation(Direction.LEFT, hash);
@@ -270,7 +273,258 @@ public class Day20Test
         );
         assertTrue(expected.equals(tile.finalOrientation), "left to left is off");
     }
+    
+    @Test
+    public void testSetOrientation_final_top_to_top() {
+        int hash = "#.##".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            "#.##",
+            "...#",
+            "#..#",
+            "..#."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "top to top is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_right_to_right() {
+        int hash = "###.".hashCode();
+        tile.setOrientation(Direction.RIGHT, hash);
+        List<String> expected = List.of(
+            "#.##",
+            "...#",
+            "#..#",
+            "..#."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "right to right is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_bottom_to_bottom() {
+        int hash = ".#..".hashCode();
+        tile.setOrientation(Direction.DOWN, hash);
+        List<String> expected = List.of(
+            "#.##",
+            "...#",
+            "#..#",
+            "..#."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "bottom to bottom is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_right_to_left() {
+        int hash = "###.".hashCode();
+        tile.setOrientation(Direction.LEFT, hash);
+        List<String> expected = List.of(
+            ".#..",
+            "#..#",
+            "#...",
+            "##.#"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "right to left is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_left_to_top() {
+        int hash = ".#.#".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            ".#.#",
+            "....",
+            "#..#",
+            ".###"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "left to top is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_left_to_right() {
+        int hash = ".#.#".hashCode();
+        tile.setOrientation(Direction.RIGHT, hash);
+        List<String> expected = List.of(
+            ".#..",
+            "#..#",
+            "#...",
+            "##.#"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "left to right is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_left_to_bottom() {
+        int hash = ".#.#".hashCode();
+        tile.setOrientation(Direction.DOWN, hash);
+        List<String> expected = List.of(
+            "###.",
+            "#..#",
+            "....",
+            "#.#."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "left to bottom is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_right_to_top() {
+        int hash = "###.".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            "###.",
+            "#..#",
+            "....",
+            "#.#."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "right to top is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_bottom_to_top() {
+        int hash = ".#..".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            ".#..",
+            "#..#",
+            "#...",
+            "##.#"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "bottom to top is off");
+    }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="setOrientation final flipped">
+    
+    @Test
+    public void testSetOrientation_final_flipped_left_to_left() {
+        int hash = ".###".hashCode();
+        tile.setOrientation(Direction.LEFT, hash);
+        List<String> expected = List.of(
+            "##.#",
+            "#...",
+            "#..#",
+            ".#.."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "left to left flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_top_to_top() {
+        int hash = "##.#".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            "##.#",
+            "#...",
+            "#..#",
+            ".#.."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "top to top flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_right_to_right() {
+        int hash = "#.#.".hashCode();
+        tile.setOrientation(Direction.RIGHT, hash);
+        List<String> expected = List.of(
+            "##.#",
+            "#...",
+            "#..#",
+            ".#.."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "right to right flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_bottom_to_bottom() {
+        int hash = "..#.".hashCode();
+        tile.setOrientation(Direction.DOWN, hash);
+        List<String> expected = List.of(
+            "##.#",
+            "#...",
+            "#..#",
+            ".#.."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "bottom to bottom flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_right_to_left() {
+        int hash = "#.#.".hashCode();
+        tile.setOrientation(Direction.LEFT, hash);
+        List<String> expected = List.of(
+            "..#.",
+            "#..#",
+            "...#",
+            "#.##"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "right to left flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_left_to_top() {
+        int hash = ".###".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            ".###",
+            "#..#",
+            "....",
+            ".#.#"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "left to top flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_left_to_right() {
+        int hash = ".###".hashCode();
+        tile.setOrientation(Direction.RIGHT, hash);
+        List<String> expected = List.of(
+            "..#.",
+            "#..#",
+            "...#",
+            "#.##"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "left to right flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_left_to_bottom() {
+        int hash = ".###".hashCode();
+        tile.setOrientation(Direction.DOWN, hash);
+        List<String> expected = List.of(
+            "#.#.",
+            "....",
+            "#..#",
+            "###."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "left to bottom flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_right_to_top() {
+        int hash = "#.#.".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            "#.#.",
+            "....",
+            "#..#",
+            "###."
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "right to top flipped is off");
+    }
+    
+    @Test
+    public void testSetOrientation_final_flipped_bottom_to_top() {
+        int hash = "..#.".hashCode();
+        tile.setOrientation(Direction.UP, hash);
+        List<String> expected = List.of(
+            "..#.",
+            "#..#",
+            "...#",
+            "#.##"
+        );
+        assertTrue(expected.equals(tile.finalOrientation), "bottom to top flipped is off");
+    }
+    //</editor-fold>
+    
 	public void testPart2()
 	{
 		List<String> input = TestDataLoader.getTestData(day, 1);
