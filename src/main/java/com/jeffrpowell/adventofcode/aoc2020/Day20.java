@@ -6,11 +6,13 @@ import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.awt.geom.Point2D;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
@@ -56,7 +58,7 @@ public class Day20 extends Solution2020<String>{
         placedTiles.put(new Point2D.Double(0, 0), tiles.get(firstTile));
         System.out.println(tiles.get(firstTile).raw.stream().collect(Collectors.joining("\n")));
         System.out.println();
-        for (Integer hash : tiles.get(firstTile).hashCircle) {
+        for (Integer hash : tiles.get(firstTile).getAllHashes()) {
             List<Tile> matchingTiles = tilesByHash.get(hash);
             if (matchingTiles.size() > 1) {
                 tiles.get(firstTile).setOrientation(Direction.RIGHT, hash);
@@ -94,7 +96,7 @@ public class Day20 extends Solution2020<String>{
         done = false;
         int row = 0;
         while (!done) {
-            int hash = lastPlacedTile.getNextHash(Direction.UP);
+            int hash = lastPlacedTile.getNextHash(Direction.DOWN);
             final long lastId = lastPlacedTile.id;
             List<Tile> matchingTiles = tilesByHash.get(hash);
             if (matchingTiles.size() == 1) {
@@ -103,7 +105,7 @@ public class Day20 extends Solution2020<String>{
             else {
                 row++;
                 Tile nextTile = matchingTiles.stream().filter(t -> t.id != lastId).findAny().get();
-                nextTile.setOrientation(Direction.DOWN, hash);
+                nextTile.setOrientation(Direction.UP, hash);
                 placedTiles.put(new Point2D.Double(column, row), nextTile);
                 lastPlacedTile = nextTile;
             }
@@ -112,7 +114,7 @@ public class Day20 extends Solution2020<String>{
         // Set the bottom edge pieces
         done = false;
         while (!done) {
-            int hash = lastPlacedTile.getNextHash(Direction.RIGHT);
+            int hash = lastPlacedTile.getNextHash(Direction.LEFT);
             final long lastId = lastPlacedTile.id;
             List<Tile> matchingTiles = tilesByHash.get(hash);
             if (matchingTiles.size() == 1) {
@@ -121,7 +123,7 @@ public class Day20 extends Solution2020<String>{
             else {
                 column--;
                 Tile nextTile = matchingTiles.stream().filter(t -> t.id != lastId).findAny().get();
-                nextTile.setOrientation(Direction.LEFT, hash);
+                nextTile.setOrientation(Direction.RIGHT, hash);
                 placedTiles.put(new Point2D.Double(column, row), nextTile);
                 lastPlacedTile = nextTile;
             }
@@ -182,13 +184,9 @@ public class Day20 extends Solution2020<String>{
         tiles.stream().forEach(Tile::calculateHashes);
         Map<Integer, List<Tile>> tilesByHash = new HashMap<>();
         for (Tile t : tiles) {
-            for (Integer h : t.hashCircle) {
-                tilesByHash.putIfAbsent(h, new ArrayList<>());
-                tilesByHash.get(h).add(t);
-            }
-            for (Integer h : t.hashCircleFlipped) {
-                tilesByHash.putIfAbsent(h, new ArrayList<>());
-                tilesByHash.get(h).add(t);
+            for (Integer hash : t.getAllHashes()) {
+                tilesByHash.putIfAbsent(hash, new ArrayList<>());
+                tilesByHash.get(hash).add(t);
             }
         }
         return tilesByHash;
@@ -211,11 +209,10 @@ public class Day20 extends Solution2020<String>{
     public static class Tile {
         public enum Location {CORNER, EDGE, MIDDLE}
         List<String> raw;
-        List<String> rawRotatedCW;
         List<String> finalOrientation;
+        Map<Direction, Integer> finalHashCircle;
         long id;
-        List<Integer> hashCircle;
-        List<Integer> hashCircleFlipped;
+        List<Hash> hashCircle;
         boolean usingFlippedHashCircle;
         Location location;
         
@@ -224,7 +221,6 @@ public class Day20 extends Solution2020<String>{
             this.raw = new ArrayList<>();
             this.location = Location.MIDDLE;
             this.hashCircle = new ArrayList<>();
-            this.hashCircleFlipped = new ArrayList<>();
             this.usingFlippedHashCircle = false;
             this.finalOrientation = null;
         }
@@ -245,39 +241,30 @@ public class Day20 extends Solution2020<String>{
             return location;
         }
         
-        public void setOrientation(Direction d, int hash) {
-            List<Integer> hashes;
-            if (hashCircleFlipped.contains(hash)) {
-                usingFlippedHashCircle = true;
-                hashes = hashCircleFlipped;
-            }
-            else {
-                usingFlippedHashCircle = false;
-                hashes = hashCircle;
-            }
-            int hashPosition = hashes.indexOf(hash);
-            switch (d) {
-                case LEFT -> {
-                    Collections.rotate(hashes, -hashPosition);
-                    setFinalOrientation(-hashPosition);
-                }
-                case UP -> {
-                    Collections.rotate(hashes, -hashPosition + 1);
-                    setFinalOrientation(-hashPosition + 1);
-                }
-                case RIGHT -> {
-                    Collections.rotate(hashes, -hashPosition + 2);
-                    setFinalOrientation(-hashPosition + 2);
-                }
-                case DOWN -> {
-                    Collections.rotate(hashes, -hashPosition + 3);
-                    setFinalOrientation(-hashPosition + 3);
-                }
+        public void calculateHashes() {
+            List<String> rotatedCW = rotateTileCW(raw);
+            hashCircle.add(new Hash(rotatedCW.get(0), Direction.LEFT));
+            hashCircle.add(new Hash(raw.get(0), Direction.UP));
+            hashCircle.add(new Hash(rotatedCW.get(rotatedCW.size() - 1), Direction.RIGHT));
+            hashCircle.add(new Hash(raw.get(raw.size() - 1), Direction.DOWN));
+            for (int i = 0; i < 4; i++) {
+                hashCircle.get(i).setRightNeighbor(hashCircle.get((i + 1) % 4));
             }
         }
         
-        private void setFinalOrientation(int rotationDistance) {
-            if (usingFlippedHashCircle) {
+        public Set<Integer> getAllHashes() {
+            return Stream.concat(hashCircle.stream().map(h -> h.hash), hashCircle.stream().map(h -> h.flippedHash)).collect(Collectors.toSet());
+        }
+        
+        public void setOrientation(Direction d, int hash) {
+            Hash matchingHash = hashCircle.stream().filter(h -> h.containsHash(hash)).findAny().get();
+            int rotationDistance = matchingHash.rotateTo(d, d);
+            setFinalOrientation(rotationDistance, matchingHash.flippedFromRaw);
+        }
+        
+        private void setFinalOrientation(int rotationDistance, boolean flippedFromRaw) {
+            List<String> rawRotatedCW = rotateTileCW(raw);
+            if (flippedFromRaw) {
                 finalOrientation = switch (rotationDistance) {
                     case 0, 4, -4 -> raw.stream().map(Tile::reverseString).collect(Collectors.toList());
                     case 1, -3 -> reverseStream(rawRotatedCW.stream()).collect(Collectors.toList());
@@ -309,45 +296,14 @@ public class Day20 extends Solution2020<String>{
         }
         
         public int getNextHash(Direction d) {
-            List<Integer> hashes;
-            if (usingFlippedHashCircle) {
-                hashes = hashCircleFlipped;
-            }
-            else {
-                hashes = hashCircle;
-            }
-            return switch (d) {
-                case LEFT -> hashes.get(0);
-                case UP -> hashes.get(1);
-                case RIGHT -> hashes.get(2);
-                case DOWN -> hashes.get(3);
-                default -> hashes.get(0);
-            };
+            Hash matchingHash = hashCircle.stream().filter(h -> h.getDirection() == d).findAny().get();
+            return matchingHash.getHash();
         }
         
-        public void calculateHashes() {
-            rawRotatedCW = rotateTileCW();
-            hashCircle.add(rawRotatedCW.get(0).hashCode());
-            hashCircle.add(raw.get(0).hashCode());
-            hashCircle.add(reverseString(rawRotatedCW.get(rawRotatedCW.size() - 1)).hashCode());
-            hashCircle.add(reverseString(raw.get(raw.size() - 1)).hashCode());
-            hashCircleFlipped.add(rawRotatedCW.get(rawRotatedCW.size() - 1).hashCode());
-            hashCircleFlipped.add(reverseString(raw.get(0)).hashCode());
-            hashCircleFlipped.add(reverseString(rawRotatedCW.get(0)).hashCode());
-            hashCircleFlipped.add(raw.get(raw.size() - 1).hashCode());
-            if (Stream.concat(hashCircle.stream(), hashCircleFlipped.stream()).distinct().count() < 8L) {
-                System.out.println(this.id + " has duplicate edge hashes!");
-            }
-        }
-        
-        private static String reverseString(String s) {
-            return new StringBuilder(s).reverse().toString();
-        }
-        
-        private List<String> rotateTileCW() {
-            char[][] mat = new char[raw.size()][];
-            for (int i = 0; i < raw.size(); i++) {
-                mat[i] = raw.get(i).toCharArray();
+        private List<String> rotateTileCW(List<String> image) {
+            char[][] mat = new char[image.size()][];
+            for (int i = 0; i < image.size(); i++) {
+                mat[i] = image.get(i).toCharArray();
             }
             //https://stackoverflow.com/a/2800033
             final int M = mat.length;
@@ -358,11 +314,11 @@ public class Day20 extends Solution2020<String>{
                     ret[c][M-1-r] = mat[r][c];
                 }
             }
-            List<String> rotatedTile = new ArrayList<>();
-            for (int i = 0; i < ret.length; i++) {
-                rotatedTile.add(new String(ret[i]));
-            }
-            return rotatedTile;
+            return Arrays.stream(ret).map(String::new).collect(Collectors.toList());
+        }
+        
+        private static String reverseString(String s) {
+            return new StringBuilder(s).reverse().toString();
         }
         
         @Override
@@ -372,6 +328,109 @@ public class Day20 extends Solution2020<String>{
             }
             else {
                 return finalOrientation.stream().map(s -> " " + s + " ").collect(Collectors.joining("\n"));
+            }
+        }
+        
+        static class Hash {
+            int hash;
+            int flippedHash;
+            Direction direction;
+            boolean flipped;
+            boolean flippedFromRaw;
+            private static final Set<Direction> TOP_LEFT = Set.of(Direction.UP, Direction.LEFT);
+            private static final Set<Direction> BOTTOM_RIGHT = Set.of(Direction.DOWN, Direction.RIGHT);
+            Hash rightNeighbor;
+
+            public Hash(String edge, Direction direction) {
+                this.direction = direction;
+                if (direction == Direction.DOWN || direction == Direction.RIGHT) {
+                    this.flippedHash = edge.hashCode();
+                    this.hash = reverseString(edge).hashCode();
+                    this.flipped = true;
+                }
+                else {
+                    this.hash = edge.hashCode();
+                    this.flippedHash = reverseString(edge).hashCode();
+                    this.flipped = false;
+                }
+            }
+
+            public void setRightNeighbor(Hash rightNeighbor) {
+                this.rightNeighbor = rightNeighbor;
+            }
+            
+            public int getHash() {
+                return flipped ? flippedHash : hash;
+            }
+
+            public Direction getDirection() {
+                return direction;
+            }
+            
+            public boolean containsHash(int hashcode) {
+                return hash == hashcode || flippedHash == hashcode;
+            }
+            
+            public boolean isFlippedFromRaw() {
+                return flippedFromRaw;
+            }
+            
+            /**
+             * 
+             * @param originalNewSide
+             * @param newSide
+             * @return rotationDistance, +CW -CCW
+             */
+            public int rotateTo(Direction originalNewSide, Direction newSide) {
+                int rotationDistance = direction.rotation90Distance(newSide);
+                if (rotationDistance == 0) {
+                    return 0;
+                }
+                if (TOP_LEFT.contains(direction) && BOTTOM_RIGHT.contains(newSide) ||
+                    BOTTOM_RIGHT.contains(direction) && TOP_LEFT.contains(newSide)) {
+                    flipped = !flipped;
+                    flippedFromRaw = true;
+                }
+                direction = newSide;
+                Direction neighborsNewSide = newSide.rotateRight90();
+                if (neighborsNewSide != originalNewSide) {
+                    rightNeighbor.rotateTo(originalNewSide, neighborsNewSide);
+                }
+                return rotationDistance;
+            }
+
+            @Override
+            public int hashCode() {
+                int h = 7;
+                h = 41 * h + this.hash;
+                h = 41 * h + this.flippedHash;
+                h = 41 * h + Objects.hashCode(this.direction);
+                h = 41 * h + (this.flipped ? 1 : 0);
+                return h;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj) {
+                    return true;
+                }
+                if (obj == null) {
+                    return false;
+                }
+                if (getClass() != obj.getClass()) {
+                    return false;
+                }
+                final Hash other = (Hash) obj;
+                if (this.hash != other.hash) {
+                    return false;
+                }
+                if (this.flippedHash != other.flippedHash) {
+                    return false;
+                }
+                if (this.flipped != other.flipped) {
+                    return false;
+                }
+                return this.direction == other.direction;
             }
         }
     }

@@ -111,4 +111,14 @@ public enum Direction
 		}
 		return null;
 	}
+    
+    public int rotation90Distance(Direction d) {
+        int distance = 0;
+        Direction current = d;
+        while (current != this) {
+            distance++;
+            current = current.rotateRight90();
+        }
+        return distance;
+    }
 }
