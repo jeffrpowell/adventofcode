@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class Day20Test
@@ -28,7 +29,7 @@ public class Day20Test
         tile.calculateHashes();
 	}
     
-    @Test
+    @Disabled
     public void testTileHashCircle() {
         Tile.Hash leftHash = new Tile.Hash(".#.#", Direction.LEFT);
         Tile.Hash topHash = new Tile.Hash("#.##", Direction.UP);
@@ -39,7 +40,7 @@ public class Day20Test
     
     //<editor-fold defaultstate="collapsed" desc="setOrientation hashCircle">
     
-    @Test
+    @Disabled
     public void testSetOrientation_left_to_left() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -49,7 +50,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "left to left hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_top_to_top() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -59,7 +60,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "top to top hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_right_to_right() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -69,7 +70,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "right to right hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_bottom_to_bottom() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -79,7 +80,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "bottom to bottom hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_right_to_left() {
         int leftHash = "#.#.".hashCode();
         int topHash = "##.#".hashCode();
@@ -89,7 +90,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "right to left hashes are off");
     }
     /*
-    @Test
+    @Disabled
     public void testSetOrientation_left_to_top() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -99,7 +100,7 @@ public class Day20Test
         assertTrue(List.of(bottomHash, leftHash, topHash, rightHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "left to top hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_left_to_right() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -109,7 +110,7 @@ public class Day20Test
         assertTrue(List.of(rightHash, bottomHash, leftHash, topHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "left to right hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_left_to_bottom() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -119,7 +120,7 @@ public class Day20Test
         assertTrue(List.of(topHash, rightHash, bottomHash, leftHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "left to bottom hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_right_to_top() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -129,7 +130,7 @@ public class Day20Test
         assertTrue(List.of(topHash, rightHash, bottomHash, leftHash).equals(tile.hashCircle.stream().map(Tile.Hash::getHash).collect(Collectors.toList())), "right to top hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_bottom_to_top() {
         int leftHash = ".#.#".hashCode();
         int topHash = "#.##".hashCode();
@@ -141,7 +142,7 @@ public class Day20Test
     //</editor-fold>
     /*
     //<editor-fold defaultstate="collapsed" desc="setOrientation hashCircleFlipped">
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_left_to_left() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -152,7 +153,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircleFlipped), "left to left flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_top_to_top() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -163,7 +164,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircleFlipped), "top to top flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_right_to_right() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -174,7 +175,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircleFlipped), "right to right flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_bottom_to_bottom() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -185,7 +186,7 @@ public class Day20Test
         assertTrue(List.of(leftHash, topHash, rightHash, bottomHash).equals(tile.hashCircleFlipped), "bottom to bottom flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_left_to_top() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -196,7 +197,7 @@ public class Day20Test
         assertTrue(List.of(bottomHash, leftHash, topHash, rightHash).equals(tile.hashCircleFlipped), "left to top flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_left_to_right() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -207,7 +208,7 @@ public class Day20Test
         assertTrue(List.of(rightHash, bottomHash, leftHash, topHash).equals(tile.hashCircleFlipped), "left to right flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_left_to_bottom() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -218,7 +219,7 @@ public class Day20Test
         assertTrue(List.of(topHash, rightHash, bottomHash, leftHash).equals(tile.hashCircleFlipped), "left to bottom flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_right_to_top() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -229,7 +230,7 @@ public class Day20Test
         assertTrue(List.of(topHash, rightHash, bottomHash, leftHash).equals(tile.hashCircleFlipped), "right to top flipped hashes are off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_flipped_bottom_to_top() {
         int leftHash = "###.".hashCode();
         int topHash = "##.#".hashCode();
@@ -243,7 +244,7 @@ public class Day20Test
     */
     //<editor-fold defaultstate="collapsed" desc="setOrientation final">
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_left_to_left() {
         int hash = ".#.#".hashCode();
         tile.setOrientation(Direction.LEFT, hash);
@@ -256,7 +257,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to left is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_top_to_top() {
         int hash = "#.##".hashCode();
         tile.setOrientation(Direction.UP, hash);
@@ -269,7 +270,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "top to top is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_right_to_right() {
         int hash = "###.".hashCode();
         tile.setOrientation(Direction.RIGHT, hash);
@@ -282,7 +283,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "right to right is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_bottom_to_bottom() {
         int hash = ".#..".hashCode();
         tile.setOrientation(Direction.DOWN, hash);
@@ -295,7 +296,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "bottom to bottom is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_right_to_left() {
         int hash = "###.".hashCode();
         tile.setOrientation(Direction.LEFT, hash);
@@ -308,7 +309,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "right to left is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_left_to_top() {
         int hash = ".#.#".hashCode();
         tile.setOrientation(Direction.UP, hash);
@@ -321,7 +322,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to top is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_left_to_right() {
         int hash = "#.#.".hashCode();
         tile.setOrientation(Direction.RIGHT, hash);
@@ -334,7 +335,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to right is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_left_to_bottom() {
         int hash = "#.#.".hashCode();
         tile.setOrientation(Direction.DOWN, hash);
@@ -347,7 +348,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to bottom is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_right_to_top() {
         int hash = ".###".hashCode();
         tile.setOrientation(Direction.UP, hash);
@@ -360,7 +361,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "right to top is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_bottom_to_top() {
         int hash = "..#.".hashCode();
         tile.setOrientation(Direction.UP, hash);
@@ -376,7 +377,7 @@ public class Day20Test
     /*
     //<editor-fold defaultstate="collapsed" desc="setOrientation final flipped">
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_left_to_left() {
         int hash = ".###".hashCode();
         tile.setOrientation(Direction.LEFT, hash);
@@ -389,7 +390,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to left flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_top_to_top() {
         int hash = "##.#".hashCode();
         tile.setOrientation(Direction.UP, hash);
@@ -402,7 +403,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "top to top flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_right_to_right() {
         int hash = "#.#.".hashCode();
         tile.setOrientation(Direction.RIGHT, hash);
@@ -415,7 +416,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "right to right flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_bottom_to_bottom() {
         int hash = "..#.".hashCode();
         tile.setOrientation(Direction.DOWN, hash);
@@ -428,7 +429,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "bottom to bottom flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_right_to_left() {
         int hash = "#.#.".hashCode();
         tile.setOrientation(Direction.LEFT, hash);
@@ -441,7 +442,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "right to left flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_left_to_top() {
         int hash = ".###".hashCode();
         tile.setOrientation(Direction.UP, hash);
@@ -454,7 +455,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to top flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_left_to_right() {
         int hash = ".###".hashCode();
         tile.setOrientation(Direction.RIGHT, hash);
@@ -467,7 +468,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to right flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_left_to_bottom() {
         int hash = ".###".hashCode();
         tile.setOrientation(Direction.DOWN, hash);
@@ -480,7 +481,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "left to bottom flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_right_to_top() {
         int hash = "#.#.".hashCode();
         tile.setOrientation(Direction.UP, hash);
@@ -493,7 +494,7 @@ public class Day20Test
         assertTrue(expected.equals(tile.finalOrientation), "right to top flipped is off");
     }
     
-    @Test
+    @Disabled
     public void testSetOrientation_final_flipped_bottom_to_top() {
         int hash = "..#.".hashCode();
         tile.setOrientation(Direction.UP, hash);
