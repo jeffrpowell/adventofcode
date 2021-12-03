@@ -70,7 +70,6 @@ public class Day7 extends Solution2020<Rule>{
     protected String part2(List<Rule> input) {
         Map<String, List<Rule>> groupedRules = RuleListUtil.groupByRulePatternKey(input);
         
-        BagRule goldenRule = null;
         for (Rule rule : groupedRules.get("empty")){
             rules.put(rule.getString(0), new BagRule(rule.getString(0)));
         }
@@ -81,9 +80,6 @@ public class Day7 extends Solution2020<Rule>{
                 bagRule.addContents(m.group(2), Integer.parseInt(m.group(1)));
             }
             rules.put(rule.getString(0), bagRule);
-            if (rule.getString(0).equals("shiny gold")) {
-                goldenRule = bagRule;
-            }
         }
         return Integer.toString(recursiveDive(rules.get("shiny gold")) - 1);
     }

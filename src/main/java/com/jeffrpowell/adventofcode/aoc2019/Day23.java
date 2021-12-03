@@ -114,8 +114,6 @@ public class Day23 extends Solution2019<List<BigInteger>>
 	}
 	
 	private static class NICComputer {
-		private final BigInteger address;
-		private final Queue<Packet> packetQueue;
 		private final IntCodeComputer computer;
 		private final BlockingQueue<BigInteger> inputQueue;
 		private final BlockingQueue<BigInteger> outputQueue;
@@ -124,8 +122,6 @@ public class Day23 extends Solution2019<List<BigInteger>>
 
 		public NICComputer(BigInteger address, List<BigInteger> tape, Queue<Packet> packetQueue, ExecutorService executor)
 		{
-			this.address = address;
-			this.packetQueue = packetQueue;
 			this.inputQueue = IntCodeComputer.generateDefaultBlockingQueue(address);
 			this.outputQueue = IntCodeComputer.generateDefaultBlockingQueue();
 			this.computer = new IntCodeComputer(tape, inputQueue, outputQueue);

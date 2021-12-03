@@ -115,9 +115,5 @@ public class Day17 extends Solution2018<String>
             return start;
         }
 
-        public Point2D getEnd() {
-            return end;
-        }
-        
     }
 }

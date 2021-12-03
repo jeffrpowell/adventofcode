@@ -75,7 +75,6 @@ public class Day4 extends Solution2020<Rule>{
         boolean has_hcl;
         boolean has_byr;
         boolean has_iyr;
-        boolean has_cid;
         boolean has_hgt;
         boolean isInvalid = false;
         
@@ -88,7 +87,6 @@ public class Day4 extends Solution2020<Rule>{
                 case "hcl" -> has_hcl = true;
                 case "byr" -> has_byr = true;
                 case "iyr" -> has_iyr = true;
-                case "cid" -> has_cid = true;
                 case "hgt" -> has_hgt = true;
             }
         }
@@ -107,7 +105,6 @@ public class Day4 extends Solution2020<Rule>{
                     case "byr" -> byr(r);
                     case "iyr" -> iyr(r);
                     case "hgt" -> hgt(r);
-                    case "cid" -> has_cid = true;
                 }
             }
             catch (Exception e) {

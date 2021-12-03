@@ -62,9 +62,9 @@ public class Day23 extends Solution2020<List<Integer>>{
         return getOrder(cups.get(1));
     }
     
-    private static void printOrder(Cup cup1, Cup currentCup) {
-        System.out.println(getOrder(cup1) + " current: " + currentCup.getLabel());
-    }
+    // private static void printOrder(Cup cup1, Cup currentCup) {
+    //     System.out.println(getOrder(cup1) + " current: " + currentCup.getLabel());
+    // }
     
     private static String getOrder(Cup cup1) {
         Cup currentCup = cup1.rightCup;

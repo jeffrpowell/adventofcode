@@ -101,12 +101,10 @@ public class Day22 extends Solution2020<Integer>{
     private static class GameResult
     {
         boolean player1Wins;
-        List<Integer> deck;
         long score;
 
         public GameResult(boolean player1Wins, List<Integer> deck, long score) {
             this.player1Wins = player1Wins;
-            this.deck = deck;
             this.score = score;
         }
         

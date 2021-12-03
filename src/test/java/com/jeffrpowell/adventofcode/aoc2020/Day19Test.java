@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 public class Day19Test
 {
-	private Solution day;
+	private Solution<?> day;
 
 	@BeforeEach
 	public void setUp()

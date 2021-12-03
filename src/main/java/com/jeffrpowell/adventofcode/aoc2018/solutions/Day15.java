@@ -207,7 +207,7 @@ public class Day15 extends Solution2018<String>{
 		public Unit(Point2D location, boolean elf)
 		{
 			this.elf = elf;
-			this.pathingQueue = new PriorityQueue(PATH_COMPARATOR);
+			this.pathingQueue = new PriorityQueue<>(PATH_COMPARATOR);
 			this.location = location;
 			this.hp = 200;
 		}
@@ -215,11 +215,6 @@ public class Day15 extends Solution2018<String>{
 		public Point2D getLocation()
 		{
 			return location;
-		}
-
-		public void setLocation(Point2D location)
-		{
-			this.location = location;
 		}
 
 		public boolean isElf()

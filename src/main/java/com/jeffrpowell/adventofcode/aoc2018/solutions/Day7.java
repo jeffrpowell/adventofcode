@@ -133,13 +133,6 @@ public class Day7 extends Solution2018<String>{
 			this.active = false;
 		}
 		
-		public Worker(String step, int startingSecond)
-		{
-			this.step = step;
-			this.startingSecond = startingSecond;
-			this.active = true;
-		}
-		
 		public void reset(String step, int startingSecond) {
 			this.step = step;
 			this.startingSecond = startingSecond;

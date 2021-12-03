@@ -84,8 +84,8 @@ public class Day24 extends Solution2020<String>{
             .collect(Collectors.toSet());
         neighborsToAdd.stream()
             .forEach(pt -> grid.putIfAbsent(pt, Boolean.FALSE));
-        Set<Point3D> pointsToCheck = new HashSet();
-        Set<Point3D> pointsToToggle = new HashSet();
+        Set<Point3D> pointsToCheck = new HashSet<>();
+        Set<Point3D> pointsToToggle = new HashSet<>();
 //        System.out.println(blackTileCount(grid));
         for (int i = 0; i < 100; i++) {
             grid.entrySet().stream()

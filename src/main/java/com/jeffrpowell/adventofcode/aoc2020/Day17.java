@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Day17 extends Solution2020<List<String>>{
 
@@ -95,37 +94,37 @@ public class Day17 extends Solution2020<List<String>>{
             .count());
     }
     
-    private static void printPocket(Map<PointND, Cube> pocket) {
-        double minX = pocket.keySet().stream().map(pt -> pt.getDimensionN(0)).min(Double::compare).get();
-        double maxX = pocket.keySet().stream().map(pt -> pt.getDimensionN(0)).max(Double::compare).get();
-        double minY = pocket.keySet().stream().map(pt -> pt.getDimensionN(1)).min(Double::compare).get();
-        double maxY = pocket.keySet().stream().map(pt -> pt.getDimensionN(1)).max(Double::compare).get();
-        double minZ = pocket.keySet().stream().map(pt -> pt.getDimensionN(2)).min(Double::compare).get();
-        double maxZ = pocket.keySet().stream().map(pt -> pt.getDimensionN(2)).max(Double::compare).get();
-        System.out.println("\n\n###########################################");
-        System.out.println("#           THE POCKET DIMENSION          #");
-        System.out.println("###########################################\n\n");
-        for (double z = minZ; z <= maxZ; z += 1.0) {
-            System.out.println("z = " + z);
-            for (double y = minY; y <= maxY; y += 1.0) {
-                if (Math.abs(y - 0.0) < 0.0001) {
-                    IntStream.rangeClosed(Double.valueOf(minX).intValue(), Double.valueOf(maxX).intValue())
-                        .mapToObj(i -> "-")
-                        .forEach(System.out::print);
-                    System.out.println("-");
-                }
-                for (double x = minX; x <= maxX; x += 1.0) {
-                    Cube c = pocket.getOrDefault(new PointND(x, y, z), new Cube(false));
-                    if (Math.abs(x - 0.0) < 0.0001) {
-                        System.out.print("|");
-                    }
-                    System.out.print(c.isActive() ? "#" : ".");
-                }
-                System.out.println("");
-            }
-            System.out.println("");
-        }
-    }
+    // private static void printPocket(Map<PointND, Cube> pocket) {
+    //     double minX = pocket.keySet().stream().map(pt -> pt.getDimensionN(0)).min(Double::compare).get();
+    //     double maxX = pocket.keySet().stream().map(pt -> pt.getDimensionN(0)).max(Double::compare).get();
+    //     double minY = pocket.keySet().stream().map(pt -> pt.getDimensionN(1)).min(Double::compare).get();
+    //     double maxY = pocket.keySet().stream().map(pt -> pt.getDimensionN(1)).max(Double::compare).get();
+    //     double minZ = pocket.keySet().stream().map(pt -> pt.getDimensionN(2)).min(Double::compare).get();
+    //     double maxZ = pocket.keySet().stream().map(pt -> pt.getDimensionN(2)).max(Double::compare).get();
+    //     System.out.println("\n\n###########################################");
+    //     System.out.println("#           THE POCKET DIMENSION          #");
+    //     System.out.println("###########################################\n\n");
+    //     for (double z = minZ; z <= maxZ; z += 1.0) {
+    //         System.out.println("z = " + z);
+    //         for (double y = minY; y <= maxY; y += 1.0) {
+    //             if (Math.abs(y - 0.0) < 0.0001) {
+    //                 IntStream.rangeClosed(Double.valueOf(minX).intValue(), Double.valueOf(maxX).intValue())
+    //                     .mapToObj(i -> "-")
+    //                     .forEach(System.out::print);
+    //                 System.out.println("-");
+    //             }
+    //             for (double x = minX; x <= maxX; x += 1.0) {
+    //                 Cube c = pocket.getOrDefault(new PointND(x, y, z), new Cube(false));
+    //                 if (Math.abs(x - 0.0) < 0.0001) {
+    //                     System.out.print("|");
+    //                 }
+    //                 System.out.print(c.isActive() ? "#" : ".");
+    //             }
+    //             System.out.println("");
+    //         }
+    //         System.out.println("");
+    //     }
+    // }
 
     private static class Cube {
         boolean active;

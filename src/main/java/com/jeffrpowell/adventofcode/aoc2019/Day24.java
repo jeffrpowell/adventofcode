@@ -69,20 +69,20 @@ public class Day24 extends Solution2019<List<String>>
 		return score;
 	}
 	
-	private static void printGrid(Map<Point2D, Bug> bugs) {
-		StringBuilder builder = new StringBuilder();
-		for (int y = 0; y < 5; y++)
-		{
-			for (int x = 0; x < 5; x++)
-			{
-				Point2D pt = new Point2D.Double(x, y);
-				builder.append(bugs.get(pt));
-			}
-			builder.append("\n");
-		}
-		builder.append("\n");
-		System.out.println(builder);
-	}
+	// private static void printGrid(Map<Point2D, Bug> bugs) {
+	// 	StringBuilder builder = new StringBuilder();
+	// 	for (int y = 0; y < 5; y++)
+	// 	{
+	// 		for (int x = 0; x < 5; x++)
+	// 		{
+	// 			Point2D pt = new Point2D.Double(x, y);
+	// 			builder.append(bugs.get(pt));
+	// 		}
+	// 		builder.append("\n");
+	// 	}
+	// 	builder.append("\n");
+	// 	System.out.println(builder);
+	// }
 
 	@Override
 	protected String part2(List<List<String>> input)

@@ -172,10 +172,6 @@ public class Day13 extends Solution2018<String>
             return location;
         }
 
-        public Direction getDirection() {
-            return direction;
-        }
-
         public Point2D getLocation() {
             return location;
         }
@@ -232,6 +228,7 @@ public class Day13 extends Solution2018<String>
                         case LEFT:
                             return Direction.DOWN;
                         case RIGHT:
+                        default:
                             return Direction.UP;
                     }
                 case RIGHT:
@@ -239,6 +236,7 @@ public class Day13 extends Solution2018<String>
                         case LEFT:
                             return Direction.UP;
                         case RIGHT:
+                        default:
                             return Direction.DOWN;
                     }
                 case UP:
@@ -246,6 +244,7 @@ public class Day13 extends Solution2018<String>
                         case LEFT:
                             return Direction.LEFT;
                         case RIGHT:
+                        default:
                             return Direction.RIGHT;
                     }
                 case DOWN:
@@ -253,6 +252,7 @@ public class Day13 extends Solution2018<String>
                         case LEFT:
                             return Direction.RIGHT;
                         case RIGHT:
+                        default:
                             return Direction.LEFT;
                     }
             }

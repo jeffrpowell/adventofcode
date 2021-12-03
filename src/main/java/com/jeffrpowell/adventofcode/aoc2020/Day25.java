@@ -20,7 +20,7 @@ public class Day25 extends Solution2020<Integer>{
 
     @Override
     protected String part1(List<Integer> input) {
-        Set<Long> publicKeys = input.stream().map(Long::new).collect(Collectors.toSet());
+        Set<Long> publicKeys = input.stream().map(Long::valueOf).collect(Collectors.toSet());
         int subject = 7;
         long value = 1;
         int smallestLoopSize = 0;

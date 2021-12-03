@@ -24,7 +24,7 @@ public class Day6 extends Solution2018<Point2D>
     private Point2D bottomRight;
 
     public Day6() {
-        this.queue = new PriorityQueue();
+        this.queue = new PriorityQueue<>();
         this.ptToSeekIndex = MultimapBuilder.hashKeys().hashSetValues().build();
         this.closestRoot = MultimapBuilder.hashKeys().hashSetValues().build();
         this.rootsWithInfiniteArea = new HashSet<>();
