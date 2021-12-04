@@ -1,11 +1,15 @@
 package com.jeffrpowell.adventofcode.inputparser;
 
-import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
-import com.jeffrpowell.adventofcode.inputparser.rule.RuleParser;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
+import com.jeffrpowell.adventofcode.inputparser.rule.RuleParser;
+import com.jeffrpowell.adventofcode.inputparser.section.CompositeInputParser;
+import com.jeffrpowell.adventofcode.inputparser.section.Section;
+import com.jeffrpowell.adventofcode.inputparser.section.SectionSplitStrategy;
 
 public class InputParserFactory
 {
@@ -58,7 +62,7 @@ public class InputParserFactory
         return new RuleParser(ruleDelimiter, namedRegexPatterns);
     }
 
-	public static InputParser<Section> getCompositeInputParser(InputParser<?>... parsers) {
-		
+	public static InputParser<Section> getCompositeInputParser(SectionSplitStrategy strategy, InputParser<?>... parsers) {
+		return new CompositeInputParser(strategy, parsers);
 	}
 }
