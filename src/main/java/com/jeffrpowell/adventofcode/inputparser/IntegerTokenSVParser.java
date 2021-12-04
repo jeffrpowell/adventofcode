@@ -19,7 +19,7 @@ public class IntegerTokenSVParser implements InputParser<List<Integer>>{
 		return input.stream()
 			.map(line -> line.split(delimiterRegex))
 			.map(Arrays::asList)
-			.map(strList -> strList.stream().map(Integer::parseInt).collect(Collectors.toList()))
+			.map(strList -> strList.stream().filter(s -> !s.isEmpty()).map(Integer::parseInt).collect(Collectors.toList()))
 			.collect(Collectors.toList());
 	}
 
