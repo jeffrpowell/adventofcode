@@ -57,4 +57,8 @@ public class InputParserFactory
     public static InputParser<Rule> getRuleParser(String ruleDelimiter, Map<String, Pattern> namedRegexPatterns) {
         return new RuleParser(ruleDelimiter, namedRegexPatterns);
     }
+
+	public static InputParser<Section> getCompositeInputParser(InputParser<?>... parsers) {
+		
+	}
 }
