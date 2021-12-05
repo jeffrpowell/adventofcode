@@ -5,14 +5,12 @@ import java.util.List;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 
-public class CompositeInputParser implements InputParser<Section>{
+public class SectionInputParser implements InputParser<Section>{
 
     private final SectionSplitStrategy strategy;
-    private final InputParser<?>[] parsers;
 
-    public CompositeInputParser(SectionSplitStrategy strategy, InputParser<?>[] parsers) {
+    public SectionInputParser(SectionSplitStrategy strategy) {
         this.strategy = strategy;
-        this.parsers = parsers;
     }
 
     @Override
@@ -20,7 +18,6 @@ public class CompositeInputParser implements InputParser<Section>{
         List<List<String>> splitInputs = strategy.splitSectionInputs(input);
         List<Section> sections = new ArrayList<>();
         for (int i = 0; i < splitInputs.size(); i++) {
-            InputParser<?> parser = parsers[Math.min(i, parsers.length - 1)];
             Section section = new Section(splitInputs.get(i));
             sections.add(section);
         }

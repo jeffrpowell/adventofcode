@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 import com.jeffrpowell.adventofcode.inputparser.rule.RuleParser;
-import com.jeffrpowell.adventofcode.inputparser.section.CompositeInputParser;
+import com.jeffrpowell.adventofcode.inputparser.section.SectionInputParser;
 import com.jeffrpowell.adventofcode.inputparser.section.Section;
 import com.jeffrpowell.adventofcode.inputparser.section.SectionSplitStrategy;
 
@@ -62,7 +62,7 @@ public class InputParserFactory
         return new RuleParser(ruleDelimiter, namedRegexPatterns);
     }
 
-	public static InputParser<Section> getCompositeInputParser(SectionSplitStrategy strategy, InputParser<?>... parsers) {
-		return new CompositeInputParser(strategy, parsers);
+	public static InputParser<Section> getSectionParser(SectionSplitStrategy strategy) {
+		return new SectionInputParser(strategy);
 	}
 }
