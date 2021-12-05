@@ -57,7 +57,25 @@ public class Point2DUtils
 		}
 	}
 	
+	public static boolean pointInsideLine(Point2D pt, boolean inclusive, Point2D start, Point2D end) {
+		if (!inclusive && (pt.equals(start) || pt.equals(end))) {
+            return false;
+        }
+        if (!pointInsideBoundary(pt, inclusive, Math.min(start.getY(), end.getY()), Math.max(start.getX(), end.getX()), Math.max(start.getY(), end.getY()), Math.min(start.getX(), end.getX()))){
+            return false;
+        }
+        double m = getSlope(start, end);
+        if (Double.isInfinite(m)) {
+            return true;
+        }
+        double b = start.getY() - m * start.getX();
+        return Math.abs(m * pt.getX() + b - pt.getY()) < 0.0001;
+	}
+	
 	public static double getSlope(Point2D pt1, Point2D pt2) {
+        if (Math.abs(pt1.getX() - pt2.getX()) < 0.0001) {
+            return Double.POSITIVE_INFINITY;
+        }
 		return (pt1.getY() - pt2.getY()) / (pt1.getX() - pt2.getX());
 	}
 	
