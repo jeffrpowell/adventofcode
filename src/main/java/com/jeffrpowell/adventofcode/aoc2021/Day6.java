@@ -1,6 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2021;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -8,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -29,7 +29,7 @@ public class Day6 extends Solution2021<List<Integer>>{
 
     @Override
     protected String part1(List<List<Integer>> input) {
-        // for (int i = 0; i < 18; i++) {
+        // for (int i = 0; i < 79; i++) {
         //     simulate(i, input.get(0));
         //     Lanternfish.allFish.clear();
         // }
@@ -45,10 +45,9 @@ public class Day6 extends Solution2021<List<Integer>>{
     }
     
     private String simulate(int days, List<Integer> initFish) {
-        List<RecursiveAction> actions = initFish.stream()
+        initFish.stream()
             .map(timer -> new Lanternfish(days, timer))
-            .collect(Collectors.toList());
-        actions.forEach(pool::invoke);
+            .forEach(pool::invoke);
         pool.awaitQuiescence(30, TimeUnit.MINUTES);
         // System.out.println("After " + days + " days: " + stringAllFish());
         return Integer.toString(Lanternfish.getAllFish().size());
@@ -84,16 +83,18 @@ public class Day6 extends Solution2021<List<Integer>>{
 
         @Override
         protected void compute() {
-            List<RecursiveAction> offspring = new ArrayList<>();
+            Collection<Lanternfish> offspring = new ArrayList<>();
             while (timeLeft > timer) {
                 timeLeft -= timer;
                 Lanternfish fish = new Lanternfish(timeLeft, 9);
-                offspring.add(fish);
+                if (timeLeft > 9) {
+                    offspring.add(fish);
+                }
                 addFish(fish);
                 timer = 7;
             }
             timer -= timeLeft;
-            invokeAll(offspring);
+            offspring.stream().forEach(Lanternfish::invoke);
         }
         
         // public int getId() {
