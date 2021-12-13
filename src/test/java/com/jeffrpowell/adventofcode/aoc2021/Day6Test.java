@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class Day2Test
+public class Day6Test
 {
 	private Solution<?> day;
 
@@ -22,5 +22,12 @@ public class Day2Test
 	{
 		List<String> input = TestDataLoader.getTestData(day, 1);
 		assertEquals("5934", day.parseAndRunPart1(input));
+	}
+
+	@Test
+	public void testPart2()
+	{
+		List<String> input = TestDataLoader.getTestData(day, 1);
+		assertEquals("26984457539", day.parseAndRunPart2(input));
 	}
 }

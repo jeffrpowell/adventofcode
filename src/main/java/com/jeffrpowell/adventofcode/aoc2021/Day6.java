@@ -2,13 +2,16 @@ package com.jeffrpowell.adventofcode.aoc2021;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -16,6 +19,8 @@ import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 public class Day6 extends Solution2021<List<Integer>>{
 
     static ForkJoinPool pool = new ForkJoinPool();
+    static Map<Integer, List<Integer>> childrenLUT = new HashMap<>();
+    static Map<Integer, List<Integer>> rootLUT = new HashMap<>();
 
     @Override
     public int getDay() {
@@ -40,8 +45,49 @@ public class Day6 extends Solution2021<List<Integer>>{
     
     @Override
     protected String part2(List<List<Integer>> input) {
-        // TODO Auto-generated method stub
-        return null;
+        int days = 256;
+        
+        for (int i = 1; i < 6; i++) {
+            List<Integer> birthDays = new ArrayList<>();
+            int countdown = days;
+            countdown -= i + 1;
+            birthDays.add(countdown);
+            while(countdown > 7) {
+                countdown -= 7;
+                birthDays.add(countdown);
+            }
+            rootLUT.put(i, birthDays);
+        }
+        for (int i = 0; i <= days; i++) {
+            List<Integer> birthDays = new ArrayList<>();
+            if (i < 9) {
+                childrenLUT.put(i, birthDays);
+                continue;
+            }
+            int countdown = days;
+            countdown -= 9;
+            birthDays.add(countdown);
+            while(countdown > 7) {
+                countdown -= 7;
+                birthDays.add(countdown);
+            }
+            childrenLUT.put(i, birthDays);
+        }
+
+        return Long.toString(
+            input.get(0).stream()
+                .map(rootLUT::get)
+                .map(root -> root.stream()
+                    .map(child -> countChildren(child))
+                    .collect(Collectors.reducing(0L, Math::addExact)) + 1)
+                .collect(Collectors.reducing(0L, Math::addExact))
+        );
+    }
+
+    private long countChildren(int child) {
+        return childrenLUT.get(child).stream()
+            .map(grandchild -> countChildren(grandchild))
+            .collect(Collectors.reducing(0L, Math::addExact)) + 1;
     }
     
     private String simulate(int days, List<Integer> initFish) {
@@ -59,6 +105,16 @@ public class Day6 extends Solution2021<List<Integer>>{
     //         .map(Lanternfish::toString)
     //         .collect(Collectors.joining(","));
     // }
+
+    private static class LookupPacket {
+        List<Integer> birthDays;
+
+        public LookupPacket(List<Integer> birthDays) {
+            this.birthDays = birthDays;
+        }
+
+
+    }
 
     private static class Lanternfish extends RecursiveAction {
         private static int ID_SEQUENCE = 1;
