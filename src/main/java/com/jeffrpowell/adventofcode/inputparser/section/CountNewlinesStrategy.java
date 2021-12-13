@@ -19,7 +19,7 @@ public class CountNewlinesStrategy implements SectionSplitStrategy{
             List<List<String>> sections = new ArrayList<>();
             int lastIndex = 0;
             while(lastIndex < allInput.size()) {
-                sections.add(allInput.subList(lastIndex, Math.min(lastIndex + count, allInput.size() - 1));
+                sections.add(allInput.subList(lastIndex, Math.min(lastIndex + count, allInput.size() - 1)));
             }
             return sections;
         }
