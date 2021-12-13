@@ -42,7 +42,20 @@ public class Day11 extends Solution2021<List<Integer>>{
     }
 
     private long step() {
-        grid.keySet().stream().forEach(pt -> grid.compute(pt, (k, v) -> v + 1));
+        grid = grid.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue() + 1
+            ));
+        List<Point2D> impacted = new ArrayList<>();
+        for (Map.Entry<Point2D, Integer> entry : grid.entrySet()) {
+            if (entry.getValue() >= 10) {
+                impacted.addAll(Point2DUtils.getBoundedAdjacentPts(entry.getKey(), 0, rightBoundary, bottomBoundary, 0, true, true).stream()
+                    .filter(pt -> grid.get(pt) != 0)
+                    .collect(Collectors.toList()));
+            }
+        }
+
         while(checkForFlashes()) {}
         Set<Point2D> flashes = grid.entrySet().stream().filter(entry -> entry.getValue() > 9).map(Map.Entry::getKey).collect(Collectors.toSet());
         flashes.stream().forEach(pt -> grid.put(pt, 0));
