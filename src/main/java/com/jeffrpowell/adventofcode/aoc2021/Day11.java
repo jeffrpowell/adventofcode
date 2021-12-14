@@ -47,30 +47,29 @@ public class Day11 extends Solution2021<List<Integer>>{
                 Map.Entry::getKey,
                 entry -> entry.getValue() + 1
             ));
+        
+        while(checkForFlashes()) {}
+        return grid.entrySet().stream().filter(entry -> entry.getValue() == 0).map(Map.Entry::getKey).collect(Collectors.toSet()).size();
+    }
+
+    private boolean checkForFlashes() {
         List<Point2D> impacted = new ArrayList<>();
+        List<Point2D> reset = new ArrayList<>();
         for (Map.Entry<Point2D, Integer> entry : grid.entrySet()) {
-            if (entry.getValue() >= 10) {
+            if (entry.getValue() > 9) {
+                reset.add(entry.getKey());
                 impacted.addAll(Point2DUtils.getBoundedAdjacentPts(entry.getKey(), 0, rightBoundary, bottomBoundary, 0, true, true).stream()
                     .filter(pt -> grid.get(pt) != 0)
                     .collect(Collectors.toList()));
             }
         }
-
-        while(checkForFlashes()) {}
-        Set<Point2D> flashes = grid.entrySet().stream().filter(entry -> entry.getValue() > 9).map(Map.Entry::getKey).collect(Collectors.toSet());
-        flashes.stream().forEach(pt -> grid.put(pt, 0));
-        return flashes.size();
-    }
-
-    private boolean checkForFlashes() {
-        List<Point2D> changesMade = new ArrayList<>();
-        grid.entrySet().stream()
-            .filter(entry -> entry.getValue() == 10)
-            .map(entry -> Point2DUtils.getBoundedAdjacentPts(entry.getKey(), 0, rightBoundary, bottomBoundary, 0, true, true))
-            .flatMap(Set::stream)
-            .peek(changesMade::add)
-            .forEach(pt -> grid.compute(pt, (k, v) -> v < 10 ? v + 1 : v));
-        return !changesMade.isEmpty();
+        for (Point2D flash : reset) {
+            grid.put(flash, 0);
+        }
+        for (Point2D neighbor : impacted) {
+            grid.put(neighbor, grid.get(neighbor) + 1);
+        }
+        return !reset.isEmpty();
     }
 
     @Override
