@@ -18,8 +18,9 @@ import com.jeffrpowell.adventofcode.inputparser.section.Section;
 import com.jeffrpowell.adventofcode.inputparser.section.SectionSplitStrategyFactory;
 
 public class Day14 extends Solution2021<Section>{
-    List<Character> template = Collections.emptyList();
-    Map<Character, Map<Character, Character>> LUT = new HashMap<>();
+    List<String> template = Collections.emptyList();
+    Map<String, Long> pairCount = new HashMap<>();
+    Map<Character, Map<Character, String>> LUT = new HashMap<>();
 
     @Override
     public int getDay() {
@@ -33,28 +34,27 @@ public class Day14 extends Solution2021<Section>{
 
     @Override
     protected String part1(List<Section> input) {
-        template = CharArrayUtils.toList(input.get(0).getInput(InputParserFactory.getStringParser()).get(0).toCharArray());
+        template = input.get(0).getInput(InputParserFactory.getTokenSVParser("")).get(0);
         List<Rule> rules = input.get(1).getInput(InputParserFactory.getRuleParser("\n", Pattern.compile("(\\w)(\\w) -> (\\w)")));
         for (Rule rule : rules) {
             LUT.putIfAbsent(rule.getChar(0), new HashMap<>());
-            LUT.get(rule.getChar(0)).put(rule.getChar(1), rule.getChar(2));
+            LUT.get(rule.getChar(0)).put(rule.getChar(1), rule.getString(2));
         }
         for (int i = 0; i < 10; i++) {
             template = step();
         }
-        Map<Character, Long> grouping = template.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.reducing(0L, item -> 1L, (accum, next) -> accum + 1L)));
+        Map<String, Long> grouping = template.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.reducing(0L, item -> 1L, (accum, next) -> accum + 1L)));
         long max = grouping.values().stream().max(Comparator.comparing(Function.identity())).get();
         long min = grouping.values().stream().min(Comparator.comparing(Function.identity())).get();
         return Long.toString(max - min);
     }
 
-    //Should consider an ordered map
-    private List<Character> step() {
-        List<Character> newTemplate = new ArrayList<>();
-        Character lastLetter = template.get(0);
+    private List<String> step() {
+        List<String> newTemplate = new ArrayList<>();
+        String lastLetter = template.get(0);
         newTemplate.add(lastLetter);
         for (int i = 1; i < template.size(); i++) {
-            Character letter = template.get(i);
+            String letter = template.get(i);
             newTemplate.add(LUT.get(lastLetter).get(letter));
             newTemplate.add(letter);
             lastLetter = letter;
@@ -64,19 +64,41 @@ public class Day14 extends Solution2021<Section>{
 
     @Override
     protected String part2(List<Section> input) {
-        template = CharArrayUtils.toList(input.get(0).getInput(InputParserFactory.getStringParser()).get(0).toCharArray());
+        template = input.get(0).getInput(InputParserFactory.getTokenSVParser("")).get(0);
         List<Rule> rules = input.get(1).getInput(InputParserFactory.getRuleParser("\n", Pattern.compile("(\\w)(\\w) -> (\\w)")));
         for (Rule rule : rules) {
             LUT.putIfAbsent(rule.getChar(0), new HashMap<>());
-            LUT.get(rule.getChar(0)).put(rule.getChar(1), rule.getChar(2));
+            LUT.get(rule.getChar(0)).put(rule.getChar(1), rule.getString(2));
+            pairCount.put(CharArrayUtils.concat("", rule.getChar(0), rule.getChar(1)), 0L);
         }
-        for (int i = 0; i < 40; i++) {
-            template = step();
+        for (int i = 0; i < template.size() - 1; i++) {
+            pairCount.compute(template.get(i)+template.get(i+1), (k, v) -> v+1);
         }
-        Map<Character, Long> grouping = template.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.reducing(0L, item -> 1L, (accum, next) -> accum + 1L)));
-        long max = grouping.values().stream().max(Comparator.comparing(Function.identity())).get();
-        long min = grouping.values().stream().min(Comparator.comparing(Function.identity())).get();
-        return Long.toString(max - min);
+        for (int i = 0; i < 10; i++) {
+            step2();
+        }
+        return Long.toString(pairCount.entrySet().stream()
+            .filter(entry -> entry.getKey().contains("B"))
+            .map(entry -> entry.getValue() * (entry.getKey().equals("BB") ? 2 : 1))
+            .reduce(0L, Math::addExact));
     }
     
+    private void step2() {
+        pairCount.entrySet().stream()
+            .filter(entry -> entry.getValue() > 0)
+            .map(Map.Entry::getKey)
+            .map(pair -> {
+                pairCount.compute(pair, (k, v) -> v - 1);
+                char left = pair.charAt(0);
+                char right = pair.charAt(1);
+                String middle = LUT.get(left).get(right);
+                String leftPair = left + middle;
+                String rightPair = middle + right;
+                return List.of(leftPair, rightPair);
+            })
+            .flatMap(List::stream)
+            .collect(Collectors.toList()).stream()
+            .forEach(pair -> pairCount.compute(pair, (k, v) -> v + 1));
+            
+    }
 }
