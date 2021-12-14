@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public class Day11 extends Solution2021<List<Integer>>{
     protected String part1(List<List<Integer>> input) {
         rightBoundary = input.get(0).size() - 1;
         bottomBoundary = input.size() - 1;
-        grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary).collect(Collectors.toMap(
+        grid = Point2DUtils.generateGrid(0, 0, rightBoundary + 1, bottomBoundary + 1).collect(Collectors.toMap(
             Function.identity(),
             pt -> input.get(Double.valueOf(pt.getX()).intValue()).get(Double.valueOf(pt.getY()).intValue())
         ));
@@ -49,7 +48,7 @@ public class Day11 extends Solution2021<List<Integer>>{
             ));
         
         while(checkForFlashes()) {}
-        return grid.entrySet().stream().filter(entry -> entry.getValue() == 0).map(Map.Entry::getKey).collect(Collectors.toSet()).size();
+        return grid.entrySet().stream().filter(entry -> entry.getValue() == 0).map(Map.Entry::getKey).count();
     }
 
     private boolean checkForFlashes() {
@@ -59,7 +58,7 @@ public class Day11 extends Solution2021<List<Integer>>{
             if (entry.getValue() > 9) {
                 reset.add(entry.getKey());
                 impacted.addAll(Point2DUtils.getBoundedAdjacentPts(entry.getKey(), 0, rightBoundary, bottomBoundary, 0, true, true).stream()
-                    .filter(pt -> grid.get(pt) != 0)
+                    .filter(this::notAlreadyFlashed)
                     .collect(Collectors.toList()));
             }
         }
@@ -72,10 +71,26 @@ public class Day11 extends Solution2021<List<Integer>>{
         return !reset.isEmpty();
     }
 
+    private boolean notAlreadyFlashed(Point2D pt) {
+        int level = grid.get(pt);
+        return 0 < level && level < 10;
+    }
+
     @Override
     protected String part2(List<List<Integer>> input) {
-        // TODO Auto-generated method stub
-        return null;
+        rightBoundary = input.get(0).size() - 1;
+        bottomBoundary = input.size() - 1;
+        grid = Point2DUtils.generateGrid(0, 0, rightBoundary + 1, bottomBoundary + 1).collect(Collectors.toMap(
+            Function.identity(),
+            pt -> input.get(Double.valueOf(pt.getX()).intValue()).get(Double.valueOf(pt.getY()).intValue())
+        ));
+        long flashes = 0;
+        long steps = 0;
+        while (flashes != grid.size()) {
+            flashes = step();
+            steps++;
+        }
+        return Long.toString(steps);
     }
     
     
