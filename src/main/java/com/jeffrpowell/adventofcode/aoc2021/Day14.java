@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.CharArrayUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -74,31 +75,30 @@ public class Day14 extends Solution2021<Section>{
         for (int i = 0; i < template.size() - 1; i++) {
             pairCount.compute(template.get(i)+template.get(i+1), (k, v) -> v+1);
         }
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 40; i++) {
             step2();
         }
+        
         return Long.toString(pairCount.entrySet().stream()
             .filter(entry -> entry.getKey().contains("B"))
             .map(entry -> entry.getValue() * (entry.getKey().equals("BB") ? 2 : 1))
-            .reduce(0L, Math::addExact));
+            .reduce(0L, Math::addExact) / 2L);
     }
     
     private void step2() {
+        Map<String, Long> nextPairCount = pairCount.keySet().stream().collect(Collectors.toMap(Function.identity(), pair -> 0L));
         pairCount.entrySet().stream()
             .filter(entry -> entry.getValue() > 0)
-            .map(Map.Entry::getKey)
-            .map(pair -> {
-                pairCount.compute(pair, (k, v) -> v - 1);
+            .forEach(entry -> {
+                String pair = entry.getKey();
                 char left = pair.charAt(0);
                 char right = pair.charAt(1);
                 String middle = LUT.get(left).get(right);
                 String leftPair = left + middle;
                 String rightPair = middle + right;
-                return List.of(leftPair, rightPair);
-            })
-            .flatMap(List::stream)
-            .collect(Collectors.toList()).stream()
-            .forEach(pair -> pairCount.compute(pair, (k, v) -> v + 1));
-            
+                nextPairCount.compute(leftPair, (k, v) -> v + entry.getValue());
+                nextPairCount.compute(rightPair, (k, v) -> v + entry.getValue());
+            });
+        pairCount = nextPairCount;
     }
 }
