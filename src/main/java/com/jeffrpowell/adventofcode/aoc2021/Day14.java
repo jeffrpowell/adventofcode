@@ -1,6 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2021;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.CharArrayUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -35,36 +35,17 @@ public class Day14 extends Solution2021<Section>{
 
     @Override
     protected String part1(List<Section> input) {
-        template = input.get(0).getInput(InputParserFactory.getTokenSVParser("")).get(0);
-        List<Rule> rules = input.get(1).getInput(InputParserFactory.getRuleParser("\n", Pattern.compile("(\\w)(\\w) -> (\\w)")));
-        for (Rule rule : rules) {
-            LUT.putIfAbsent(rule.getChar(0), new HashMap<>());
-            LUT.get(rule.getChar(0)).put(rule.getChar(1), rule.getString(2));
-        }
-        for (int i = 0; i < 10; i++) {
-            template = step();
-        }
-        Map<String, Long> grouping = template.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.reducing(0L, item -> 1L, (accum, next) -> accum + 1L)));
-        long max = grouping.values().stream().max(Comparator.comparing(Function.identity())).get();
-        long min = grouping.values().stream().min(Comparator.comparing(Function.identity())).get();
-        return Long.toString(max - min);
-    }
-
-    private List<String> step() {
-        List<String> newTemplate = new ArrayList<>();
-        String lastLetter = template.get(0);
-        newTemplate.add(lastLetter);
-        for (int i = 1; i < template.size(); i++) {
-            String letter = template.get(i);
-            newTemplate.add(LUT.get(lastLetter).get(letter));
-            newTemplate.add(letter);
-            lastLetter = letter;
-        }
-        return newTemplate;
+        System.err.println("There is an off-by-one somewhere. The answer is a couple numbers less than the output");
+        return simulate(input, 10);
     }
 
     @Override
     protected String part2(List<Section> input) {
+        System.err.println("There is an off-by-one somewhere. The answer is a couple numbers less than the output");
+        return simulate(input, 40);
+    }
+
+    private String simulate(List<Section> input, int times) {
         template = input.get(0).getInput(InputParserFactory.getTokenSVParser("")).get(0);
         List<Rule> rules = input.get(1).getInput(InputParserFactory.getRuleParser("\n", Pattern.compile("(\\w)(\\w) -> (\\w)")));
         for (Rule rule : rules) {
@@ -75,17 +56,31 @@ public class Day14 extends Solution2021<Section>{
         for (int i = 0; i < template.size() - 1; i++) {
             pairCount.compute(template.get(i)+template.get(i+1), (k, v) -> v+1);
         }
-        for (int i = 0; i < 40; i++) {
-            step2();
+        for (int i = 0; i < times; i++) {
+            step();
         }
-        
-        return Long.toString(pairCount.entrySet().stream()
-            .filter(entry -> entry.getKey().contains("B"))
-            .map(entry -> entry.getValue() * (entry.getKey().equals("BB") ? 2 : 1))
-            .reduce(0L, Math::addExact) / 2L);
+        Map<String, Long> counter = LUT.values().stream()
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toMap(
+                Function.identity(),
+                k -> 0L,
+                (Long a, Long b) -> a
+            ));
+        counter.keySet().forEach(letter -> {
+            counter.put(letter, 
+                pairCount.entrySet().stream()
+                    .filter(entry -> entry.getKey().contains(letter))
+                    .map(entry -> entry.getValue() * (entry.getKey().equals(letter+letter) ? 2 : 1))
+                    .reduce(0L, Math::addExact) / 2L + 1
+            );
+        });
+        long max = counter.values().stream().max(Comparator.comparing(Function.identity())).get();
+        long min = counter.values().stream().min(Comparator.comparing(Function.identity())).get();
+        return Long.toString(max - min + 1);
     }
     
-    private void step2() {
+    private void step() {
         Map<String, Long> nextPairCount = pairCount.keySet().stream().collect(Collectors.toMap(Function.identity(), pair -> 0L));
         pairCount.entrySet().stream()
             .filter(entry -> entry.getValue() > 0)
