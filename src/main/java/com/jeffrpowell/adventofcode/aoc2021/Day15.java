@@ -2,6 +2,7 @@ package com.jeffrpowell.adventofcode.aoc2021;
 
 import java.awt.geom.Point2D;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,16 +43,32 @@ public class Day15 extends Solution2021<List<Integer>> {
     
     @Override
     protected String part2(List<List<Integer>> input) {
+        Point2D destination = new Point2D.Double(input.get(0).size() * 5 - 1, input.size() * 5 - 1);
         grid = Point2DUtils.generateGrid(0, 0, input.get(0).size(), input.size())
             .collect(Collectors.toMap(
                 Function.identity(), 
                 pt -> new Node(pt, input.get(i2d(pt.getY())).get(i2d(pt.getX())), destination)
             ));
-        grid.entrySet().stream()
-            .forEach(entry -> {
-                Point2DUtils.applyVectorToPtNTimes(vector, pt, n)
-            });
-        getTotalRisk(new Point2D.Double(input.get(0).size() - 1, input.size() - 1));
+        int blockWidth = input.get(0).size();
+        int blockHeight = input.size();
+        Map<Point2D, Node> tempGrid = new HashMap<>();
+        for(Map.Entry<Point2D, Node> entry : grid.entrySet()) {
+            for (int blockX = 0; blockX < 5; blockX++) {
+                for(int blockY = 0; blockY < 5; blockY++) {
+                    if (blockY == 0 && blockX == 0) {
+                        continue;
+                    }
+                    int width = blockWidth * blockX;
+                    int height = blockHeight * blockY;
+                    long risk = Math.max(1, (entry.getValue().getRisk() + blockX + blockY) % 10);
+                    Point2D nextLocation = Point2DUtils.applyVectorToPt(new Point2D.Double(width, height), entry.getKey());
+                    tempGrid.put(nextLocation, new Node(nextLocation, risk, destination));
+                }
+            }
+        }
+        tempGrid.putAll(grid);
+        grid = tempGrid;
+        return getTotalRisk(destination);
     }
 
     private String getTotalRisk(Point2D destination) {

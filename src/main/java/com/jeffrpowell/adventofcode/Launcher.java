@@ -19,7 +19,7 @@ public class Launcher
 		else {
 			List<String> puzzleInput = inputStreamToStringList(puzzleInputStream);
 			
-			System.out.println(DAY.parseAndRunPart1(puzzleInput));
+			//System.out.println(DAY.parseAndRunPart1(puzzleInput));
 			System.out.println(DAY.parseAndRunPart2(puzzleInput));
 		}
     }

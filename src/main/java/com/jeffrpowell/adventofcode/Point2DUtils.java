@@ -39,6 +39,10 @@ public class Point2DUtils
     public static Point2D applyVectorToPtNTimes(Point2D vector, Point2D pt, int n) {
         return new Point2D.Double(pt.getX() + vector.getX() * n, pt.getY() + vector.getY() * n);
     }
+
+    public static Stream<Point2D> repeatVectorToPtNTimes(Point2D vector, Point2D pt, int n) {
+        return Stream.iterate(applyVectorToPt(vector, pt), lastPt -> true, lastPt -> applyVectorToPt(vector, lastPt)).limit(n);
+    }
 	
 	public static boolean pointInsideBoundary(Point2D pt, boolean inclusive, double topBoundary, double rightBoundary, double bottomBoundary, double leftBoundary) {
 		double x = pt.getX();
