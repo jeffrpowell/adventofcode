@@ -1,8 +1,8 @@
 package com.jeffrpowell.adventofcode.aoc2021;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,6 +33,37 @@ public class Day16 extends Solution2021<String>{
     private void parseNextToken(List<Boolean> remaining, State s) {
         long version = bitsToLong(remaining.subList(0, 3));
         long type = bitsToLong(remaining.subList(3, 6));
+        s.versionCounter += version;
+        if (type == 4) {
+            remaining = parseLiteral(remaining.subList(6, remaining.size()), s);
+        }
+        else {
+            long lengthTypeId = bitsToLong(remaining.subList(6, 7));
+            if (lengthTypeId == 0) {
+                remaining = parseOperator0(remaining.subList(7, remaining.size()), s);
+            }
+            else {
+                remaining = parseOperator1(remaining.subList(7, remaining.size()), s);
+            }
+        }
+        parseNextToken(remaining, s);
+    }
+
+    private List<Boolean> parseLiteral(List<Boolean> remaining, State s) {
+        for (int i = 0; i < remaining.size(); i += 5) {
+            if (!remaining.get(i)) {
+                return remaining.subList(i + 5, remaining.size());
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    private List<Boolean> parseOperator0(List<Boolean> remaining, State s) {
+        return remaining;
+    }
+
+    private List<Boolean> parseOperator1(List<Boolean> remaining, State s) {
+        return remaining;
     }
 
     private static List<Boolean> hexToBitSet(String hex) {
