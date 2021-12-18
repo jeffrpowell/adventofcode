@@ -1,6 +1,6 @@
 package com.jeffrpowell.adventofcode;
 
-import com.jeffrpowell.adventofcode.aoc2021.Day15;
+import com.jeffrpowell.adventofcode.aoc2021.Day16;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Launcher
 {
-	public static final Solution<?> DAY = new Day15();
+	public static final Solution<?> DAY = new Day16();
 	
     public static void main(String[] args) {
 		InputStream puzzleInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(DAY));
@@ -19,7 +19,7 @@ public class Launcher
 		else {
 			List<String> puzzleInput = inputStreamToStringList(puzzleInputStream);
 			
-			//System.out.println(DAY.parseAndRunPart1(puzzleInput));
+			System.out.println(DAY.parseAndRunPart1(puzzleInput));
 			System.out.println(DAY.parseAndRunPart2(puzzleInput));
 		}
     }
