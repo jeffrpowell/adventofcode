@@ -24,13 +24,19 @@ public class Day16 extends Solution2021<String>{
 
     @Override
     protected String part1(List<String> input) {
-        List<Boolean> bits = hexToBitSet(input.get(0));
+        List<Boolean> bits = hexToBits(input.get(0));
+        bits.remove(bits.size() - 1);
+        bits.remove(bits.size() - 1);
+        bits.remove(bits.size() - 1);
         State s = new State();
-        parseNextToken(bits, s);
+        do {
+            bits = parseNextToken(bits, s);
+        }
+        while (!bits.isEmpty());
         return Integer.toString(s.versionCounter);
     }
 
-    private void parseNextToken(List<Boolean> remaining, State s) {
+    private List<Boolean> parseNextToken(List<Boolean> remaining, State s) {
         long version = bitsToLong(remaining.subList(0, 3));
         long type = bitsToLong(remaining.subList(3, 6));
         s.versionCounter += version;
@@ -46,10 +52,10 @@ public class Day16 extends Solution2021<String>{
                 remaining = parseOperator1(remaining.subList(7, remaining.size()), s);
             }
         }
-        parseNextToken(remaining, s);
+        return remaining;
     }
 
-    private List<Boolean> parseLiteral(List<Boolean> remaining, State s) {
+    List<Boolean> parseLiteral(List<Boolean> remaining, State s) {
         for (int i = 0; i < remaining.size(); i += 5) {
             if (!remaining.get(i)) {
                 return remaining.subList(i + 5, remaining.size());
@@ -58,15 +64,28 @@ public class Day16 extends Solution2021<String>{
         return new ArrayList<>();
     }
 
-    private List<Boolean> parseOperator0(List<Boolean> remaining, State s) {
+    //15 bits, length of all sub-packets
+    List<Boolean> parseOperator0(List<Boolean> remaining, State s) {
+        int length = Long.valueOf(bitsToLong(remaining.subList(0, 15))).intValue();
+        int originalSize = remaining.size();
+        remaining = remaining.subList(15, remaining.size());
+        while(remaining.size() != originalSize - length) {
+            remaining = parseNextToken(remaining, s);
+        }
         return remaining;
     }
 
-    private List<Boolean> parseOperator1(List<Boolean> remaining, State s) {
+    //11 bits, number of sub-packets
+    List<Boolean> parseOperator1(List<Boolean> remaining, State s) {
+        long numSubpackets = bitsToLong(remaining.subList(0, 11));
+        remaining = remaining.subList(11, remaining.size());
+        for (; numSubpackets >= 0; numSubpackets--) {
+            remaining = parseNextToken(remaining, s);
+        }
         return remaining;
     }
 
-    private static List<Boolean> hexToBitSet(String hex) {
+    public static List<Boolean> hexToBits(String hex) {
         long[] bits = new long[hex.length() / 16 + 1];
         for(int i = 0; i < hex.length(); i += 16) {
             bits[i/16] = new BigInteger(hex.substring(i, Math.min(i+16, hex.length())), 16).longValue();
@@ -74,11 +93,11 @@ public class Day16 extends Solution2021<String>{
         return Arrays.stream(bits).mapToObj(Long::toBinaryString).flatMap(Day16::stringToBits).collect(Collectors.toList());
     }
 
-    private static Stream<Boolean> stringToBits(String s) {
+    public static Stream<Boolean> stringToBits(String s) {
         return s.chars().mapToObj(c -> c == '1');
     }
 
-    private static long bitsToLong(List<Boolean> bits) {
+    public static long bitsToLong(List<Boolean> bits) {
         long value = 0L;
         for (int i = 0; i < bits.size(); ++i) {
             value += bits.get(i) ? (1L << (bits.size() - i - 1)) : 0L;
@@ -92,7 +111,7 @@ public class Day16 extends Solution2021<String>{
         return null;
     }
 
-    private static class State {
+    public static class State {
         int versionCounter = 0;
     }
     
