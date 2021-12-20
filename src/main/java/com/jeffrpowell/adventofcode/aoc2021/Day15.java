@@ -99,17 +99,17 @@ public class Day15 extends Solution2021<List<Integer>> {
 
         public Path(Node head, Set<Node> path) {
             this.head = head;
-            this.pathPts = path.stream().map(n -> n.location).collect(Collectors.toSet());
-            this.risk = path.stream().map(Node::getRisk).reduce(0L, Math::addExact) + head.getRisk();
+            this.pathPts = path.stream().map(n -> n.location).collect(Collectors.toSet()); //Profiler says about 23% of time is spent here
+            this.risk = path.stream().map(Node::getRisk).reduce(0L, Math::addExact) + head.getRisk(); //Profiler says about 10% of time is spent here
             this.score = this.risk + this.head.getDistanceToTarget();
         }
 
-        public Stream<Path> getNewPaths() {
+        public Stream<Path> getNewPaths() { //TODO: Profiler says 88.5% of time is spent here
             return head.getNeighbors(this).stream()
                 .map(grid::get)
-                .map(newHead -> new Path(
+                .map(newHead -> new Path( //33% of the 88.5% is newing up this Path (see Path constructor for breakdown)
                     newHead, 
-                    Stream.concat(pathPts.stream().map(grid::get), Stream.of(head)).collect(Collectors.toSet())
+                    Stream.concat(pathPts.stream().map(grid::get), Stream.of(head)).collect(Collectors.toSet()) //54.7% of the 88.5% is collecting this stream
                 ));
         }
 

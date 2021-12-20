@@ -117,7 +117,7 @@ public class Day12 extends Solution2021<Rule> {
         }
 
         public CavePath(CavePath o) {
-            super(o);
+            super(o); //TODO: Profiler indicates this is what blows heap for part 2 (coming from CavePath::nextPaths)
             this.head = o.head;
             this.part2 = o.part2;
             this.tookSmallException = o.tookSmallException;
