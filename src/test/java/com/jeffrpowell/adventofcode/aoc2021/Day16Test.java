@@ -43,7 +43,7 @@ public class Day16Test
 		bits = bits.subList(7, bits.size()); //strip off version + typeid + lengthtypeid
 		bits = bits.subList(0, bits.size() - 7); //strip off expected trailing 0s
 		Day16.State s = new Day16.State();
-		bits = day.parseOperator0(bits, s);
+		bits = day.parseOperator0(bits, 0, s);
 		assertTrue(bits.isEmpty());
 	}
 
@@ -53,7 +53,7 @@ public class Day16Test
 		bits = bits.subList(7, bits.size()); //strip off version + typeid + lengthtypeid
 		bits = bits.subList(0, bits.size() - 5); //strip off expected trailing 0s
 		Day16.State s = new Day16.State();
-		bits = day.parseOperator1(bits, s);
+		bits = day.parseOperator1(bits, 0, s);
 		assertTrue(bits.isEmpty());
 	}
 }
