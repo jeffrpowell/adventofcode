@@ -43,8 +43,8 @@ public class Day17 extends Solution2021<Rule> {
         int yMin = r.getInt(2);
         int yMax = r.getInt(3);
         int count = 0;
-        for (int y = yMin; y < Math.abs(yMin); y++) {
-            for (int x = 13; x < xMax; x++) {
+        for (int y = yMin - 1; y <= Math.abs(yMin) + 1; y++) {
+            for (int x = 10; x <= xMax + 1; x++) {
                 if (simulate(new Point2D.Double(x, y), xMin, xMax, yMin, yMax)) { 
                     count++;
                 }
