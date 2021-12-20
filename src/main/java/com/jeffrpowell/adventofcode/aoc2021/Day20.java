@@ -1,10 +1,8 @@
 package com.jeffrpowell.adventofcode.aoc2021;
 
 import java.awt.geom.Point2D;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,10 +41,7 @@ public class Day20 extends Solution2021<Section> {
         // Point2DUtils.printPoints(image.entrySet().stream().filter(entry -> Boolean.TRUE.equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet()));
         enhance(false);
         // Point2DUtils.printPoints(image.entrySet().stream().filter(entry -> Boolean.TRUE.equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet()));
-        return Long.toString(image.entrySet().stream().filter(entry -> {
-            Point2D pt = entry.getKey();
-            return pt.getX() != 105 && pt.getY() != -6 && pt.getY() != 105;
-        }).map(Map.Entry::getValue).filter(Boolean.TRUE::equals).count());
+        return Long.toString(image.values().stream().filter(Boolean.TRUE::equals).count());
     }
     
     @Override
@@ -56,11 +51,8 @@ public class Day20 extends Solution2021<Section> {
         for (int i = 0; i < 50; i++) {
             enhance(i % 2 == 0 && liveMode);
         }
-        Point2DUtils.printPoints(image.entrySet().stream().filter(entry -> Boolean.TRUE.equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet()));
-        return Long.toString(image.entrySet().stream().filter(entry -> {
-            Point2D pt = entry.getKey();
-            return pt.getX() != 297 && pt.getY() != -198 && pt.getY() != 297;
-        }).map(Map.Entry::getValue).filter(Boolean.TRUE::equals).count());
+        // Point2DUtils.printPoints(image.entrySet().stream().filter(entry -> Boolean.TRUE.equals(entry.getValue())).map(Map.Entry::getKey).collect(Collectors.toSet()));
+        return Long.toString(image.values().stream().filter(Boolean.TRUE::equals).count());
     }
 
     private void instantiate(List<Section> input) {
@@ -103,12 +95,12 @@ public class Day20 extends Solution2021<Section> {
         image = image.keySet().stream()
             .collect(Collectors.toMap(
                 Function.identity(),
-                pt -> algorithmLookup(bitsToLong(grabNeighbors(pt)))
+                pt -> algorithmLookup(bitsToLong(grabNeighbors(pt, frontierBit)))
             ));
             expandFrontierSimple(frontierBit);
     }
 
-    private List<Boolean> grabNeighbors(Point2D pt) {
+    private List<Boolean> grabNeighbors(Point2D pt, Boolean frontierBit) {
         double x = pt.getX();
         double y = pt.getY();
         return Stream.of(
@@ -121,7 +113,14 @@ public class Day20 extends Solution2021<Section> {
             new Point2D.Double(x - 1, y + 1),
             new Point2D.Double(x, y + 1),
             new Point2D.Double(x + 1, y + 1)
-        ).map(image::get).collect(Collectors.toList());
+        ).map(p -> {
+            if (image.containsKey(p)) {
+                return image.get(p);
+            }
+            else {
+                return !frontierBit;
+            }
+        }).collect(Collectors.toList());
     }
 
     public static long bitsToLong(List<Boolean> bits) {
@@ -137,10 +136,10 @@ public class Day20 extends Solution2021<Section> {
     }
 
     private void expandFrontierSimple(Boolean frontierBit) {
-        currentMinX -= 4;
-        currentMinY -= 4;
-        currentMaxY += 4;
-        currentMaxX += 4;
+        currentMinX -= 2;
+        currentMinY -= 2;
+        currentMaxY += 2;
+        currentMaxX += 2;
         for (double row = currentMinY; row <= currentMaxY; row++) {
             for (double col = currentMinX; col <= currentMaxX; col++) {
                 Point2D pt = new Point2D.Double(col, row);
