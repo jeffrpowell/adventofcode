@@ -3,9 +3,12 @@ package com.jeffrpowell.adventofcode.aoc2021;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
+
+import java.awt.geom.Point2D;
 
 public class Day17 extends Solution2021<Rule> {
 
@@ -22,19 +25,16 @@ public class Day17 extends Solution2021<Rule> {
     @Override
     protected String part1(List<Rule> input) {
         Rule r = input.get(0);
-        int xMin = r.getInt(0);
-        int xMax = r.getInt(1);
         int yMin = r.getInt(2);
         int yMax = r.getInt(3);
 
-        int maxDownwardGravity = yMax - yMin + 1;
-        long distance = 0;
-        for(;maxDownwardGravity >= 0; maxDownwardGravity--) {
-            distance += maxDownwardGravity;
+        int maxVal = 0;
+        for (int y = 1; y < 150; y++) {
+            maxVal = Math.max(maxVal, simulateY(y, yMin, yMax));
         }
-        return Long.toString(distance);
+        return Integer.toString(maxVal);
     }
-
+    
     @Override
     protected String part2(List<Rule> input) {
         Rule r = input.get(0);
@@ -42,36 +42,55 @@ public class Day17 extends Solution2021<Rule> {
         int xMax = r.getInt(1);
         int yMin = r.getInt(2);
         int yMax = r.getInt(3);
-        int maxDownwardGravity = yMax - yMin + 1;
-        int minXNeeded = findMinXNeeded(xMin);
-        int maxXAvailable = findMaxXAvailable(minXNeeded, xMax);
-        return "";
+        int count = 0;
+        for (int y = yMin; y < Math.abs(yMin); y++) {
+            for (int x = 13; x < xMax; x++) {
+                if (simulate(new Point2D.Double(x, y), xMin, xMax, yMin, yMax)) { 
+                    count++;
+                }
+            }
+        }
+        return Integer.toString(count);
     }
 
-    private int findMinXNeeded(int xMin) {
-        for (int i = 5; i < xMin / 2; i++) {
-            int distance = 0;
-            for (int j = i; j >= 0; j--) {
-                distance += j;
-                if (distance >= xMin) {
-                    return i;
-                }
+    private int simulateY(int initialY, int yMin, int yMax) {
+        int val = 0;
+        int speed = initialY;
+        int maxVal = 0;
+        while (val >= yMin) {
+            val += speed;
+            speed--;
+            maxVal = Math.max(maxVal, val);
+            if (val <= yMax && val >= yMin) {
+                return maxVal;
             }
         }
         return -1;
     }
 
-    private int findMaxXAvailable(int minXNeeded, int xMax) {
-        for (int i = minXNeeded; i < xMax / 2; i++) {
-            int distance = 0;
-            for (int j = i; j >= 0; j--) {
-                distance += j;
-                if (distance > xMax) {
-                    return i - 1;
-                }
+    private boolean simulate(Point2D initialVector, int xMin, int xMax, int yMin, int yMax) {
+        Point2D pt = new Point2D.Double(0, 0);
+        while (pt.getX() < xMax && pt.getY() > yMin) {
+            pt = Point2DUtils.applyVectorToPt(initialVector, pt);
+            if (inside(pt, yMax, xMax, yMin, xMin)) {
+                return true;
             }
+            applyDrag(initialVector);
         }
-        return -1;
+        return false;
+    }
+
+    private boolean inside(Point2D pt, int top, int right, int bottom, int left) {
+        double x = pt.getX();
+		double y = pt.getY();
+        return x <= right &&
+            x >= left &&
+            y >= bottom &&
+            y <= top;
+    }
+
+    private void applyDrag(Point2D pt) {
+        pt.setLocation(Math.signum(pt.getX()), pt.getY() - 1);
     }
 
 }
