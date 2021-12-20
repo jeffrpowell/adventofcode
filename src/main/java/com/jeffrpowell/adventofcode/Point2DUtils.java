@@ -3,6 +3,7 @@ package com.jeffrpowell.adventofcode;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -176,4 +177,19 @@ public class Point2DUtils
             pt.getY() * Math.round(Math.cos(radians)) - pt.getX() * Math.round(Math.sin(radians))
         );
     }	
+
+    public static void printPoints(Set<Point2D> pts) {
+        Point2D min = pts.stream().reduce(new Point2D.Double(Integer.MAX_VALUE, Integer.MAX_VALUE), (accum, next) -> new Point2D.Double(Math.min(accum.getX(), next.getX()), Math.min(accum.getY(), next.getY())));
+        Point2D max = pts.stream().reduce(new Point2D.Double(Integer.MIN_VALUE, Integer.MIN_VALUE), (accum, next) -> new Point2D.Double(Math.max(accum.getX(), next.getX()), Math.max(accum.getY(), next.getY())));
+        StringBuilder builder = new StringBuilder("(").append(min.getX()).append(",").append(min.getY()).append(") -> (").append(max.getX()).append(",").append(min.getY()).append(")\n");
+        for (double row = min.getY(); row < max.getY() + 1; row++) {
+            for (double col = min.getX(); col < max.getX() + 1; col++) {
+                Point2D pt = new Point2D.Double(col, row);
+                builder.append(pts.contains(pt) ? "#": ".");
+            }
+            builder.append("\n");
+        }
+        builder.append("(").append(min.getX()).append(",").append(max.getY()).append(") -> (").append(max.getX()).append(",").append(max.getY()).append(")\n");
+        System.out.println(builder);
+    }
 }

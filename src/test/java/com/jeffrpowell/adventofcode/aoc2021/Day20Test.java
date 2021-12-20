@@ -8,30 +8,29 @@ import com.jeffrpowell.adventofcode.Solution;
 import com.jeffrpowell.adventofcode.TestDataLoader;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class Day6Test
+public class Day20Test
 {
 	private Solution<?> day;
 
 	@BeforeEach
 	public void setUp()
 	{
-		day = new Day6();
+		day = new Day20();
 	}
 
 	@Test
 	public void testPart1()
 	{
 		List<String> input = TestDataLoader.getTestData(day, 1);
-		assertEquals("5934", day.parseAndRunPart1(input));
+		assertEquals("35", day.parseAndRunPart1(input));
 	}
-
-	@Disabled
+	
+	@Test
 	public void testPart2()
 	{
 		List<String> input = TestDataLoader.getTestData(day, 1);
-		assertEquals("26984457539", day.parseAndRunPart2(input));
+		assertEquals("3351", day.parseAndRunPart2(input));
 	}
 }
