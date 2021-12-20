@@ -2,8 +2,8 @@ package com.jeffrpowell.adventofcode.aoc2021;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,15 +25,16 @@ public class Day16 extends Solution2021<String>{
     @Override
     protected String part1(List<String> input) {
         List<Boolean> bits = hexToBits(input.get(0));
-        bits.remove(bits.size() - 1);
-        bits.remove(bits.size() - 1);
-        bits.remove(bits.size() - 1);
         State s = new State();
         do {
             bits = parseNextToken(bits, s);
         }
-        while (!bits.isEmpty());
+        while (notTheEndYet(bits));
         return Integer.toString(s.versionCounter);
+    }
+
+    private boolean notTheEndYet(List<Boolean> bits) {
+        return !bits.isEmpty() && bits.size() < 16 && bits.stream().filter(b -> b).count() > 0;
     }
 
     private List<Boolean> parseNextToken(List<Boolean> remaining, State s) {
@@ -67,8 +68,8 @@ public class Day16 extends Solution2021<String>{
     //15 bits, length of all sub-packets
     List<Boolean> parseOperator0(List<Boolean> remaining, State s) {
         int length = Long.valueOf(bitsToLong(remaining.subList(0, 15))).intValue();
-        int originalSize = remaining.size();
         remaining = remaining.subList(15, remaining.size());
+        int originalSize = remaining.size();
         while(remaining.size() != originalSize - length) {
             remaining = parseNextToken(remaining, s);
         }
@@ -79,18 +80,32 @@ public class Day16 extends Solution2021<String>{
     List<Boolean> parseOperator1(List<Boolean> remaining, State s) {
         long numSubpackets = bitsToLong(remaining.subList(0, 11));
         remaining = remaining.subList(11, remaining.size());
-        for (; numSubpackets >= 0; numSubpackets--) {
+        for (; numSubpackets > 0; numSubpackets--) {
             remaining = parseNextToken(remaining, s);
         }
         return remaining;
     }
 
     public static List<Boolean> hexToBits(String hex) {
-        long[] bits = new long[hex.length() / 16 + 1];
-        for(int i = 0; i < hex.length(); i += 16) {
-            bits[i/16] = new BigInteger(hex.substring(i, Math.min(i+16, hex.length())), 16).longValue();
+        String leftPad = getLeftPad(hex.substring(0, 1));
+        return stringToBits(leftPad + new BigInteger(hex, 16).toString(2)).collect(Collectors.toList());
+        // long[] bits = new long[hex.length() / 16 + 1];
+        // for(int i = 0; i < hex.length(); i += 16) {
+        //     bits[i/16] = new BigInteger(hex.substring(i, Math.min(i+16, hex.length())), 16).longValue();
+        // }
+        // return Arrays.stream(bits)
+        //     .mapToObj(Long::toBinaryString)
+        //     .map(Day16::leftPad)
+        //     .flatMap(Day16::stringToBits)
+        //     .collect(Collectors.toList());
+    }
+
+    public static String getLeftPad(String firstHex) {
+        String autoString = new BigInteger(firstHex, 16).toString(2);
+        if (autoString.length() < 4) {
+            return Stream.generate(() -> "0").limit(4 - autoString.length()).collect(Collectors.joining());
         }
-        return Arrays.stream(bits).mapToObj(Long::toBinaryString).flatMap(Day16::stringToBits).collect(Collectors.toList());
+        return "";
     }
 
     public static Stream<Boolean> stringToBits(String s) {

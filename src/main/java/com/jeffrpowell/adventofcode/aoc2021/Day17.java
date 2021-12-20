@@ -45,6 +45,7 @@ public class Day17 extends Solution2021<Rule> {
         int maxDownwardGravity = yMax - yMin + 1;
         int minXNeeded = findMinXNeeded(xMin);
         int maxXAvailable = findMaxXAvailable(minXNeeded, xMax);
+        return "";
     }
 
     private int findMinXNeeded(int xMin) {
