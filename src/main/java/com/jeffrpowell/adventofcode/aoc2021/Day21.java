@@ -1,9 +1,15 @@
 package com.jeffrpowell.adventofcode.aoc2021;
 
-import java.util.HashSet;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.function.IntFunction;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -31,9 +37,9 @@ public class Day21 extends Solution2021<Rule> {
         long p2Score = 0;
         boolean p1Turn = true;
         while(p1Score < 1000 && p2Score < 1000) {
-            long roll = rollDie(100);
-            roll += rollDie(100);
-            roll += rollDie(100);
+            long roll = rollDie();
+            roll += rollDie();
+            roll += rollDie();
             if (p1Turn) {
                 p1 = (p1 + roll) % 10;
                 p1Score += p1 + 1;
@@ -47,63 +53,105 @@ public class Day21 extends Solution2021<Rule> {
         return Long.toString(Math.min(p1Score, p2Score) * dieRollCount);
     }
 
-    private int rollDie(int maxVal) {
-        die = Math.max((die + 1) % (maxVal + 1), 1);
+    private int rollDie() {
+        die = Math.max((die + 1) % 101, 1);
         dieRollCount++;
         return die;
     }
-
+    
     @Override
     protected String part2(List<Rule> input) {
-        Set<Universe> knownUniverses = new HashSet<>();
-        return null;
+        int p1 = input.get(0).getInt(1) - 1;
+        int p2 = input.get(1).getInt(1) - 1;
+        Deque<Universe> q = new ArrayDeque<>();
+        q.push(new Universe(p1, p2, 0, 0, true, 1));
+        long p1Wins = 0;
+        long p2Wins = 0;
+        while(!q.isEmpty()) {
+            Universe u = q.pop();
+            List<Universe> next = u.nextUniverses();
+            for (Universe universe : next) {
+                if (universe.p1Score >= 21) {
+                    p1Wins += universe.knownCopies;
+                }
+                else if (universe.p2Score >= 21) {
+                    p2Wins += universe.knownCopies;
+                }
+                else {
+                    q.push(universe);
+                }
+            }
+        }
+        return Long.toString(Math.max(p1Wins, p2Wins));
     }
 
     private static class Universe {
-        int die;
+        private static final Map<Integer, List<MoveCache>> MOVES;
+
+        static {
+            MOVES = new HashMap<>();
+            IntFunction<List<MoveCache>> moveGen = location -> 
+                IntStream.range(0, 10)
+                    .mapToObj(newLocation -> new MoveCache(location, newLocation))
+                    .filter(mc -> mc.copies > 0)
+                    .collect(Collectors.toList());
+            for (int i = 0; i < 10; i++) {
+                MOVES.put(i, moveGen.apply(i));
+            }
+        }
+
         int p1;
         int p2;
-        boolean p1Winning;
-        
-        public Universe(int die, int p1, int p2, boolean p1Winning) {
-            this.die = die;
+        int p1Score;
+        int p2Score;
+        boolean p1Turn;
+        long knownCopies;
+
+        public Universe(int p1, int p2, int p1Score, int p2Score, boolean p1Turn, long knownCopies) {
             this.p1 = p1;
             this.p2 = p2;
-            this.p1Winning = p1Winning;
+            this.p1Score = p1Score;
+            this.p2Score = p2Score;
+            this.p1Turn = p1Turn;
+            this.knownCopies = knownCopies;
         }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + die;
-            result = prime * result + p1;
-            result = prime * result + (p1Winning ? 1231 : 1237);
-            result = prime * result + p2;
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            Universe other = (Universe) obj;
-            if (die != other.die)
-                return false;
-            if (p1 != other.p1)
-                return false;
-            if (p1Winning != other.p1Winning)
-                return false;
-            if (p2 != other.p2)
-                return false;
-            return true;
-        }
-
         
+        public List<Universe> nextUniverses() {
+            boolean nextTurn = !p1Turn;
+            List<Universe> universes = new ArrayList<>();
+            if (p1Turn) {
+                for (MoveCache newSpot : MOVES.get(p1)) {
+                    universes.add(new Universe(newSpot.location, p2, p1Score + newSpot.location + 1, p2Score, nextTurn, knownCopies * newSpot.copies));
+                }
+            }
+            else {
+                for (MoveCache newSpot : MOVES.get(p2)) {
+                    universes.add(new Universe(p1, newSpot.location, p1Score, p2Score + newSpot.location + 1, nextTurn, knownCopies * newSpot.copies));
+                }
+            }
+            return universes;
+        }
+
+        private static class MoveCache {
+            private static final long[] BELL_CURVE = new long[]{0, 0, 0, 1, 3, 6, 7, 6, 3, 1, 0};
+            int location;
+            long copies;
+
+            public MoveCache(int oldLocation, int newLocation) {
+                this.location = newLocation;
+                int distance = findDistance(oldLocation, newLocation);
+                this.copies = BELL_CURVE[distance];
+            }
+
+            private int findDistance(int oldLocation, int newLocation) {
+                if (newLocation >= oldLocation) {
+                    return newLocation - oldLocation;
+                }
+                else {
+                    return 10 - oldLocation + newLocation;
+                }
+            }
+        }
     }
     
 }
