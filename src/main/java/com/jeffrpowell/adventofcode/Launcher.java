@@ -19,8 +19,18 @@ public class Launcher
 		else {
 			List<String> puzzleInput = inputStreamToStringList(puzzleInputStream);
 			
+			System.out.println("\nPart 1");
+			System.out.println("--------------------------");
+			long t = System.currentTimeMillis();
 			System.out.println(DAY.parseAndRunPart1(puzzleInput));
+			System.out.println("--------------------------");
+			System.out.println("Completed part 1 in " + (System.currentTimeMillis() - t));
+			System.out.println("\nPart 2");
+			System.out.println("--------------------------");
+			t = System.currentTimeMillis();
 			System.out.println(DAY.parseAndRunPart2(puzzleInput));
+			System.out.println("--------------------------");
+			System.out.println("Completed part 2 in " + (System.currentTimeMillis() - t));
 		}
     }
 	
