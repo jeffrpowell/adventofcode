@@ -24,7 +24,7 @@ public class Day18 extends Solution2021<String> {
     @Override
     protected String part1(List<String> input) {
         List<Pair> numbers = input.stream().map(this::parseInput).collect(Collectors.toList());
-        return Long.toString(numbers.stream().reduce((acc, next) -> new Pair(acc, next)).get().getMagnitude());
+        return Long.toString(numbers.stream().reduce((acc, next) -> new Pair(acc, next, true)).get().getMagnitude());
     }
 
     @Override
@@ -36,18 +36,15 @@ public class Day18 extends Solution2021<String> {
     Pair parseInput(String line) {
         Deque<Pair.Builder> stack = new ArrayDeque<>();
         Pair.Builder builderInContext = null;
-        int depth = -1;
         for (Character c : CharArrayUtils.toList(line.toCharArray())) {
             if (c == '[') {
-                depth++;
-                if (depth > 0) {
+                if (builderInContext != null) {
                     stack.push(builderInContext);
                 }
                 builderInContext = new Pair.Builder();
-                builderInContext.depth(depth);
             }
             else if (c >= '0' && c <= '9') {
-                builderInContext.pushNumber(new Num(depth, Integer.parseInt(String.valueOf(c))));
+                builderInContext.pushNumber(new Num(Integer.parseInt(String.valueOf(c))));
             }
             else if (c == ']') {
                 Pair p = builderInContext.build();
@@ -55,7 +52,6 @@ public class Day18 extends Solution2021<String> {
                     return p;
                 }
                 else {
-                    depth--;
                     builderInContext = stack.pop();
                     builderInContext.pushNumber(p);
                 }
@@ -65,10 +61,8 @@ public class Day18 extends Solution2021<String> {
     }
 
     static class Num implements Member {
-        private int depth;
         private int value;
-        public Num(int depth, int value) {
-            this.depth = depth;
+        public Num(int value) {
             this.value = value;
         }
         @Override
@@ -77,12 +71,7 @@ public class Day18 extends Solution2021<String> {
         }
 
         @Override
-        public int getDepth() {
-            return depth;
-        }
-
-        @Override
-        public void acceptVisitor(Visitor v) {
+        public void acceptVisitor(Visitor v, int depth) {
             v.visitNum(this);
         }
 
@@ -90,7 +79,6 @@ public class Day18 extends Solution2021<String> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + depth;
             result = prime * result + value;
             return result;
         }
@@ -104,8 +92,6 @@ public class Day18 extends Solution2021<String> {
             if (getClass() != obj.getClass())
                 return false;
             Num other = (Num) obj;
-            if (depth != other.depth)
-                return false;
             if (value != other.value)
                 return false;
             return true;
@@ -114,26 +100,15 @@ public class Day18 extends Solution2021<String> {
     }
 
     static class Pair implements Member {
-        private int depth;
         private Member left;
         private Member right;
         
-        public Pair(int depth, Member left, Member right) {
-            this.depth = depth;
+        public Pair(Member left, Member right, boolean reduce) {
             this.left = left;
             this.right = right;
-        }
-
-        /**
-         * Addition constructor; automatically reduces
-         * @param left
-         * @param right
-         */
-        public Pair(Member left, Member right) {
-            this.left = left;
-            this.right = right;
-            this.depth = 0;
-            updateDepthsAndReduce();
+            if (reduce) {
+                reduce();
+            }
         }
 
         @Override
@@ -141,27 +116,25 @@ public class Day18 extends Solution2021<String> {
             return 3 * left.getMagnitude() + 2 * right.getMagnitude();
         }
         
-        @Override
-        public int getDepth() {
-            return depth;
+        private void reduce() {
+            ExplodeChecker explodeChecker = new ExplodeChecker();
+            while(explodeChecker.unhappy) {
+                explodeChecker.reset();
+                acceptVisitor(explodeChecker, 0);
+            }
         }
 
-        private void updateDepthsAndReduce() {
-
-        }
-
         @Override
-        public void acceptVisitor(Visitor v) {
-            v.visitPair(this);
-            left.acceptVisitor(v);
-            right.acceptVisitor(v);
+        public void acceptVisitor(Visitor v, int depth) {
+            v.visitPair(this, depth);
+            left.acceptVisitor(v, depth + 1);
+            right.acceptVisitor(v, depth + 1);
         }
 
         public static class Builder {
             private Member left;
             private Member right;
             private boolean pushLeft;
-            private int depth;
 
             public Builder() {
                 this.pushLeft = true;
@@ -177,12 +150,8 @@ public class Day18 extends Solution2021<String> {
                 }
             }
 
-            public void depth(int depth) {
-                this.depth = depth;
-            }
-
             public Pair build() {
-                return new Pair(depth, left, right);
+                return new Pair(left, right, false);
             }
         }
 
@@ -190,7 +159,6 @@ public class Day18 extends Solution2021<String> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + depth;
             result = prime * result + ((left == null) ? 0 : left.hashCode());
             result = prime * result + ((right == null) ? 0 : right.hashCode());
             return result;
@@ -205,8 +173,6 @@ public class Day18 extends Solution2021<String> {
             if (getClass() != obj.getClass())
                 return false;
             Pair other = (Pair) obj;
-            if (depth != other.depth)
-                return false;
             if (left == null) {
                 if (other.left != null)
                     return false;
@@ -223,25 +189,43 @@ public class Day18 extends Solution2021<String> {
     
     static interface Member {
         public long getMagnitude();
-        public int getDepth();
-        public void acceptVisitor(Visitor v);
+        public void acceptVisitor(Visitor v, int depth);
     }
 
     static interface Visitor {
-        public void visitPair(Pair p);
+        public void visitPair(Pair p, int depth);
         public void visitNum(Num n);
+        public boolean isUnhappy();
+        public void reset();
     }
 
     static class ExplodeChecker implements Visitor {
 
+        public boolean unhappy;
+
+        public ExplodeChecker() {
+            this.unhappy = true;
+        }
+
         @Override
-        public void visitPair(Pair p) {
+        public void visitPair(Pair p, int depth) {
             // TODO Auto-generated method stub
             
         }
 
         @Override
         public void visitNum(Num n) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public boolean isUnhappy() {
+            return unhappy;
+        }
+
+        @Override
+        public void reset() {
             // TODO Auto-generated method stub
             
         }
@@ -249,15 +233,31 @@ public class Day18 extends Solution2021<String> {
     }
 
     static class SplitChecker implements Visitor {
+        public boolean unhappy;
+
+        public SplitChecker() {
+            this.unhappy = true;
+        }
 
         @Override
-        public void visitPair(Pair p) {
+        public void visitPair(Pair p, int depth) {
             // TODO Auto-generated method stub
             
         }
 
         @Override
         public void visitNum(Num n) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public boolean isUnhappy() {
+            return unhappy;
+        }
+
+        @Override
+        public void reset() {
             // TODO Auto-generated method stub
             
         }
