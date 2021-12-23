@@ -19,7 +19,7 @@ public class Day18Test
 	public void testParseInput_simple()
 	{
 		String input = "[1,2]";
-		Day18.Pair expected = new Day18.Pair(new Day18.Num(1), new Day18.Num(2), false);
+		Day18.Pair expected = new Day18.Pair(new Day18.Num(1), new Day18.Num(2));
 		Day18.Pair actual = day.parseInput(input);
 		assertEquals(expected, actual);
 	}
@@ -33,14 +33,11 @@ public class Day18Test
 				new Day18.Pair( 
 					new Day18.Pair( 
 						new Day18.Num(1), 
-						new Day18.Num(2),
-						false
+						new Day18.Num(2)
 						),
-					new Day18.Num(3),
-					false
+					new Day18.Num(3)
 					),
-				new Day18.Num(4),
-				false
+				new Day18.Num(4)
 			);
 		Day18.Pair actual = day.parseInput(input);
 		assertEquals(expected, actual);
@@ -57,12 +54,9 @@ public class Day18Test
 					new Day18.Num(2),
 					new Day18.Pair( 
 						new Day18.Num(3), 
-						new Day18.Num(4),
-						false
-					),
-					false
-				),
-				false
+						new Day18.Num(4)
+					)
+				)
 			);
 		Day18.Pair actual = day.parseInput(input);
 		assertEquals(expected, actual);
@@ -79,32 +73,24 @@ public class Day18Test
 					new Day18.Pair( 
 						new Day18.Pair(
 							new Day18.Num(2),
-							new Day18.Num(8),
-							false
+							new Day18.Num(8)
 						),
 						new Day18.Pair( 
 							new Day18.Num(3), 
-							new Day18.Num(3),
-							false
-						),
-						false
-					),
-					false
+							new Day18.Num(3)
+						)
+					)
 				),
 				new Day18.Pair( 
 					new Day18.Pair( 
 						new Day18.Pair( 
 							new Day18.Num(1),
-							new Day18.Num(9),
-							false
+							new Day18.Num(9)
 						),
-						new Day18.Num(9),
-						false
+						new Day18.Num(9)
 					),
-					new Day18.Num(6),
-					false
-				),
-				false
+					new Day18.Num(6)
+				)
 			);
 		Day18.Pair actual = day.parseInput(input);
 		assertEquals(expected, actual);

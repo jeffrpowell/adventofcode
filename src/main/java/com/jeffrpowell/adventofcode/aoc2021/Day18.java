@@ -24,7 +24,13 @@ public class Day18 extends Solution2021<String> {
     @Override
     protected String part1(List<String> input) {
         List<Pair> numbers = input.stream().map(this::parseInput).collect(Collectors.toList());
-        return Long.toString(numbers.stream().reduce((acc, next) -> new Pair(acc, next, true)).get().getMagnitude());
+        return Long.toString(numbers.stream().reduce((acc, next) -> {
+            Pair p = new Pair(acc, next);
+            acc.setParent(p);
+            next.setParent(p);
+            p.reduce();
+            return p;
+        }).get().getMagnitude());
     }
 
     @Override
@@ -61,6 +67,7 @@ public class Day18 extends Solution2021<String> {
     }
 
     static class Num implements Member {
+        private Pair parent;
         private int value;
         public Num(int value) {
             this.value = value;
@@ -76,13 +83,16 @@ public class Day18 extends Solution2021<String> {
         }
 
         @Override
+        public void setParent(Pair p) {
+            this.parent = p;
+        }
+        @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + value;
             return result;
         }
-
         @Override
         public boolean equals(Object obj) {
             if (this == obj)
@@ -100,15 +110,20 @@ public class Day18 extends Solution2021<String> {
     }
 
     static class Pair implements Member {
+        private Pair parent;
         private Member left;
         private Member right;
         
-        public Pair(Member left, Member right, boolean reduce) {
+        public Pair(Pair parent, Member left, Member right) {
+            this.parent = parent;
             this.left = left;
             this.right = right;
-            if (reduce) {
-                reduce();
-            }
+        }
+        
+        public Pair(Member left, Member right) {
+            this.parent = null;
+            this.left = left;
+            this.right = right;
         }
 
         @Override
@@ -116,7 +131,7 @@ public class Day18 extends Solution2021<String> {
             return 3 * left.getMagnitude() + 2 * right.getMagnitude();
         }
         
-        private void reduce() {
+        public void reduce() {
             ExplodeChecker explodeChecker = new ExplodeChecker();
             while(explodeChecker.unhappy) {
                 explodeChecker.reset();
@@ -151,7 +166,10 @@ public class Day18 extends Solution2021<String> {
             }
 
             public Pair build() {
-                return new Pair(left, right, false);
+                Pair p = new Pair(left, right);
+                left.setParent(p);
+                right.setParent(p);
+                return p;
             }
         }
 
@@ -185,11 +203,37 @@ public class Day18 extends Solution2021<String> {
                 return false;
             return true;
         }
+
+        public Pair getParent() {
+            return parent;
+        }
+
+        @Override
+        public void setParent(Pair p) {
+            this.parent = p;
+        }
+
+        public Member getLeft() {
+            return left;
+        }
+
+        public void setLeft(Member left) {
+            this.left = left;
+        }
+
+        public Member getRight() {
+            return right;
+        }
+
+        public void setRight(Member right) {
+            this.right = right;
+        }
     }
     
     static interface Member {
         public long getMagnitude();
         public void acceptVisitor(Visitor v, int depth);
+        public void setParent(Pair p);
     }
 
     static interface Visitor {
@@ -209,7 +253,21 @@ public class Day18 extends Solution2021<String> {
 
         @Override
         public void visitPair(Pair p, int depth) {
-            // TODO Auto-generated method stub
+            if (depth > 3) {
+                long left = p.getLeft().getMagnitude();
+                long right = p.getRight().getMagnitude();
+                Pair parent = p.getParent();
+                Pair currentPair = p;
+                while (parent != null) {
+                    if (parent.getRight() == currentPair) {
+                        currentPair = currentPair.getParent();
+                        parent = currentPair.getParent();
+                    }
+                    else {
+                        
+                    }
+                }
+            }
             
         }
 
