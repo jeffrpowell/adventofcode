@@ -68,8 +68,8 @@ public class Day18 extends Solution2021<String> {
 
     static class Num implements Member {
         private Pair parent;
-        private int value;
-        public Num(int value) {
+        private long value;
+        public Num(long value) {
             this.value = value;
         }
         @Override
@@ -78,8 +78,11 @@ public class Day18 extends Solution2021<String> {
         }
 
         @Override
-        public void acceptVisitor(Visitor v, int depth) {
-            v.visitNum(this);
+        public boolean acceptVisitor(Visitor v, int depth) {
+            if (v.visitNum(this)) {
+                return true;
+            }
+            return false;
         }
 
         @Override
@@ -90,7 +93,7 @@ public class Day18 extends Solution2021<String> {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + value;
+            result = prime * result + (int) (value ^ (value >>> 32));
             return result;
         }
         @Override
@@ -132,18 +135,38 @@ public class Day18 extends Solution2021<String> {
         }
         
         public void reduce() {
+            handleExplosions();
+            handleSplit(new SplitChecker());
+        }
+        
+        private void handleExplosions() {
             ExplodeChecker explodeChecker = new ExplodeChecker();
-            while(explodeChecker.unhappy) {
-                explodeChecker.reset();
-                acceptVisitor(explodeChecker, 0);
+            boolean tryAgain = acceptVisitor(explodeChecker, 0);
+            while (tryAgain) {
+                tryAgain = acceptVisitor(explodeChecker, 0);
+            }
+        }
+        
+        private void handleSplit(SplitChecker splitChecker) {
+            boolean splitted = acceptVisitor(splitChecker, 0);
+            if (splitted) {
+                handleExplosions();
+                handleSplit(splitChecker);
             }
         }
 
         @Override
-        public void acceptVisitor(Visitor v, int depth) {
-            v.visitPair(this, depth);
-            left.acceptVisitor(v, depth + 1);
-            right.acceptVisitor(v, depth + 1);
+        public boolean acceptVisitor(Visitor v, int depth) {
+            if (left.acceptVisitor(v, depth + 1)) {
+                return true;
+            }
+            if (v.visitPair(this, depth)){
+                return true;
+            }
+            if (right.acceptVisitor(v, depth + 1)) {
+                return true;
+            }
+            return false;
         }
 
         public static class Builder {
@@ -232,27 +255,19 @@ public class Day18 extends Solution2021<String> {
     
     static interface Member {
         public long getMagnitude();
-        public void acceptVisitor(Visitor v, int depth);
+        public boolean acceptVisitor(Visitor v, int depth); //true => early return
         public void setParent(Pair p);
     }
 
     static interface Visitor {
-        public void visitPair(Pair p, int depth);
-        public void visitNum(Num n);
-        public boolean isUnhappy();
-        public void reset();
+        public boolean visitPair(Pair p, int depth);
+        public boolean visitNum(Num n);
     }
 
     static class ExplodeChecker implements Visitor {
 
-        public boolean unhappy;
-
-        public ExplodeChecker() {
-            this.unhappy = true;
-        }
-
         @Override
-        public void visitPair(Pair p, int depth) {
+        public boolean visitPair(Pair p, int depth) {
             if (depth > 3) {
                 long left = p.getLeft().getMagnitude();
                 long right = p.getRight().getMagnitude();
@@ -264,30 +279,43 @@ public class Day18 extends Solution2021<String> {
                         parent = currentPair.getParent();
                     }
                     else {
-                        
+                        Member currentRight = currentPair.right;
+                        while(currentRight instanceof Pair) {
+                            currentRight = ((Pair) currentRight).right;
+                        }
+                        ((Num)currentRight).value += left; 
                     }
                 }
+                parent = p.getParent();
+                currentPair = p;
+                while (parent != null) {
+                    if (parent.getLeft() == currentPair) {
+                        currentPair = currentPair.getParent();
+                        parent = currentPair.getParent();
+                    }
+                    else {
+                        Member currentLeft = currentPair.left;
+                        while(currentLeft instanceof Pair) {
+                            currentLeft = ((Pair) currentLeft).left;
+                        }
+                        ((Num)currentLeft).value += right; 
+                    }
+                }
+                if (p.getParent().right == p) {
+                    p.getParent().setRight(new Num(0));
+                }
+                else {
+                    p.getParent().setLeft(new Num(0));
+                }
+                return true;
             }
-            
+            return false;
         }
 
         @Override
-        public void visitNum(Num n) {
-            // TODO Auto-generated method stub
-            
+        public boolean visitNum(Num n) {
+            return false; //noop for exploding
         }
-
-        @Override
-        public boolean isUnhappy() {
-            return unhappy;
-        }
-
-        @Override
-        public void reset() {
-            // TODO Auto-generated method stub
-            
-        }
-
     }
 
     static class SplitChecker implements Visitor {
@@ -298,27 +326,25 @@ public class Day18 extends Solution2021<String> {
         }
 
         @Override
-        public void visitPair(Pair p, int depth) {
-            // TODO Auto-generated method stub
-            
+        public boolean visitPair(Pair p, int depth) {
+            return false; //noop for splitting
         }
 
         @Override
-        public void visitNum(Num n) {
-            // TODO Auto-generated method stub
-            
+        public boolean visitNum(Num n) {
+            long val = n.getMagnitude();
+            boolean roundUp = (val / 2) * 2 != val;
+            if (val > 9) {
+                if (n.parent.right == n) {
+                    n.parent.setRight(new Pair(new Num(val / 2), new Num(val / 2 + (roundUp ? 1 : 0))));
+                }
+                else {
+                    n.parent.setLeft(new Pair(new Num(val / 2), new Num(val / 2 + (roundUp ? 1 : 0))));
+                }
+                unhappy = true;
+                return true;
+            }
+            return false;
         }
-
-        @Override
-        public boolean isUnhappy() {
-            return unhappy;
-        }
-
-        @Override
-        public void reset() {
-            // TODO Auto-generated method stub
-            
-        }
-
     }
 }
