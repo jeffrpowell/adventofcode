@@ -62,13 +62,17 @@ public class Day23 extends Solution2021<List<String>> {
         visitedStates = new HashSet<>();
         PriorityQueue<State> q = new PriorityQueue<>(Comparator.comparing(State::getScore));
         q.add(new State(0, grid));
-        while(!q.peek().isDone()) {
+        while(!q.isEmpty()) {
             State current = q.poll();
             visitedStates.add(current);
             current.getNeighbors().forEach(q::add);
         }
-        State winner = q.poll();
-        return Long.toString(winner.getCost());
+        return Long.toString(visitedStates.stream()
+            .filter(Day23.State::isDone)
+            .map(Day23.State::getCost)
+            .min(Comparator.naturalOrder())
+            .get()
+        );
     }
 
     private long d2l(double d) {
@@ -143,6 +147,9 @@ public class Day23 extends Solution2021<List<String>> {
         public Set<State> getNeighbors() {
             Set<State> states = new HashSet<>();
             for (Occupant o : Occupant.values()) {
+                if (columnFilled(o)) {
+                    continue;
+                }
                 if (columnReadyToFill(o)) {
                     Point2D dest = deepestOpenPts.get(o).get();
                     findValidFillerForColumn(o).stream()
@@ -166,6 +173,10 @@ public class Day23 extends Solution2021<List<String>> {
         //null return means that the column is full
         private Optional<Point2D> getDeepestOpenPoint(Occupant o) {
             return Sets.difference(PointUtilities.getDestinationPts(o), grid.keySet()).stream().sorted(Comparator.comparing(Point2D::getY).reversed()).findFirst();
+        }
+
+        private boolean columnFilled(Occupant o) {
+            return PointUtilities.getDestinationPts(o).stream().allMatch(pt -> grid.containsKey(pt) && grid.get(pt) == o);
         }
 
         private boolean columnReadyToFill(Occupant o) {
@@ -220,8 +231,8 @@ public class Day23 extends Solution2021<List<String>> {
                     right = Point2DUtils.applyVectorToPt(new Point2D.Double(right.getX() == 9.0 ? 1 : 2, 0), right);
                 }
                 else {
-                    if (grid.get(left) == o) {
-                        valid.add(left);
+                    if (grid.get(right) == o) {
+                        valid.add(right);
                     }
                     break;
                 }
