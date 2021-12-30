@@ -7,17 +7,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Sets;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
-
-import javafx.scene.shape.Path;
 
 public class Day23 extends Solution2021<List<String>> {
     
@@ -87,23 +87,22 @@ public class Day23 extends Solution2021<List<String>> {
 
     private class Path {
         State head;
-        Set<Point2D> pathPts;
+        Set<State> pathPts;
         long cost;
         double score;
 
         public Path(State head, Set<State> path) {
             this.head = head;
-            this.pathPts = path.stream().map(n -> n.location).collect(Collectors.toSet());
+            this.pathPts = path;
             this.cost = path.stream().map(State::getCost).reduce(0L, Math::addExact) + head.getCost();
             this.score = this.cost + this.head.getDistanceToGoal();
         }
 
         public Stream<Path> getNewPaths() {
-            return head.getNeighbors(this).stream()
-                .map(grid::get)
+            return head.getNeighbors().stream()
                 .map(newHead -> new Path(
                     newHead, 
-                    Stream.concat(pathPts.stream().map(grid::get), Stream.of(head)).collect(Collectors.toSet())
+                    Stream.concat(pathPts.stream(), Stream.of(head)).collect(Collectors.toSet())
                 ));
         }
 
@@ -162,15 +161,85 @@ public class Day23 extends Solution2021<List<String>> {
             return distanceToGoal == 16;
         }
 
-        public Set<Point2D> getNeighbors(Path p) {
-            return Point2DUtils.getBoundedAdjacentPts(location, 0, rightBoundary, bottomBoundary, 0, true, false).stream()
-                .filter(pt -> !visitedPts.contains(pt))
-                .collect(Collectors.toSet());
+        public Set<State> getNeighbors() {
+            for (Occupant o : Occupant.values()) {
+                
+            }
+        }
+
+        //null return means that the column is full
+        private Optional<Point2D> getDeepestOpenPoint(Occupant o, Map<Point2D, Occupant> grid) {
+            return Sets.difference(PointUtilities.getDestinationPts(o), grid.keySet()).stream().sorted(Comparator.comparing(Point2D::getY)).findFirst();
+        }
+
+        private boolean columnReadyToFill(Occupant o) {
+            return PointUtilities.getDestinationPts(o).stream().map(grid::get).allMatch(v -> v == null || v == o);
+        }
+
+        private Set<Point2D> findOpenHallwayFromColumn(Occupant o) {
+            double x = PointUtilities.getOccupantX(o);
+            Point2D left = new Point2D.Double(x - 1, 0);
+            Point2D right = new Point2D.Double(x + 1, 0);
+            Set<Point2D> openHallway = new HashSet<>();
+            while (left.getX() >= 0) {
+                if (!grid.containsKey(left)) {
+                    openHallway.add(left);
+                    left = Point2DUtils.applyVectorToPt(left, new Point2D.Double(left.getX() == 1.0 ? -1 : -2, 0));
+                }
+                else {
+                    break;
+                }
+            }
+            while (right.getX() <= 10) {
+                if (!grid.containsKey(right)) {
+                    openHallway.add(right);
+                    right = Point2DUtils.applyVectorToPt(right, new Point2D.Double(right.getX() == 9.0 ? 1 : 2, 0));
+                }
+                else {
+                    break;
+                }
+            }
+            return openHallway;
+        }
+
+        private Set<Point2D> findValidFillerForColumn(Occupant o) {
+            double x = PointUtilities.getOccupantX(o);
+            Point2D left = new Point2D.Double(x - 1, 0);
+            Point2D right = new Point2D.Double(x + 1, 0);
+            Set<Point2D> valid = new HashSet<>();
+            while (left.getX() >= 0) {
+                if (!grid.containsKey(left)) {
+                    left = Point2DUtils.applyVectorToPt(left, new Point2D.Double(left.getX() == 1.0 ? -1 : -2, 0));
+                }
+                else {
+                    if (grid.get(left) == o) {
+                        valid.add(left);
+                    }
+                    break;
+                }
+            }
+            while (right.getX() <= 10) {
+                if (!grid.containsKey(right)) {
+                    right = Point2DUtils.applyVectorToPt(right, new Point2D.Double(right.getX() == 9.0 ? 1 : 2, 0));
+                }
+                else {
+                    if (grid.get(left) == o) {
+                        valid.add(left);
+                    }
+                    break;
+                }
+            }
+            return valid;
         }
     }
 
     public static class PointUtilities {
         private PointUtilities() {}
+
+        static final double A_X = 2;
+        static final double B_X = 4;
+        static final double C_X = 6;
+        static final double D_X = 8;
 
         static final Supplier<Set<Point2D>> GET_HALLWAY_DESTINATION_PTS = () -> Set.of(
             new Point2D.Double(0,0),
@@ -182,28 +251,28 @@ public class Day23 extends Solution2021<List<String>> {
             new Point2D.Double(10,0)
         );
         static final Supplier<Set<Point2D>> GET_A_DESTINATION_PTS = () -> Set.of(
-                new Point2D.Double(2,1),
-                new Point2D.Double(2,2),
-                new Point2D.Double(2,3),
-                new Point2D.Double(2,4)
+                new Point2D.Double(A_X,1),
+                new Point2D.Double(A_X,2),
+                new Point2D.Double(A_X,3),
+                new Point2D.Double(A_X,4)
             );
         static final Supplier<Set<Point2D>> GET_B_DESTINATION_PTS = () -> Set.of(
-                new Point2D.Double(4,1),
-                new Point2D.Double(4,2),
-                new Point2D.Double(4,3),
-                new Point2D.Double(4,4)
+                new Point2D.Double(B_X,1),
+                new Point2D.Double(B_X,2),
+                new Point2D.Double(B_X,3),
+                new Point2D.Double(B_X,4)
             );
         static final Supplier<Set<Point2D>> GET_C_DESTINATION_PTS = () -> Set.of(
-                new Point2D.Double(6,1),
-                new Point2D.Double(6,2),
-                new Point2D.Double(6,3),
-                new Point2D.Double(6,4)
+                new Point2D.Double(C_X,1),
+                new Point2D.Double(C_X,2),
+                new Point2D.Double(C_X,3),
+                new Point2D.Double(C_X,4)
             );
         static final Supplier<Set<Point2D>> GET_D_DESTINATION_PTS = () -> Set.of(
-                new Point2D.Double(8,1),
-                new Point2D.Double(8,2),
-                new Point2D.Double(8,3),
-                new Point2D.Double(8,4)
+                new Point2D.Double(D_X,1),
+                new Point2D.Double(D_X,2),
+                new Point2D.Double(D_X,3),
+                new Point2D.Double(D_X,4)
             );
         static final Supplier<Set<Point2D>> GET_ALL_DESTINATION_PTS = () -> Stream.of(
                 GET_HALLWAY_DESTINATION_PTS.get(),
@@ -220,6 +289,15 @@ public class Day23 extends Solution2021<List<String>> {
                 case B -> GET_B_DESTINATION_PTS.get();
                 case C -> GET_C_DESTINATION_PTS.get();
                 case D -> GET_D_DESTINATION_PTS.get();
+            };
+        }
+
+        public static double getOccupantX(Occupant o) {
+            return switch (o) {
+                case A -> A_X;
+                case B -> B_X;
+                case C -> C_X;
+                case D -> D_X;
             };
         }
 
