@@ -30,4 +30,5 @@ hs_err_pid*
 /.vscode/
 
 nbactions.xml
+nb-configuration.xml
 recording.jfr
