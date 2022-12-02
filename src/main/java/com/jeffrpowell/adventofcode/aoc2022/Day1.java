@@ -1,6 +1,5 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
-import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import com.jeffrpowell.adventofcode.inputparser.section.Section;
