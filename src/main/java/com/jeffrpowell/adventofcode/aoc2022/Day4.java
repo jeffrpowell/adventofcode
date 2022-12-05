@@ -1,13 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
