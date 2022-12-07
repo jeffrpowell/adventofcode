@@ -2,7 +2,6 @@ package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,9 +43,7 @@ public class Day7 extends Solution2022<Rule>{
         Map<Path, Directory> directories = new HashMap<>();
         parseDirectoryTree(input, directories);
         return Long.toString(directories.values().stream()
-            .sorted(Comparator.comparing(Directory::getParentsCount).reversed())
-            .peek(Directory::cacheSize)
-            .map(Directory::getTotalSize)
+            .map(Directory::getTotalSizeCompute)
             .filter(l -> l <= 100_000L)
             .collect(Collectors.reducing(0L, Math::addExact)));
     }
@@ -60,7 +57,7 @@ public class Day7 extends Solution2022<Rule>{
                 contextPath = contextPath.resolve(line.getString(0));
                 directories.computeIfAbsent(
                     contextPath, 
-                    p -> new Directory(p, line.getString(0))
+                    p -> new Directory(line.getString(0))
                 );
             }
             else if (line.getRulePatternKey().equals(LINE_CD_UP)) {
@@ -73,7 +70,7 @@ public class Day7 extends Solution2022<Rule>{
                         contextPath = contextPath.resolve(nextLine.getString(0));
                         directories.computeIfAbsent(
                             contextPath, 
-                            p -> new Directory(p, nextLine.getString(0))
+                            p -> new Directory(nextLine.getString(0))
                         );
                     }
                     else if (nextLine.getRulePatternKey().equals(LINE_CD_UP)) {
@@ -92,11 +89,11 @@ public class Day7 extends Solution2022<Rule>{
                 case LINE_DIR:
                     context.addChild(directories.computeIfAbsent(
                         contextPath.resolve(line.getString(0)), 
-                        p -> new Directory(p, line.getString(0))
+                        p -> new Directory(line.getString(0))
                     ));
                     break;
                 case LINE_FILE:
-                    context.size += line.getLong(0);
+                    context.addFile(line.getLong(0));
                     break;
                 default:
                     return line;
@@ -109,9 +106,8 @@ public class Day7 extends Solution2022<Rule>{
     protected String part2(List<Rule> input) {
         Map<Path, Directory> directories = new HashMap<>();
         parseDirectoryTree(input, directories);
-        directories.values().stream()
-            .sorted(Comparator.comparing(Directory::getParentsCount).reversed())
-            .forEach(Directory::cacheSize);
+        directories.values().stream().forEach(Directory::cacheSize);
+        // directories.get(Path.of("/")).printDirectory();
         long spaceToFreeUp = 30_000_000 - (70_000_000L - directories.get(Path.of("/")).getTotalSize());
         return Long.toString(directories.values().stream()
             .map(Directory::getTotalSize)
@@ -121,37 +117,37 @@ public class Day7 extends Solution2022<Rule>{
     }
 
     private static class Directory {
-        private final Path path;
-        protected static final Map<String, Long> SIZE_CACHE = new HashMap<>();
         private final String name;
         private final List<Directory> children;
+        private final List<Long> files;
         private long size;
 
-        public Directory(Path path, String name) {
-            this.path = path;
+        public Directory(String name) {
             this.name = name;
             this.children = new ArrayList<>();
+            this.files = new ArrayList<>();
             this.size = 0L;
-            SIZE_CACHE.put(name, 0L);
         }
 
         public void addChild(Directory child) {
             children.add(child);
         }
 
-        public long getParentsCount() {
-            return path.getNameCount();
+        public void addFile(long fileSize) {
+            files.add(fileSize);
+            size += fileSize;
         }
 
         public void cacheSize() {
+            size = getTotalSizeCompute();
+        }
+
+        public long getTotalSizeCompute() {
+            long sizeCounter = 0L;
             for (Directory child : children) {
-                if (SIZE_CACHE.get(child.name) == 0L) {
-                    long childSize = child.getTotalSize();
-                    SIZE_CACHE.put(child.name, childSize);
-                }
-                size += SIZE_CACHE.get(child.name);
+                sizeCounter += child.getTotalSizeCompute();
             }
-            SIZE_CACHE.replace(name, size);
+            return sizeCounter + files.stream().collect(Collectors.reducing(0L, Math::addExact));
         }
 
         public long getTotalSize() {
@@ -159,15 +155,24 @@ public class Day7 extends Solution2022<Rule>{
         }
 
         public void printDirectory() {
-            System.out.println(name);
+            System.out.println(name + "("+size+")");
             int tabs = 1;
             children.stream().forEach(c -> c.printDirectory(tabs));
         }
 
         private void printDirectory(int tabs) {
             IntStream.range(0, tabs).forEach(i -> System.out.print("  "));
-            System.out.println(name);
+            System.out.println(name + "("+size+")");
+            printFiles(tabs+1);
             children.stream().forEach(c -> c.printDirectory(tabs+1));
         }
+
+        private void printFiles(int tabs) {
+            String indent = IntStream.range(0, tabs).mapToObj(i -> "  ").collect(Collectors.joining());
+            for (int i = 0; i < files.size(); i++) {
+                System.out.println(indent + "file " + i + " (" + files.get(i) + ")");
+            }
+        }
+
     }
 }
