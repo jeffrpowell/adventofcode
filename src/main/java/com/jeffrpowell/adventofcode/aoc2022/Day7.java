@@ -1,5 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -40,22 +41,8 @@ public class Day7 extends Solution2022<Rule>{
 
     @Override
     protected String part1(List<Rule> input) {
-        Map<String, Directory> directories = new HashMap<>();
-        Iterator<Rule> i = input.iterator();
-        Directory context = new Directory("/");
-        while (i.hasNext()) {
-            Rule line = i.next();
-            if (line.getRulePatternKey().equals(LINE_CD)) {
-                context = directories.computeIfAbsent(line.getString(0), Directory::new);
-            }
-            else if (line.getRulePatternKey().equals(LINE_LS)) {
-                Rule nextLine = parseDirectory(i, context, directories);
-                if (nextLine != null && nextLine.getRulePatternKey().equals(LINE_CD)) {
-                    context = directories.computeIfAbsent(nextLine.getString(0), Directory::new);
-                }
-            }
-        }
-        directories.get("/").printDirectory();
+        Map<Path, Directory> directories = new HashMap<>();
+        parseDirectoryTree(input, directories);
         return Long.toString(directories.values().stream()
             .sorted(Comparator.comparing(Directory::getParentsCount).reversed())
             .peek(Directory::cacheSize)
@@ -64,12 +51,49 @@ public class Day7 extends Solution2022<Rule>{
             .collect(Collectors.reducing(0L, Math::addExact)));
     }
 
-    private Rule parseDirectory(Iterator<Rule> i, Directory context, Map<String, Directory> directories) {
+    private void parseDirectoryTree(List<Rule> input, Map<Path, Directory> directories) {
+        Iterator<Rule> i = input.iterator();
+        Path contextPath = Path.of("");
+        while (i.hasNext()) {
+            Rule line = i.next();
+            if (line.getRulePatternKey().equals(LINE_CD)) {
+                contextPath = contextPath.resolve(line.getString(0));
+                directories.computeIfAbsent(
+                    contextPath, 
+                    p -> new Directory(p, line.getString(0))
+                );
+            }
+            else if (line.getRulePatternKey().equals(LINE_CD_UP)) {
+                contextPath = contextPath.getParent();
+            }
+            else if (line.getRulePatternKey().equals(LINE_LS)) {
+                Rule nextLine = parseDirectory(i, contextPath, directories);
+                if (nextLine != null) {
+                    if (nextLine.getRulePatternKey().equals(LINE_CD)) {
+                        contextPath = contextPath.resolve(nextLine.getString(0));
+                        directories.computeIfAbsent(
+                            contextPath, 
+                            p -> new Directory(p, nextLine.getString(0))
+                        );
+                    }
+                    else if (nextLine.getRulePatternKey().equals(LINE_CD_UP)) {
+                        contextPath = contextPath.getParent();
+                    }
+                } 
+            }
+        }
+    }
+
+    private Rule parseDirectory(Iterator<Rule> i, Path contextPath, Map<Path, Directory> directories) {
+        Directory context = directories.get(contextPath);
         while (i.hasNext()) {
             Rule line = i.next();
             switch (line.getRulePatternKey()) {
                 case LINE_DIR:
-                    context.addChild(directories.computeIfAbsent(line.getString(0), Directory::new));
+                    context.addChild(directories.computeIfAbsent(
+                        contextPath.resolve(line.getString(0)), 
+                        p -> new Directory(p, line.getString(0))
+                    ));
                     break;
                 case LINE_FILE:
                     context.size += line.getLong(0);
@@ -83,43 +107,40 @@ public class Day7 extends Solution2022<Rule>{
 
     @Override
     protected String part2(List<Rule> input) {
-        return null;
+        Map<Path, Directory> directories = new HashMap<>();
+        parseDirectoryTree(input, directories);
+        directories.values().stream()
+            .sorted(Comparator.comparing(Directory::getParentsCount).reversed())
+            .forEach(Directory::cacheSize);
+        long spaceToFreeUp = 30_000_000 - (70_000_000L - directories.get(Path.of("/")).getTotalSize());
+        return Long.toString(directories.values().stream()
+            .map(Directory::getTotalSize)
+            .filter(size -> size >= spaceToFreeUp)
+            .sorted()
+            .findFirst().get());
     }
 
     private static class Directory {
+        private final Path path;
         protected static final Map<String, Long> SIZE_CACHE = new HashMap<>();
         private final String name;
         private final List<Directory> children;
-        private Directory parent;
         private long size;
 
-        public Directory(String name) {
+        public Directory(Path path, String name) {
+            this.path = path;
             this.name = name;
             this.children = new ArrayList<>();
-            this.parent = null;
             this.size = 0L;
             SIZE_CACHE.put(name, 0L);
         }
 
         public void addChild(Directory child) {
             children.add(child);
-            child.parent = this;
-        }
-
-        public long getDescendency() {
-            return children.size() + children.stream()
-                .map(Directory::getDescendency)
-                .collect(Collectors.reducing(0L, Math::addExact));
         }
 
         public long getParentsCount() {
-            Directory parentTemp = this;
-            int counter = 0;
-            while (parentTemp.parent != null) {
-                counter++;
-                parentTemp = parentTemp.parent;
-            }
-            return counter;
+            return path.getNameCount();
         }
 
         public void cacheSize() {
