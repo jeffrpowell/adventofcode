@@ -215,4 +215,19 @@ public class Point2DUtils
         builder.append("(").append(min.getX()).append(",").append(max.getY()).append(") -> (").append(max.getX()).append(",").append(max.getY()).append(")\n");
         return builder.toString();
     }
+
+    public static Point2D movePtInDirection(Point2D source, Direction direction, int amount) {
+        Point2D vector = switch (direction) {
+            case UP -> new Point2D.Double(0, -1);
+            case DOWN -> new Point2D.Double(0, 1);
+            case DOWN_LEFT -> new Point2D.Double(-1, 1);
+            case DOWN_RIGHT -> new Point2D.Double(1, 1);
+            case LEFT -> new Point2D.Double(-1, 0);
+            case RIGHT -> new Point2D.Double(1, 0);
+            case UP_LEFT -> new Point2D.Double(-1, -1);
+            case UP_RIGHT -> new Point2D.Double(1, -1);
+            default -> throw new IllegalArgumentException("Unexpected value: " + direction);
+        };
+        return applyVectorToPtNTimes(vector, source, amount);
+    }
 }
