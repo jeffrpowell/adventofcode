@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Launcher
 {
-	public static final Solution<?> DAY = new Day9();
+	public static final Solution<?> DAY = new Day10();
 	
     public static void main(String[] args) {
 		InputStream puzzleInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(DAY));
