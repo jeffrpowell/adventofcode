@@ -1,6 +1,9 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,12 +30,36 @@ public class Day11 extends Solution2022<Section>{
 
     @Override
     protected String part1(List<Section> input) {
-        List<Monkey> monkeys = input.stream().map(Monkey::new).collect(Collectors.toList());
+        return run(input, true);
     }
 
     @Override
     protected String part2(List<Section> input) {
-        return null;
+        return run(input, false);
+    }
+
+    private String run(List<Section> input, boolean divideBy3) {
+        List<Monkey> monkeys = input.stream().map(Monkey::new).collect(Collectors.toList());
+        monkeys.sort(Comparator.comparing(Monkey::getId));
+        for (int i = 0; i < (divideBy3 ? 20 : 10_000); i++) {
+            for (Monkey monkey : monkeys) {
+                Map<Integer, List<BigInteger>> thrownItems = monkey.inspectItems(divideBy3);
+                for (Map.Entry<Integer, List<BigInteger>> thrownItemEntry : thrownItems.entrySet()) {
+                    monkeys.get(thrownItemEntry.getKey()).catchItems(thrownItemEntry.getValue());
+                }
+            }
+            // if ((i+1) % 20 == 0) {
+            //     System.out.println(i + 1);
+            //     System.out.println(monkeys.stream().map(Monkey::getInspectedItems).map(l -> l.toString()).collect(Collectors.joining("\n")));
+            //     System.out.println(monkeys.stream().map(Monkey::getItems).map(List::toString).collect(Collectors.joining("\n")));
+            //     System.out.println();
+            // }
+        }
+        return monkeys.stream()
+            .map(Monkey::getInspectedItems)
+            .sorted(Comparator.reverseOrder())
+            .limit(2)
+            .collect(Collectors.reducing(1L, Math::multiplyExact)).toString();
     }
 
     private static class Monkey {
@@ -44,21 +71,22 @@ public class Day11 extends Solution2022<Section>{
         private static final String LINE_FALSE = "LINE_FALSE";
 
         private int id;
-        private List<Integer> items;
-        private Function<Integer, Integer> operation;
-        private int divisibleBy;
+        private List<BigInteger> items;
+        private Function<BigInteger, BigInteger> operation;
+        private BigInteger divisibleBy;
         private int trueTarget;
         private int falseTarget;
+        private long inspectedItems;
 
         public Monkey(Section input) {
             List<Rule> lines = input.getInput(
                 InputParserFactory.getRuleParser("\n", Map.of(
-                    LINE_ID, Pattern.compile("Monkey (\\d)"),
-                    LINE_ITEMS, Pattern.compile("Starting items: (.+)"),
-                    LINE_OPERATION, Pattern.compile("Operation: new = old (.) (.+)"),
-                    LINE_TEST, Pattern.compile("Test: divisible by (\\d+)"),
-                    LINE_TRUE, Pattern.compile("If true: throw to monkey (\\d)"),
-                    LINE_FALSE, Pattern.compile("If false: throw to monkey (\\d)")
+                    LINE_ID, Pattern.compile("\\s*Monkey (\\d):"),
+                    LINE_ITEMS, Pattern.compile("\\s*Starting items: (.+)"),
+                    LINE_OPERATION, Pattern.compile("\\s*Operation: new = old (.) (.+)"),
+                    LINE_TEST, Pattern.compile("\\s*Test: divisible by (\\d+)"),
+                    LINE_TRUE, Pattern.compile("\\s*If true: throw to monkey (\\d)"),
+                    LINE_FALSE, Pattern.compile("\\s*If false: throw to monkey (\\d)")
                 ))
             );
             for (Rule line : lines) {
@@ -68,13 +96,13 @@ public class Day11 extends Solution2022<Section>{
                         break;
                     case LINE_ITEMS:
                         String itemsStr = line.getString(0);
-                        this.items = Arrays.stream(itemsStr.split(", ")).map(Integer::parseInt).collect(Collectors.toList());
+                        this.items = Arrays.stream(itemsStr.split(", ")).map(BigInteger::new).collect(Collectors.toList());
                         break;
                     case LINE_OPERATION:
                         parseOperation(line.getString(0), line.getString(1));
                         break;
                     case LINE_TEST:
-                        this.divisibleBy = line.getInt(0);
+                        this.divisibleBy = BigInteger.valueOf(line.getLong(0));
                         break;
                     case LINE_TRUE:
                         this.trueTarget = line.getInt(0);
@@ -84,22 +112,62 @@ public class Day11 extends Solution2022<Section>{
                         break;
                 }
             }
+            this.inspectedItems = 0L;
         }
 
         private void parseOperation(String operator, String operand) {
             if (operator.equals("*")) {
                 if (operand.equals("old")) {
-                    this.operation = old -> old * old;
+                    this.operation = (BigInteger old) -> old.pow(2);
                 }
                 else {
-                    int num = Integer.parseInt(operand);
-                    this.operation = old -> old * num;
+                    BigInteger num = new BigInteger(operand);
+                    this.operation = (BigInteger old) -> old.multiply(num);
                 }
             }
             else {
-                int num = Integer.parseInt(operand);
-                this.operation = old -> old + num;
+                BigInteger num = new BigInteger(operand);
+                this.operation = (BigInteger old) -> old.add(num);
             }
+        }
+
+        public Map<Integer,List<BigInteger>> inspectItems(boolean divideBy3) {
+            List<BigInteger> trueMatches = new ArrayList<>();
+            List<BigInteger> falseMatches = new ArrayList<>();
+            for (BigInteger item : items) {
+                item = operation.apply(item);
+                if (divideBy3) {
+                    item = item.divide(BigInteger.valueOf(3));
+                }
+                if (item.mod(divisibleBy).equals(BigInteger.ZERO)) {
+                    trueMatches.add(item);
+                }
+                else {
+                    falseMatches.add(item);
+                }
+                inspectedItems++;
+            }
+            items.clear();
+            return Map.of(
+                trueTarget, trueMatches,
+                falseTarget, falseMatches
+            );
+        }
+
+        public void catchItems(List<BigInteger> items) {
+            this.items.addAll(items);
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public List<BigInteger> getItems() {
+            return items;
+        }
+
+        public Long getInspectedItems() {
+            return inspectedItems;
         }
     }
 }
