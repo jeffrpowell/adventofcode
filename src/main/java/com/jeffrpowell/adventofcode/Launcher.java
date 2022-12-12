@@ -22,7 +22,7 @@ public class Launcher
 			System.out.println("\nPart 1");
 			System.out.println("--------------------------");
 			long t = System.currentTimeMillis();
-			String answer = DAY.parseAndRunPart1(puzzleInput);
+			String answer = null;//DAY.parseAndRunPart1(puzzleInput);
 			long time = System.currentTimeMillis() - t;
 			System.out.println(answer);
 			System.out.println("--------------------------");

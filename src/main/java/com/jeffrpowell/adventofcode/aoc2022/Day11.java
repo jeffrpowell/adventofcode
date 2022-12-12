@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -77,6 +78,7 @@ public class Day11 extends Solution2022<Section>{
         private int trueTarget;
         private int falseTarget;
         private long inspectedItems;
+        private Map<BigInteger, Boolean> divisibleCache;
 
         public Monkey(Section input) {
             List<Rule> lines = input.getInput(
@@ -96,7 +98,9 @@ public class Day11 extends Solution2022<Section>{
                         break;
                     case LINE_ITEMS:
                         String itemsStr = line.getString(0);
-                        this.items = Arrays.stream(itemsStr.split(", ")).map(BigInteger::new).collect(Collectors.toList());
+                        this.items = Arrays.stream(itemsStr.split(", "))
+                            .map(BigInteger::new)
+                            .collect(Collectors.toList());
                         break;
                     case LINE_OPERATION:
                         parseOperation(line.getString(0), line.getString(1));
@@ -113,6 +117,16 @@ public class Day11 extends Solution2022<Section>{
                 }
             }
             this.inspectedItems = 0L;
+            BigInteger cacheThresholdStart = this.divisibleBy.multiply(BigInteger.valueOf(1_000_000));
+            this.divisibleCache = Stream.iterate(BigInteger.ONE, (BigInteger i) -> i.add(BigInteger.ONE))
+                .limit(cacheThresholdStart.longValue())
+                .collect(Collectors.toMap(
+                    Function.identity(),
+                    k -> false
+                ));
+            for (BigInteger i = this.divisibleBy; i.compareTo(cacheThresholdStart) < 0; i.add(i)) {
+                this.divisibleCache.put(i, true);
+            }
         }
 
         private void parseOperation(String operator, String operand) {
@@ -139,7 +153,7 @@ public class Day11 extends Solution2022<Section>{
                 if (divideBy3) {
                     item = item.divide(BigInteger.valueOf(3));
                 }
-                if (item.mod(divisibleBy).equals(BigInteger.ZERO)) {
+                if (isDivisible(item)) {
                     trueMatches.add(item);
                 }
                 else {
@@ -152,6 +166,10 @@ public class Day11 extends Solution2022<Section>{
                 trueTarget, trueMatches,
                 falseTarget, falseMatches
             );
+        }
+
+        private boolean isDivisible(BigInteger item) {
+            return divisibleCache.computeIfAbsent(item, i -> i.mod(divisibleBy).equals(BigInteger.ZERO));
         }
 
         public void catchItems(List<BigInteger> items) {
