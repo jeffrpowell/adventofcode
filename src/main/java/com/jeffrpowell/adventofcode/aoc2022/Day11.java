@@ -1,6 +1,5 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -42,10 +40,12 @@ public class Day11 extends Solution2022<Section>{
     private String run(List<Section> input, boolean divideBy3) {
         List<Monkey> monkeys = input.stream().map(Monkey::new).collect(Collectors.toList());
         monkeys.sort(Comparator.comparing(Monkey::getId));
+        long modPeriod = monkeys.stream().map(Monkey::getDivisibleBy).collect(Collectors.reducing(1L, Math::multiplyExact));
+        monkeys.stream().forEach(m -> m.setModPeriod(modPeriod));
         for (int i = 0; i < (divideBy3 ? 20 : 10_000); i++) {
             for (Monkey monkey : monkeys) {
-                Map<Integer, List<BigInteger>> thrownItems = monkey.inspectItems(divideBy3);
-                for (Map.Entry<Integer, List<BigInteger>> thrownItemEntry : thrownItems.entrySet()) {
+                Map<Integer, List<Long>> thrownItems = monkey.inspectItems(divideBy3);
+                for (Map.Entry<Integer, List<Long>> thrownItemEntry : thrownItems.entrySet()) {
                     monkeys.get(thrownItemEntry.getKey()).catchItems(thrownItemEntry.getValue());
                 }
             }
@@ -72,13 +72,14 @@ public class Day11 extends Solution2022<Section>{
         private static final String LINE_FALSE = "LINE_FALSE";
 
         private int id;
-        private List<BigInteger> items;
-        private Function<BigInteger, BigInteger> operation;
-        private BigInteger divisibleBy;
+        private List<Long> items;
+        private Function<Long, Long> operation;
+        private Long divisibleBy;
         private int trueTarget;
         private int falseTarget;
         private long inspectedItems;
-        private Map<BigInteger, Boolean> divisibleCache;
+        private long modPeriod;
+        // private Map<Long, Boolean> divisibleCache;
 
         public Monkey(Section input) {
             List<Rule> lines = input.getInput(
@@ -99,14 +100,14 @@ public class Day11 extends Solution2022<Section>{
                     case LINE_ITEMS:
                         String itemsStr = line.getString(0);
                         this.items = Arrays.stream(itemsStr.split(", "))
-                            .map(BigInteger::new)
+                            .map(Long::parseLong)
                             .collect(Collectors.toList());
                         break;
                     case LINE_OPERATION:
                         parseOperation(line.getString(0), line.getString(1));
                         break;
                     case LINE_TEST:
-                        this.divisibleBy = BigInteger.valueOf(line.getLong(0));
+                        this.divisibleBy = line.getLong(0);
                         break;
                     case LINE_TRUE:
                         this.trueTarget = line.getInt(0);
@@ -117,43 +118,46 @@ public class Day11 extends Solution2022<Section>{
                 }
             }
             this.inspectedItems = 0L;
-            BigInteger cacheThresholdStart = this.divisibleBy.multiply(BigInteger.valueOf(1_000_000));
-            this.divisibleCache = Stream.iterate(BigInteger.ONE, (BigInteger i) -> i.add(BigInteger.ONE))
-                .limit(cacheThresholdStart.longValue())
-                .collect(Collectors.toMap(
-                    Function.identity(),
-                    k -> false
-                ));
-            for (BigInteger i = this.divisibleBy; i.compareTo(cacheThresholdStart) < 0; i.add(i)) {
-                this.divisibleCache.put(i, true);
-            }
+            // Long cacheThresholdStart = this.divisibleBy.multiply(Long.valueOf(1_000_000));
+            // this.divisibleCache = Stream.iterate(Long.ONE, (Long i) -> i.add(Long.ONE))
+            //     .limit(cacheThresholdStart.longValue())
+            //     .collect(Collectors.toMap(
+            //         Function.identity(),
+            //         k -> false
+            //     ));
+            // for (Long i = this.divisibleBy; i.compareTo(cacheThresholdStart) < 0; i.add(i)) {
+            //     this.divisibleCache.put(i, true);
+            // }
         }
 
         private void parseOperation(String operator, String operand) {
             if (operator.equals("*")) {
                 if (operand.equals("old")) {
-                    this.operation = (BigInteger old) -> old.pow(2);
+                    this.operation = (Long old) -> old * old;
                 }
                 else {
-                    BigInteger num = new BigInteger(operand);
-                    this.operation = (BigInteger old) -> old.multiply(num);
+                    Long num = Long.parseLong(operand);
+                    this.operation = (Long old) -> old * num;
                 }
             }
             else {
-                BigInteger num = new BigInteger(operand);
-                this.operation = (BigInteger old) -> old.add(num);
+                Long num = Long.parseLong(operand);
+                this.operation = (Long old) -> old + num;
             }
         }
 
-        public Map<Integer,List<BigInteger>> inspectItems(boolean divideBy3) {
-            List<BigInteger> trueMatches = new ArrayList<>();
-            List<BigInteger> falseMatches = new ArrayList<>();
-            for (BigInteger item : items) {
+        public Map<Integer,List<Long>> inspectItems(boolean divideBy3) {
+            List<Long> trueMatches = new ArrayList<>();
+            List<Long> falseMatches = new ArrayList<>();
+            for (Long item : items) {
                 item = operation.apply(item);
                 if (divideBy3) {
-                    item = item.divide(BigInteger.valueOf(3));
+                    item /= 3;
                 }
-                if (isDivisible(item)) {
+                else if (item > modPeriod) {
+                    item %= modPeriod;
+                }
+                if (item % divisibleBy == 0) {
                     trueMatches.add(item);
                 }
                 else {
@@ -167,12 +171,12 @@ public class Day11 extends Solution2022<Section>{
                 falseTarget, falseMatches
             );
         }
-
-        private boolean isDivisible(BigInteger item) {
-            return divisibleCache.computeIfAbsent(item, i -> i.mod(divisibleBy).equals(BigInteger.ZERO));
+        
+        public void setModPeriod(long modPeriod) {
+            this.modPeriod = modPeriod;
         }
 
-        public void catchItems(List<BigInteger> items) {
+        public void catchItems(List<Long> items) {
             this.items.addAll(items);
         }
 
@@ -180,12 +184,17 @@ public class Day11 extends Solution2022<Section>{
             return id;
         }
 
-        public List<BigInteger> getItems() {
+        public List<Long> getItems() {
             return items;
+        }
+
+        public Long getDivisibleBy() {
+            return divisibleBy;
         }
 
         public Long getInspectedItems() {
             return inspectedItems;
         }
+
     }
 }

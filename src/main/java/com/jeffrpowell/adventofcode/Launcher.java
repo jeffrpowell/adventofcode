@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Launcher
 {
-	public static final Solution<?> DAY = new Day11();
+	public static final Solution<?> DAY = new Day12();
 	
     public static void main(String[] args) {
 		InputStream puzzleInputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getInputFileName(DAY));
@@ -22,7 +22,7 @@ public class Launcher
 			System.out.println("\nPart 1");
 			System.out.println("--------------------------");
 			long t = System.currentTimeMillis();
-			String answer = null;//DAY.parseAndRunPart1(puzzleInput);
+			String answer = DAY.parseAndRunPart1(puzzleInput);
 			long time = System.currentTimeMillis() - t;
 			System.out.println(answer);
 			System.out.println("--------------------------");
