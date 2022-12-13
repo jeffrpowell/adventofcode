@@ -32,3 +32,5 @@ hs_err_pid*
 nbactions.xml
 nb-configuration.xml
 recording.jfr
+
+/src/main/resources/
