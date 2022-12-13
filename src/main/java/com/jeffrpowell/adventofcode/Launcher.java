@@ -59,7 +59,7 @@ public class Launcher
 				}
 				else {
 					try (FileWriter f = new FileWriter("src/main/resources/"+getInputFileName(DAY, false)); PrintWriter out = new PrintWriter(f)){
-						out.println(response.body());
+						out.print(response.body());
 					}
 					catch (IOException e) {
 						throw new IllegalArgumentException("Failed to write input data file", e);
