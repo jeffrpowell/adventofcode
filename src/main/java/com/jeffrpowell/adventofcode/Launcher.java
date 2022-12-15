@@ -16,11 +16,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jeffrpowell.adventofcode.aoc2022.Day14;
+import com.jeffrpowell.adventofcode.aoc2022.*;
 
 public class Launcher
 {
-	public static final Solution<?> DAY = new Day14();
+	public static final Solution<?> DAY = new Day15();
 	
     public static void main(String[] args) {
 		List<String> puzzleInput = getPuzzleInput();

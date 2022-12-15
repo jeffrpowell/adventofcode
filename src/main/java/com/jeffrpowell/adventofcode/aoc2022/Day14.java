@@ -2,6 +2,7 @@ package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.awt.geom.Point2D;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 
 public class Day14 extends Solution2022<String>{
 
+    private static final Point2D START = new Point2D.Double(500,0);
     @Override
     public int getDay() {
         return 14;
@@ -46,8 +48,18 @@ public class Day14 extends Solution2022<String>{
                     }
                 }
             });
-        Point2DUtils.printPoints(grid.keySet());
-        return null;
+        // Point2DUtils.printPoints(grid.keySet());
+        double maxY = grid.keySet().stream().map(Point2D::getY).max(Comparator.naturalOrder()).get();
+        boolean done = false;
+        do {
+            done = sendSand(grid);
+        }
+        while (!done);
+        return Long.toString(grid.values().stream().filter(i -> i == 2).count());
+    }
+
+    private boolean sendSand(Map<Point2D, Integer> grid) {
+        return true;
     }
 
     @Override
