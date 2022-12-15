@@ -198,7 +198,7 @@ public class Point2DUtils
     }
 
     public static void printPoints(Map<Point2D, String> pts) {
-
+        System.out.println(pointsToString(pts));
     }
 
     public static String pointsToString(Map<Point2D, String> pts) {
