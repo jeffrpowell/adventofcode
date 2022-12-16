@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
-import com.jeffrpowell.adventofcode.inputparser.section.Section;
+import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 
 public class Day16 extends Solution2022<Rule>{
 
