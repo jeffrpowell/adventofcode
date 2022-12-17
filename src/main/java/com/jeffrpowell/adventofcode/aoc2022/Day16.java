@@ -1,6 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class Day16 extends Solution2022<Rule>{
         Map<String, Valve> valveIndex = input.stream()
             .collect(Collectors.toMap(
                 r -> r.getString(0),
-                r -> new Valve(r.getInt(1), r.getString(2))
+                r -> new Valve(r.getString(0), r.getInt(1), r.getString(2))
             ));
         
         valveIndex.values().stream().forEach(v -> v.hookUpNeighbors(valveIndex));
@@ -43,10 +44,12 @@ public class Day16 extends Solution2022<Rule>{
     }
 
     private static class Valve {
+        String name;
         Map<Valve, Integer> neighbors;
         int pressure;
         String neighborStr;
-        public Valve(int pressure, String neighborStr) {
+        public Valve(String name, int pressure, String neighborStr) {
+            this.name = name;
             this.pressure = pressure;
             this.neighborStr = neighborStr;
         }
@@ -61,6 +64,7 @@ public class Day16 extends Solution2022<Rule>{
         }
 
         public void squashNeighbors() {
+            Set<Valve> cyclePrevention = new HashSet<>();
             while(neighbors.keySet().stream().anyMatch(v -> v.getPressure() == 0))
             {
                 Map<Valve, Integer> newNeighbors = neighbors.entrySet().stream()
@@ -72,8 +76,12 @@ public class Day16 extends Solution2022<Rule>{
                         e -> e.getValue() + 1,
                         Math::min
                     ));
-                neighbors.keySet().stream().filter(v -> v.getPressure() == 0).forEach(neighbors::remove);
+                Set<Valve> toRemove = neighbors.keySet().stream().filter(v -> v.getPressure() == 0).collect(Collectors.toSet());
+                toRemove.stream().forEach(v -> {neighbors.remove(v); cyclePrevention.add(v);});
                 for (Map.Entry<Valve, Integer> entry : newNeighbors.entrySet()) {
+                    if (cyclePrevention.contains(entry.getKey())) {
+                        continue;
+                    }
                     if (neighbors.containsKey(entry.getKey())) {
                         neighbors.put(entry.getKey(), Math.min(entry.getValue(), neighbors.get(entry.getKey())));
                     }
@@ -94,6 +102,11 @@ public class Day16 extends Solution2022<Rule>{
 
         public Map<Valve, Integer> getNeighbors() {
             return neighbors;
+        }
+
+        @Override
+        public String toString() {
+            return name + "(" + pressure + ") -> " + neighbors.entrySet().stream().map(e -> e.getKey().name + "@" + e.getValue() + "(" + e.getKey().pressure + ")").collect(Collectors.joining(","));
         }
     }
 }
