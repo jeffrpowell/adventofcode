@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,23 +53,25 @@ public class Day16 extends Solution2022<Rule>{
                 maxScore = t.pressureScore();
             }
             for (var entry : valveIndex.get(t.head()).getNeighbors().entrySet()) {
-                if (entry.getValue() >= t.timeLeft() || t.visited().contains(entry.getKey().name)) {
+                if (entry.getValue() >= t.timeLeft() || t.openedValves().contains(entry.getKey().name)) {
                     continue;
                 }
-                Set<String> visited = Stream.of(Set.of(t.head), t.visited()).flatMap(Set::stream).collect(Collectors.toSet());
-                q.push(new Traversal(t.pressureScore(), visited, entry.getKey().name, t.timeLeft() - entry.getValue())); //choose to skip the valve
-                q.push(new Traversal(
-                    t.pressureScore() + entry.getKey().getTotalPressure(t.timeLeft() - entry.getValue() - 1), 
-                    visited, 
-                    entry.getKey().name, 
-                    t.timeLeft() - entry.getValue() - 1)
-                ); //choose to open the valve
+                q.push(new Traversal(t.pressureScore(), t.openedValves(), entry.getKey().name, t.timeLeft() - entry.getValue())); //choose to skip the valve
+                if (!t.openedValves().contains(t.head())) {
+                    Set<String> newOpenedValves = Stream.of(Set.of(t.head), t.openedValves()).flatMap(Set::stream).collect(Collectors.toSet());
+                    q.push(new Traversal(
+                        t.pressureScore() + entry.getKey().getTotalPressure(t.timeLeft() - entry.getValue() - 1), 
+                        newOpenedValves, 
+                        entry.getKey().name, 
+                        t.timeLeft() - entry.getValue() - 1)
+                    ); //choose to open the valve
+                }
             }
         }
         return Integer.toString(maxScore);
     }
 
-    record Traversal(int pressureScore, Set<String> visited, String head, int timeLeft){};
+    record Traversal(int pressureScore, Set<String> openedValves, String head, int timeLeft){};
 
     @Override
     protected String part2(List<Rule> input) {
@@ -100,15 +103,19 @@ public class Day16 extends Solution2022<Rule>{
             cyclePrevention.add(this);
             while(neighbors.keySet().stream().anyMatch(v -> v.getPressure() == 0))
             {
-                Map<Valve, Integer> newNeighbors = neighbors.entrySet().stream()
+                Map<Valve, Integer> newNeighbors = new HashMap<>();
+                neighbors.entrySet().stream()
                     .filter(e -> e.getKey().getPressure() == 0)
-                    .map(e -> e.getKey().getNeighbors().entrySet())
-                    .flatMap(Set::stream)
-                    .collect(Collectors.toMap(
-                        e -> e.getKey(),
-                        e -> e.getValue() + 1,
-                        Math::min
-                    ));
+                    .forEach(e -> {
+                        for (var v : e.getKey().getNeighbors().entrySet()){
+                            if (newNeighbors.containsKey(e.getKey())) {
+                                newNeighbors.put(v.getKey(), Math.min(e.getValue() + v.getValue(), newNeighbors.get(e.getKey())));
+                            }
+                            else {
+                                newNeighbors.put(v.getKey(), e.getValue() + v.getValue());
+                            }
+                        }
+                    });
                 Set<Valve> toRemove = neighbors.keySet().stream().filter(v -> v.getPressure() == 0).collect(Collectors.toSet());
                 toRemove.stream().forEach(v -> {neighbors.remove(v); cyclePrevention.add(v);});
                 for (Map.Entry<Valve, Integer> entry : newNeighbors.entrySet()) {
