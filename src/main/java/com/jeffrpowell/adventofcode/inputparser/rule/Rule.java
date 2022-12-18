@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javafx.geometry.Point3D;
+
 public class Rule {
     private final List<String> tokens;
     private final Map<Integer, Object> cache;
@@ -80,6 +82,16 @@ public class Rule {
     private Point2D parsePoint2D(String s) {
         String[] coords = s.split(",");
         return new Point2D.Double(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]));
+    }
+    
+    public Point3D getPoint3D(int i) {
+        this.cache.putIfAbsent(i, parsePoint3D(tokens.get(i)));
+        return (Point3D) this.cache.get(i);
+    }
+    
+    private Point3D parsePoint3D(String s) {
+        String[] coords = s.split(",");
+        return new Point3D(Double.parseDouble(coords[0]), Double.parseDouble(coords[1]), Double.parseDouble(coords[2]));
     }
     
     @Override
