@@ -47,28 +47,62 @@ public class Day17 extends Solution2022<List<String>>{
             }
             settledPts.addAll(newPts);
             piece = piece.getNext(minY);
-            // Point2DUtils.printPoints(
-            //     Stream.concat(
-            //         Stream.concat(
-            //             piece.getAllPts(), 
-            //             settledPts.stream()
-            //         ), 
-            //         Stream.of(
-            //             new Point2D.Double(leftWall, floor), 
-            //             new Point2D.Double(rightWall, floor), 
-            //             new Point2D.Double(leftWall, minY), 
-            //             new Point2D.Double(rightWall, minY)
-            //         )
-            //     )
-            //     .collect(Collectors.toSet())
-            // );
         }
+        // printPts(piece, settledPts, minY);
         return Double.toString(floor - minY);
     }
 
+    record Visit(int blowi, String pieceType){}
+
     @Override
     protected String part2(List<List<String>> input) {
-        return null;
+        Tetris piece = new Flat(new Point2D.Double(leftWall + 3, floor - 4));
+        double minY = floor;
+        int blowi = 0;
+        Set<Visit> visited = new HashSet<>();
+        Set<Point2D> settledPts = new HashSet<>();
+        for (int i = 0; i < 2022; i++) {
+            boolean settled = false;
+            while (!settled) {
+                String blow = input.get(0).get(blowi);
+                blowi = (blowi + 1) % input.get(0).size();
+                Visit visit = new Visit(blowi, piece.getClass().getSimpleName());
+                if (!visited.add(visit)) {
+                    calculateHeight(i, minY);
+                }
+                settled = piece.blow(blow, settledPts);
+            }
+            Set<Point2D> newPts = piece.getAllPts().collect(Collectors.toSet());
+            for (Point2D p : newPts) {
+                minY = Math.min(minY, p.getY());
+            }
+            settledPts.addAll(newPts);
+            piece = piece.getNext(minY);
+        }
+        // printPts(piece, settledPts, minY);
+        return Double.toString(floor - minY);
+    }
+
+    private long calculateHeight(int i, double minY) {
+        return -1;
+    }
+
+    private void printPts(Tetris piece, Set<Point2D> settledPts, double minY) {
+        Point2DUtils.printPoints(
+            Stream.concat(
+                Stream.concat(
+                    piece.getAllPts(), 
+                    settledPts.stream()
+                ), 
+                Stream.of(
+                    new Point2D.Double(leftWall, floor), 
+                    new Point2D.Double(rightWall, floor), 
+                    new Point2D.Double(leftWall, minY), 
+                    new Point2D.Double(rightWall, minY)
+                )
+            )
+            .collect(Collectors.toSet())
+        );
     }
 
     private abstract static class Tetris {
@@ -195,17 +229,29 @@ public class Day17 extends Solution2022<List<String>>{
 
         @Override
         public Stream<Point2D> getLeftPts() {
-            return Stream.of(Point2DUtils.movePtInDirection(bottomLeft, Direction.UP, 1));
+            return Stream.of(
+                Point2DUtils.movePtInDirection(bottomLeft, Direction.RIGHT, 1),
+                Point2DUtils.movePtInDirection(bottomLeft, Direction.UP, 1),
+                Point2DUtils.applyVectorToPt(new Point2D.Double(1, -2), bottomLeft)
+            );
         }
 
         @Override
         public Stream<Point2D> getRightPts() {
-            return Stream.of(Point2DUtils.applyVectorToPt(new Point2D.Double(2, -1), bottomLeft));
+            return Stream.of(
+                Point2DUtils.movePtInDirection(bottomLeft, Direction.RIGHT, 1),
+                Point2DUtils.applyVectorToPt(new Point2D.Double(2, -1), bottomLeft),
+                Point2DUtils.applyVectorToPt(new Point2D.Double(1, -2), bottomLeft)
+            );
         }
 
         @Override
         public Stream<Point2D> getBottomPts() {
-            return Stream.of(Point2DUtils.movePtInDirection(bottomLeft, Direction.RIGHT, 1));
+            return Stream.of(
+                Point2DUtils.movePtInDirection(bottomLeft, Direction.RIGHT, 1),
+                Point2DUtils.movePtInDirection(bottomLeft, Direction.UP, 1),
+                Point2DUtils.applyVectorToPt(new Point2D.Double(2, -1), bottomLeft)
+            );
         }
 
     }
@@ -234,7 +280,11 @@ public class Day17 extends Solution2022<List<String>>{
 
         @Override
         public Stream<Point2D> getLeftPts() {
-            return Stream.of(bottomLeft);
+            return Stream.of(
+                bottomLeft, 
+                Point2DUtils.movePtInDirection(bottomLeft, Direction.UP_RIGHT, 2),
+                Point2DUtils.applyVectorToPt(new Point2D.Double(2, -1), bottomLeft)
+            );
         }
 
         @Override
