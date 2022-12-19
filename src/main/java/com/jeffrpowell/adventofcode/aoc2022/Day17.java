@@ -61,14 +61,26 @@ public class Day17 extends Solution2022<List<String>>{
         int blowi = 0;
         Set<Visit> visited = new HashSet<>();
         Set<Point2D> settledPts = new HashSet<>();
-        for (int i = 0; i < 2022; i++) {
+        double heightAtFirstRepeat = 0;
+        long multiplier = 0;
+        long targetPieces = 1_000_000_000_000L;
+        for (int i = 0; i < 5000; i++) {
             boolean settled = false;
             while (!settled) {
                 String blow = input.get(0).get(blowi);
                 blowi = (blowi + 1) % input.get(0).size();
                 Visit visit = new Visit(blowi, piece.getClass().getSimpleName());
                 if (!visited.add(visit)) {
-                    calculateHeight(i, minY);
+                    if (heightAtFirstRepeat > 0) {
+                        double nextHeight = floor - minY - heightAtFirstRepeat;
+                        return Double.toString(heightAtFirstRepeat + (nextHeight * multiplier));
+                    }
+                    else {
+                        multiplier = targetPieces / i - 1;
+                        heightAtFirstRepeat = floor - minY;
+                        visited.clear();
+                        visited.add(visit);
+                    }
                 }
                 settled = piece.blow(blow, settledPts);
             }
