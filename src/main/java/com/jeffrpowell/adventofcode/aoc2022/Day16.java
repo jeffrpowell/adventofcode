@@ -3,11 +3,13 @@ package com.jeffrpowell.adventofcode.aoc2022;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -40,10 +42,15 @@ public class Day16 extends Solution2022<Rule>{
         
         valveIndex.values().stream().forEach(v -> v.hookUpNeighbors(valveIndex));
         valveIndex.values().stream().forEach(Valve::squashNeighbors);
+        Set<Valve> pressureValves = valveIndex.values().stream().filter(v -> v.getPressure() > 0).collect(Collectors.toSet());
+        valveIndex.values().stream().forEach(v -> v.completeGraph(pressureValves));
+        return getMaxPressure(valveIndex);
+    }
+
+    private String getMaxPressure(Map<String, Valve> valveIndex) {
         Deque<Traversal> q = new ArrayDeque<>();
         valveIndex.get("AA").getNeighbors().entrySet().stream()
             .forEach(e -> {
-                q.push(new Traversal(0, Collections.emptySet(), e.getKey().name, 30 - e.getValue()));
                 q.push(new Traversal(e.getKey().getTotalPressure(30 - e.getValue() - 1), Collections.emptySet(), e.getKey().name, 30 - e.getValue() - 1));
             });
         int maxScore = 0;
@@ -56,7 +63,6 @@ public class Day16 extends Solution2022<Rule>{
                 if (entry.getValue() >= t.timeLeft() || t.openedValves().contains(entry.getKey().name)) {
                     continue;
                 }
-                q.push(new Traversal(t.pressureScore(), t.openedValves(), entry.getKey().name, t.timeLeft() - entry.getValue())); //choose to skip the valve
                 if (!t.openedValves().contains(t.head())) {
                     Set<String> newOpenedValves = Stream.of(Set.of(t.head), t.openedValves()).flatMap(Set::stream).collect(Collectors.toSet());
                     q.push(new Traversal(
@@ -130,6 +136,35 @@ public class Day16 extends Solution2022<Rule>{
                     }
                 }
             }
+        }
+
+        public void completeGraph(Set<Valve> pressureValves) {
+            Set<Valve> targets = pressureValves.stream()
+                .filter(v -> !neighbors.keySet().contains(v))
+                .filter(v -> !v.name.equals(name))
+                .collect(Collectors.toSet());
+            targets.stream().forEach(t -> neighbors.put(t, distanceToTarget(t)));
+        }
+
+        record Hunt(Valve head, int distance, Set<String> visited){}
+
+        private int distanceToTarget(Valve target) {
+            PriorityQueue<Hunt> q = new PriorityQueue<>(Comparator.comparing(Hunt::distance));
+            Set<String> rootVisited = neighbors.keySet().stream().map(v -> v.name).collect(Collectors.toSet());
+            rootVisited.add(name);
+            neighbors.entrySet().stream().forEach(e -> q.add(new Hunt(e.getKey(), e.getValue(), rootVisited)));
+            while (!q.isEmpty()) {
+                Hunt h = q.poll();
+                if (h.head().equals(target)) {
+                    return h.distance();
+                }
+                Set<String> visited = Stream.concat(Stream.of(h.head().name), h.visited().stream()).collect(Collectors.toSet());
+                h.head().getNeighbors().entrySet().stream()
+                    .filter(n -> !visited.contains(n.getKey().name))
+                    .filter(n -> !neighbors.containsKey(n.getKey()))
+                    .forEach(e -> q.add(new Hunt(e.getKey(), h.distance + e.getValue(), visited)));
+            }
+            return Integer.MAX_VALUE;
         }
 
         public int getTotalPressure(int minutesLeft) {
