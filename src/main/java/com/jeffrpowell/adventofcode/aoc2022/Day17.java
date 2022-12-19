@@ -114,7 +114,7 @@ public class Day17 extends Solution2022<List<String>>{
             else if (blow.equals(">") 
                 && getRightPts()
                     .map(p -> Point2DUtils.movePtInDirection(p, Direction.RIGHT, 1))
-                    .noneMatch(p -> p.getX() < rightWall || settledPts.contains(p))
+                    .noneMatch(p -> p.getX() == rightWall || settledPts.contains(p))
             ) {
                 bottomLeft = Point2DUtils.movePtInDirection(bottomLeft, Direction.RIGHT, 1);
             }
@@ -161,7 +161,7 @@ public class Day17 extends Solution2022<List<String>>{
 
         @Override
         public Stream<Point2D> getRightPts() {
-            return Stream.of(bottomLeft);
+            return Stream.of(Point2DUtils.movePtInDirection(bottomLeft, Direction.RIGHT, 3));
         }
 
         @Override
