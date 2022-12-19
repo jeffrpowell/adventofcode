@@ -153,10 +153,16 @@ public class Day16 extends Solution2022<Rule>{
             Set<String> rootVisited = neighbors.keySet().stream().map(v -> v.name).collect(Collectors.toSet());
             rootVisited.add(name);
             neighbors.entrySet().stream().forEach(e -> q.add(new Hunt(e.getKey(), e.getValue(), rootVisited)));
+            int best = Integer.MAX_VALUE;
             while (!q.isEmpty()) {
                 Hunt h = q.poll();
                 if (h.head().equals(target)) {
-                    return h.distance();
+                    if (best == Integer.MAX_VALUE) {
+                        best = h.distance();
+                    }
+                    else {
+                        return Math.min(best, h.distance());
+                    }
                 }
                 Set<String> visited = Stream.concat(Stream.of(h.head().name), h.visited().stream()).collect(Collectors.toSet());
                 h.head().getNeighbors().entrySet().stream()
@@ -164,7 +170,7 @@ public class Day16 extends Solution2022<Rule>{
                     .filter(n -> !neighbors.containsKey(n.getKey()))
                     .forEach(e -> q.add(new Hunt(e.getKey(), h.distance + e.getValue(), visited)));
             }
-            return Integer.MAX_VALUE;
+            return best;
         }
 
         public int getTotalPressure(int minutesLeft) {
