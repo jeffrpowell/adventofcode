@@ -1,8 +1,10 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.awt.geom.Point2D;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,22 +66,40 @@ public class Day17 extends Solution2022<List<String>>{
         double heightAtFirstRepeat = 0;
         long multiplier = 0;
         long targetPieces = 1_000_000_000_000L;
-        for (int i = 0; i < 5000; i++) {
+        long piecesAtFirstRepeat = 0;
+        double lastHeightAchieved = floor;
+        long lastPiecesDropped = 0;
+        boolean firstRepeat = true;
+        double heightIncrease = 0;
+        long pieceIncrease = 0;
+        Map<Long, Double> increaseCache = new HashMap<>();
+        for (int i = 0; i < 50000; i++) {
             boolean settled = false;
             while (!settled) {
                 String blow = input.get(0).get(blowi);
                 blowi = (blowi + 1) % input.get(0).size();
                 Visit visit = new Visit(blowi, piece.getClass().getSimpleName());
                 if (!visited.add(visit)) {
-                    if (heightAtFirstRepeat > 0) {
-                        double nextHeight = floor - minY - heightAtFirstRepeat;
-                        return Double.toString(heightAtFirstRepeat + (nextHeight * multiplier));
-                    }
-                    else {
-                        multiplier = targetPieces / i - 1;
+                    if (firstRepeat) {
                         heightAtFirstRepeat = floor - minY;
+                        piecesAtFirstRepeat = i + 1;
+                        lastHeightAchieved = minY;
+                        lastPiecesDropped = i + 1;
                         visited.clear();
                         visited.add(visit);
+                        firstRepeat = false;
+                    }
+                    else {
+                        heightIncrease = lastHeightAchieved - minY;
+                        pieceIncrease = i - lastPiecesDropped + 1;
+                        lastHeightAchieved = minY;
+                        lastPiecesDropped = i + 1;
+                        visited.clear();
+                        visited.add(visit);
+                        long pieceMultiplier = (targetPieces - piecesAtFirstRepeat) / pieceIncrease;
+                        double heightThatIsSkipped = heightIncrease * pieceMultiplier;
+                        long mod = (targetPieces - piecesAtFirstRepeat) % pieceIncrease;
+                        return Double.toString(heightAtFirstRepeat + heightThatIsSkipped + increaseCache.get(mod));
                     }
                 }
                 settled = piece.blow(blow, settledPts);
@@ -90,6 +110,9 @@ public class Day17 extends Solution2022<List<String>>{
             }
             settledPts.addAll(newPts);
             piece = piece.getNext(minY);
+            if (!firstRepeat) {
+                increaseCache.put(i-piecesAtFirstRepeat, minY-heightAtFirstRepeat);
+            }
         }
         // printPts(piece, settledPts, minY);
         return Double.toString(floor - minY);
