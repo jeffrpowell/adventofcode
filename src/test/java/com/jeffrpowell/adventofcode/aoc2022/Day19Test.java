@@ -26,4 +26,11 @@ public class Day19Test
 		List<String> input = TestDataLoader.getTestData(day, 1);
 		assertEquals("33", day.parseAndRunPart1(input));
 	}
+
+	@Test
+	public void testPart2()
+	{
+		List<String> input = TestDataLoader.getTestData(day, 1);
+		assertEquals("3472", day.parseAndRunPart2(input));
+	}
 }

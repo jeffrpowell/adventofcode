@@ -116,7 +116,7 @@ public class Day19 extends Solution2022<Rule>{
         }
 
         private int maxGeodesPossible(Sim s) {
-            return ((s.time * (s.time+1)) / 2)  + s.time*s.gBot + s.geode;
+            return ((s.time * (s.time-1)) / 2) + s.time*s.gBot + s.geode;
         }
 
         private Stream<Sim> purchaseBots(Sim s) {
@@ -129,11 +129,11 @@ public class Day19 extends Solution2022<Rule>{
             }
             else {
                 boolean buildOre = s.ore >= oreCost_ore
-                    && s.oBot < maxOreCost;
+                    && s.oBot < maxOreCost && s.time > 16;
                 boolean buildClay = s.ore >= clayCost_ore 
-                    && s.cBot < obsidianCost_clay;
+                    && s.cBot < obsidianCost_clay && s.time > 7;
                 boolean buildObsidian = s.ore >= obsidianCost_ore && s.clay >= obsidianCost_clay
-                    && s.sBot < geodeCost_obsidian;
+                    && s.sBot < geodeCost_obsidian && s.time > 4;
                 List<Sim> sims = new ArrayList<>();
                 sims.add(s);
                 if (buildOre) {
