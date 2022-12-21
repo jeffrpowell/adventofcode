@@ -29,11 +29,11 @@ public class Day20 extends Solution2022<Integer>{
                 Mover m = copy.get(i);
                 if (m.moved()) continue;
                 int newIndex = i + m.num();
-                if (m.num() < 0 && newIndex < 0) {
+                if (m.num() < 0 && newIndex < 1) {
                     newIndex = size - (Math.abs(newIndex) % size) - 1;
                 }
-                else if (m.num() >= 0 && newIndex >= size) {
-                    newIndex %= size;
+                else if (m.num() >= 0 && newIndex >= size - 1) {
+                    newIndex %= size - 1;
                 }
                 copy.remove(i);
                 copy.add(newIndex, new Mover(m.num(), true));
@@ -50,6 +50,14 @@ public class Day20 extends Solution2022<Integer>{
         return Integer.toString(newList.get(x) + newList.get(y) + newList.get(z));
     }
     record Mover(int num, boolean moved){}
+
+    private void printList(List<Mover> copy) {
+        for (int i = 0; i < copy.size(); i++) {
+            Mover m = copy.get(i);
+            System.out.println(i + ": " + m.num + " (" + m.moved + ")");
+        }
+        System.out.println();
+    }
 
     private String attempt1(List<Integer> input){
         Map<Key, Index> indices = new HashMap<>();
