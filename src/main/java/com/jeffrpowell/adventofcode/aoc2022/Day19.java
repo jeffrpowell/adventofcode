@@ -2,10 +2,9 @@ package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,7 +28,7 @@ public class Day19 extends Solution2022<Rule>{
     @Override
     protected String part1(List<Rule> input) {
         return input.stream().map(
-            r -> new Blueprint(
+            r -> new Blueprint(24,
                 r.getInt(0),
                 r.getInt(1),
                 r.getInt(2),
@@ -45,11 +44,24 @@ public class Day19 extends Solution2022<Rule>{
 
     @Override
     protected String part2(List<Rule> input) {
-        return null;
+        return input.stream().map(
+            r -> new Blueprint(32,
+                r.getInt(0),
+                r.getInt(1),
+                r.getInt(2),
+                r.getInt(3),
+                r.getInt(4),
+                r.getInt(5),
+                r.getInt(6)
+            )
+        )
+        .filter(b -> b.id < 4)
+        .map(Blueprint::geodeProceeds)
+        .collect(Collectors.reducing(1, Math::multiplyExact)).toString();
     }
 
     private static class Blueprint {
-        private static final int TIMER = 24;
+        int timer;
         int id;
         int oreCost_ore;
         int clayCost_ore;
@@ -57,9 +69,11 @@ public class Day19 extends Solution2022<Rule>{
         int obsidianCost_clay;
         int geodeCost_ore;
         int geodeCost_obsidian;
+        int maxOreCost;
         Deque<Sim> stack = new ArrayDeque<>();
-        public Blueprint(int id, int oreCost_ore, int clayCost_ore, int obsidianCost_ore, int obsidianCost_clay,
+        public Blueprint(int timer, int id, int oreCost_ore, int clayCost_ore, int obsidianCost_ore, int obsidianCost_clay,
                 int geodeCost_ore, int geodeCost_obsidian) {
+            this.timer = timer;
             this.id = id;
             this.oreCost_ore = oreCost_ore;
             this.clayCost_ore = clayCost_ore;
@@ -67,6 +81,7 @@ public class Day19 extends Solution2022<Rule>{
             this.obsidianCost_clay = obsidianCost_clay;
             this.geodeCost_ore = geodeCost_ore;
             this.geodeCost_obsidian = geodeCost_obsidian;
+            this.maxOreCost = Stream.of(oreCost_ore, clayCost_ore, obsidianCost_ore, geodeCost_ore).max(Comparator.naturalOrder()).get();
         }
         
         record Sim(
@@ -76,28 +91,28 @@ public class Day19 extends Solution2022<Rule>{
         ){}
 
         public int quality() {
-            System.out.println("Trying blueprint " + id);
-            Set<Sim> visited = new HashSet<>();
-            stack.push(new Sim(TIMER, 0, 0, 0, 0, 1, 0, 0, 0));
+            return geodeProceeds() * id;
+        }
+
+        public int geodeProceeds() {
+            System.out.print("Trying blueprint " + id);
+            stack.push(new Sim(timer, 0, 0, 0, 0, 1, 0, 0, 0));
             int max = 0;
             while (!stack.isEmpty()) {
                 Sim s = stack.pop();
-                visited.add(s);
                 if (s.time == 0) {
                     if (max < s.geode) {
                         max = s.geode;
                     }
                 }
-                else if (s.time > 0 && maxGeodesPossible(s) <= max) {
-                }
-                else {
+                else if (s.time > 0 && maxGeodesPossible(s) > max) {
                     purchaseBots(s)
                         .map(this::doHarvest)
-                        .filter(sim -> !visited.contains(sim))
                         .forEach(stack::push);
                 }
             }
-            return max * id;
+            System.out.println(" - can break " + max + " geodes");
+            return max;
         }
 
         private int maxGeodesPossible(Sim s) {
@@ -112,25 +127,22 @@ public class Day19 extends Solution2022<Rule>{
                     s.oBot, s.cBot, s.sBot, s.gBot + 1
                 ));
             }
-            else if (s.cBot == 0) {
-                if (s.ore >= clayCost_ore) {
-                    return Stream.of(new Sim(
-                        s.time,
-                        s.ore - clayCost_ore, s.clay - 1, s.obsidian, s.geode,
-                        s.oBot, s.cBot + 1, s.sBot, s.gBot
-                    ));
-                }
-                else {
-                    return Stream.of(s);
-                }
-            }
             else {
+                boolean buildOre = s.ore >= oreCost_ore
+                    && s.oBot < maxOreCost;
                 boolean buildClay = s.ore >= clayCost_ore 
-                    && s.cBot < (obsidianCost_clay / obsidianCost_ore);
+                    && s.cBot < obsidianCost_clay;
                 boolean buildObsidian = s.ore >= obsidianCost_ore && s.clay >= obsidianCost_clay
-                    && s.oBot < (geodeCost_obsidian / geodeCost_ore);
+                    && s.sBot < geodeCost_obsidian;
                 List<Sim> sims = new ArrayList<>();
                 sims.add(s);
+                if (buildOre) {
+                    sims.add(new Sim(
+                        s.time,
+                        s.ore - oreCost_ore - 1, s.clay, s.obsidian, s.geode,
+                        s.oBot + 1, s.cBot, s.sBot, s.gBot
+                    ));
+                }
                 if (buildClay) {
                     sims.add(new Sim(
                         s.time,
