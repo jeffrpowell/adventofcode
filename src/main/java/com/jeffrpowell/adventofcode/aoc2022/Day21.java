@@ -1,7 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -62,41 +61,43 @@ public class Day21 extends Solution2022<Rule>{
 
     @Override
     protected String part2(List<Rule> input) {
-        //root: sbtm + bmgf
         Map<String, Supplier<Double>> map = new HashMap<>();
         map.putAll(input.stream()
             .collect(Collectors.toMap(
                 r -> r.getString(0),
                 r -> makeFn(r, map)
             )));
+        Rule rootRule = input.stream().filter(s -> s.getString(0).equals("root")).findAny().get();
+        String leftKey = rootRule.getString(1);
+        String rightKey = rootRule.getString(2);
         map.put("humn", () -> 0.0);
-        double sbtm = map.get("sbtm").get();
-        double bmgf = map.get("bmgf").get();
+        double left = map.get(leftKey).get();
+        double right = map.get(rightKey).get();
         map.put("humn", () -> -10_000_000_000_000.0);
         String dependant;
         boolean linearlyCorrelated = true;
-        if (map.get("sbtm").get() != sbtm && map.get("bmgf").get() != bmgf) {
+        if (map.get(leftKey).get() != left && map.get(rightKey).get() != right) {
             return "Houston...problem";
         }
         double targetToEqual;
         double dependantVar;
-        double newSbtm = map.get("sbtm").get();
+        double newleft = map.get(leftKey).get();
         double bottom;
         double top;
-        if (newSbtm != sbtm) {
-            dependant = "sbtm";
-            dependantVar = sbtm;
-            targetToEqual = bmgf;
-            if (newSbtm > sbtm) {
+        if (newleft != left) {
+            dependant = leftKey;
+            dependantVar = left;
+            targetToEqual = right;
+            if (newleft > left) {
                 linearlyCorrelated = false;
             }
         }
         else {
-            dependant = "bmgf";
-            double newBmgf = map.get("bmgf").get();
-            dependantVar = bmgf;
-            targetToEqual = sbtm;
-            if (newBmgf > bmgf) {
+            dependant = rightKey;
+            double newright = map.get(rightKey).get();
+            dependantVar = right;
+            targetToEqual = left;
+            if (newright > right) {
                 linearlyCorrelated = false;
             }
         }
@@ -129,15 +130,7 @@ public class Day21 extends Solution2022<Rule>{
                 top = humn - 1;
             }
             else {
-                List<Double> answers = new ArrayList<>();
-                while (dependantVar == targetToEqual) {
-                    answers.add(humn);
-                    humn--;
-                    final double temp = humn;
-                    map.put("humn", () -> temp);
-                    dependantVar = map.get(dependant).get();
-                }
-                return Long.toString(answers.stream().min(Comparator.naturalOrder()).get().longValue());
+                return Long.toString(Double.valueOf(humn).longValue());
             }
         }
         BigDecimal bigTop = BigDecimal.valueOf(top);
@@ -147,7 +140,7 @@ public class Day21 extends Solution2022<Rule>{
         map.put("humn", () -> h);
         dependantVar = map.get(dependant).get();
         if (dependantVar == targetToEqual) {
-            return Long.toString(Double.doubleToLongBits(humn));
+            return Long.toString(Double.valueOf(humn).longValue());
         }
         return "not found";
     }
