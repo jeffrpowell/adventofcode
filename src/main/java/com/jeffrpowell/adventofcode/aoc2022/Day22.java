@@ -21,6 +21,7 @@ import com.jeffrpowell.adventofcode.inputparser.section.SectionSplitStrategyFact
 
 import javafx.geometry.Point3D;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
@@ -147,31 +148,47 @@ public class Day22 extends Solution2022<Section>{
         
         Point3D center = new Point3D(24.5, 24.5, 24.5);
         Point3DUtils.BoundingBox box;
-        grid.putAll(parseSide(map, bottom, new Translate(-50, 0, -1)));
-        box = Point3DUtils.getBoundingBox(grid.keySet());
-        grid.putAll(parseSide(map, right, new Translate(-100, 0)
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
-            .createConcatenation(new Translate(1, 0, 0))));
-        box = Point3DUtils.getBoundingBox(grid.keySet());
-        grid.putAll(parseSide(map, front, new Translate(-50, -50)
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-            .createConcatenation(new Translate(0, 1, 0))));
-        box = Point3DUtils.getBoundingBox(grid.keySet());
-        grid.putAll(parseSide(map, top, new Translate(-50, -100)
-            .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-            .createConcatenation(new Translate(0, 0, 1))));
-        box = Point3DUtils.getBoundingBox(grid.keySet());
-        grid.putAll(parseSide(map, back, new Translate(0, -150)
-            .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Z_AXIS))
-            .createConcatenation(new Translate(0, -1, 0))));
-        box = Point3DUtils.getBoundingBox(grid.keySet());
-        grid.putAll(parseSide(map, left, new Translate(0, -100)
-            .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
-            .createConcatenation(new Translate(-1, 0, 0))));
-        box = Point3DUtils.getBoundingBox(grid.keySet());
+        try {
+            grid.putAll(parseSide(map, bottom, new Translate(-50, 0, -1)));
+            box = Point3DUtils.getBoundingBox(grid.keySet());
+            grid.putAll(parseSide(map, right, 
+                new Translate(1, 0, 0)
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
+                .createConcatenation(new Translate(-100, 0))
+            ));
+            box = Point3DUtils.getBoundingBox(grid.keySet());
+            grid.putAll(parseSide(map, front, 
+                new Translate(0, 1, 0)
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS).createInverse())
+                .createConcatenation(new Translate(-50, -50))
+            ));
+            box = Point3DUtils.getBoundingBox(grid.keySet());
+            grid.putAll(parseSide(map, top, 
+                new Translate(0, 0, 1)
+                .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+                .createConcatenation(new Translate(-50, -100))
+            ));
+            box = Point3DUtils.getBoundingBox(grid.keySet());
+            grid.putAll(parseSide(map, back, 
+                new Translate(0, -1, 0)
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Z_AXIS).createInverse())
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
+                .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+                .createConcatenation(new Translate(0, -150))
+            ));
+            box = Point3DUtils.getBoundingBox(grid.keySet());
+            grid.putAll(parseSide(map, left, 
+                new Translate(-1, 0, 0)
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
+                .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+                .createConcatenation(new Translate(0, -100))
+            ));
+            box = Point3DUtils.getBoundingBox(grid.keySet());
+        }
+        catch (NonInvertibleTransformException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return grid;
     }
 
