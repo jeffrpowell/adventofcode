@@ -250,7 +250,7 @@ public class Day23 extends Solution2021<List<String>> {
 
         @Override
         public String toString() {
-            return cost + "\n" + Point2DUtils.pointsToString(grid.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().name())));
+            return cost + "\n" + Point2DUtils.pointsToString(grid.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().name())), ".");
         }
 
         @Override

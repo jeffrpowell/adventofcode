@@ -134,9 +134,9 @@ public class Point3DUtils
 		double minX = Double.MAX_VALUE;
 		double minY = Double.MAX_VALUE;
 		double minZ = Double.MAX_VALUE;
-		double maxX = Double.MIN_VALUE;
-		double maxY = Double.MIN_VALUE;
-		double maxZ = Double.MIN_VALUE;
+		double maxX = -Double.MAX_VALUE;
+		double maxY = -Double.MAX_VALUE;
+		double maxZ = -Double.MAX_VALUE;
 		for (Point3D p : pts) {
 			if (p.getX() > maxX) {
 				maxX = p.getX();
