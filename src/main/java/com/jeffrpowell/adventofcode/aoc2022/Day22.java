@@ -149,41 +149,47 @@ public class Day22 extends Solution2022<Section>{
         Point3D center = new Point3D(24.5, 24.5, 24.5);
         Point3DUtils.BoundingBox box;
         try {
-            grid.putAll(parseSide(map, bottom, new Translate(-50, 0, -1)));
-            box = Point3DUtils.getBoundingBox(grid.keySet());
-            grid.putAll(parseSide(map, right, 
+            Map<Point3D, Boolean> bottomPts = parseSide(map, bottom, new Translate(-50, 0, -1));
+            box = Point3DUtils.getBoundingBox(bottomPts.keySet());
+            Map<Point3D, Boolean> rightPts = parseSide(map, right, 
                 new Translate(1, 0, 0)
                 .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
                 .createConcatenation(new Translate(-100, 0))
-            ));
-            box = Point3DUtils.getBoundingBox(grid.keySet());
-            grid.putAll(parseSide(map, front, 
+            );
+            box = Point3DUtils.getBoundingBox(rightPts.keySet());
+            Map<Point3D, Boolean> frontPts = parseSide(map, front, 
                 new Translate(0, 1, 0)
                 .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS).createInverse())
                 .createConcatenation(new Translate(-50, -50))
-            ));
-            box = Point3DUtils.getBoundingBox(grid.keySet());
-            grid.putAll(parseSide(map, top, 
+            );
+            box = Point3DUtils.getBoundingBox(frontPts.keySet());
+            Map<Point3D, Boolean> topPts = parseSide(map, top, 
                 new Translate(0, 0, 1)
                 .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
                 .createConcatenation(new Translate(-50, -100))
-            ));
-            box = Point3DUtils.getBoundingBox(grid.keySet());
-            grid.putAll(parseSide(map, back, 
+            );
+            box = Point3DUtils.getBoundingBox(topPts.keySet());
+            Map<Point3D, Boolean> backPts = parseSide(map, back, 
                 new Translate(0, -1, 0)
                 .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Z_AXIS).createInverse())
                 .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
                 .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
                 .createConcatenation(new Translate(0, -150))
-            ));
-            box = Point3DUtils.getBoundingBox(grid.keySet());
-            grid.putAll(parseSide(map, left, 
+            );
+            box = Point3DUtils.getBoundingBox(backPts.keySet());
+            Map<Point3D, Boolean> leftPts = parseSide(map, left, 
                 new Translate(-1, 0, 0)
                 .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
                 .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
                 .createConcatenation(new Translate(0, -100))
-            ));
-            box = Point3DUtils.getBoundingBox(grid.keySet());
+            );
+            box = Point3DUtils.getBoundingBox(leftPts.keySet());
+            grid.putAll(bottomPts);
+            grid.putAll(rightPts);
+            grid.putAll(frontPts);
+            grid.putAll(topPts);
+            grid.putAll(leftPts);
+            grid.putAll(backPts);
         }
         catch (NonInvertibleTransformException e) {
             // TODO Auto-generated catch block
