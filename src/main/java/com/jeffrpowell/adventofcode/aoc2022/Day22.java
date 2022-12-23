@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +28,16 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 
 public class Day22 extends Solution2022<Section>{
+
+    private final boolean real;
+
+    public Day22() {
+        real = true;
+    }
+
+    public Day22(boolean real) {
+        this.real = real;
+    }
 
     @Override
     public int getDay() {
@@ -130,8 +141,9 @@ public class Day22 extends Solution2022<Section>{
     protected String part2(List<Section> input) {
         List<List<String>> map = input.get(0).getInput(InputParserFactory.getTokenSVParser(""));
         try {
-            Map<Point3D, Boolean> grid = parseGrid(map);
-            Point3D start = new Point3D(0,0,-1);
+            List<Side> sides = makeSides();
+            Map<Point3D, Boolean> grid = sides.stream().map(s -> s.parseSide(map)).collect(HashMap::new, Map::putAll, Map::putAll);
+            Point3D start = new Point3D(0,0,50);
             Point3D vector = new Point3D(1, 0, 0);
             String steps = input.get(1).getInput(InputParserFactory.getStringParser()).get(0);
             List<Integer> walks = Arrays.stream(Pattern.compile("[R|L]").split(steps)).map(Integer::parseInt).collect(Collectors.toList());
@@ -143,38 +155,52 @@ public class Day22 extends Solution2022<Section>{
             for (int i = 0; i < walks.size(); i++) {
                 p = walk2(p, walks.get(i), grid, visited);
                 if (i < turns.size()) {
-                    Point3D newV = rotateVector(turns.get(i).equals("R"), p);
+                    Point3D newV = rotateVector(turns.get(i).equals("R"), p, sides);
                     p = new Position2(p.pt, newV);
                 }
                 visited.add(p);
             }
-            Point3D center = new Point3D(24.5, 24.5, 24.5);
-            Transform t = new Translate(0, -100)
-                .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
-                .createConcatenation( new Translate(-1, 0, 0));
-            Point3D remappedPt = t.transform(p.pt);
-            Point3D remappedV = t.transform(p.v);
-            return p.v.toString();
+            final Point3D pt = p.pt;
+            Point3D remappedPt = sides.stream().filter(s -> s.containsPt(pt)).map(s -> {
+                try {
+                    return s.reverseMapPt(pt);
+                } catch (NonInvertibleTransformException e) {
+                    return pt;
+                }
+            }).findFirst().get();
+            final Point3D lastPt = visited.get(visited.size() - 1).pt;
+            Point3D remappedLastPt = sides.stream().filter(s -> s.containsPt(lastPt)).map(s -> {
+                try {
+                    return s.reverseMapPt(lastPt);
+                } catch (NonInvertibleTransformException e) {
+                    return lastPt;
+                }
+            }).findFirst().get();
+            int directionScore = 0;
+            if (remappedPt.getX() - remappedLastPt.getX() == 1) {
+                directionScore = 0;
+            }
+            else if (remappedPt.getX() - remappedLastPt.getX() == -1) {
+                directionScore = 2;
+            }
+            else if (remappedPt.getY() - remappedLastPt.getY() == -1) {
+                directionScore = 3;
+            }
+            else if (remappedPt.getY() - remappedLastPt.getY() == 1) {
+                directionScore = 1;
+            }
+            return Double.toString(1000 * (p.pt.getY() + 1) + 4 * (p.pt.getX() + 1) + directionScore);
         } catch (NonInvertibleTransformException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private Point3D rotateVector(boolean right, Position2 p) throws NonInvertibleTransformException {
-        Point3D axis;
-        if (p.pt.getX() == -1 || p.pt.getX() == 50) {
-            axis = Rotate.X_AXIS;
-        }
-        if (p.pt.getY() == -1 || p.pt.getY() == 50) {
-            axis = Rotate.Y_AXIS;
-        }
-        else {
-            axis = Rotate.Z_AXIS;
-        }
+    private Point3D rotateVector(boolean right, Position2 p, List<Side> sides) throws NonInvertibleTransformException {
+        final Point3D pt = p.pt;
+        Point3D axis = sides.stream().filter(s -> s.containsPt(pt)).map(Side::getAxis).findFirst().get();
         Rotate r = new Rotate(90, axis);
-        if (right || (!right && axis == Rotate.Z_AXIS)) {
+        if ((right && axis != Rotate.Z_AXIS) || (!right && axis == Rotate.Z_AXIS)) {
             return r.transform(p.v);
         }
         else {
@@ -182,81 +208,129 @@ public class Day22 extends Solution2022<Section>{
         }
     }
 
-    private Map<Point3D, Boolean> parseGrid(List<List<String>> map) throws NonInvertibleTransformException {
-        Map<Point3D, Boolean> grid = new HashMap<>();
-        Rectangle bottom = new Rectangle(50, 0, 50, 50);
-        Rectangle right = new Rectangle(100, 0, 50, 50);
-        Rectangle front = new Rectangle(50, 50, 50, 50);
-        Rectangle top = new Rectangle(50, 100, 50, 50);
-        Rectangle left = new Rectangle(0, 100, 50, 50);
-        Rectangle back = new Rectangle(0, 150, 50, 50);
-        
+    private List<Side> makeSides() throws NonInvertibleTransformException {
+        List<Side> sides = new ArrayList<>();
         Point3D center = new Point3D(24.5, 24.5, 24.5);
-        Point3DUtils.BoundingBox box;
-        Map<Point3D, Boolean> bottomPts = parseSide(map, bottom, new Translate(-50, 0, -1));
-        box = Point3DUtils.getBoundingBox(bottomPts.keySet());
-        Map<Point3D, Boolean> rightPts = parseSide(map, right, 
-            new Translate(1, 0, 0)
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
-            .createConcatenation(new Translate(-100, 0))
-        );
-        box = Point3DUtils.getBoundingBox(rightPts.keySet());
-        Map<Point3D, Boolean> frontPts = parseSide(map, front, 
-            new Translate(0, -1, 0)
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS).createInverse())
-            .createConcatenation(new Translate(-50, -50))
-        );
-        box = Point3DUtils.getBoundingBox(frontPts.keySet());
-        Map<Point3D, Boolean> topPts = parseSide(map, top, 
-            new Translate(0, 0, 1)
+        
+        Rectangle top_rect = new Rectangle(50, 0, 50, 50);
+        Rectangle right_rect = new Rectangle(100, 0, 50, 50);
+        Rectangle front_rect = new Rectangle(50, 50, 50, 50);
+        Rectangle bottom_rect = new Rectangle(50, 100, 50, 50);
+        Rectangle left_rect = new Rectangle(0, 100, 50, 50);
+        Rectangle back_rect = new Rectangle(0, 150, 50, 50);
+
+        if (!real) {
+            center = new Point3D(2, 2, 2);
+            top_rect = new Rectangle(50, 0, 4, 4);
+            right_rect = new Rectangle(100, 0, 4, 4);
+            front_rect = new Rectangle(50, 50, 4, 4);
+            bottom_rect = new Rectangle(50, 100, 4, 4);
+            left_rect = new Rectangle(0, 100, 4, 4);
+            back_rect = new Rectangle(0, 150, 4, 4);
+        }
+
+        Point3D top_offset = new Point3D(0,0,1);
+        Point3D right_offset = new Point3D(1,0,0);
+        Point3D front_offset = new Point3D(0,1,0);
+        Point3D bottom_offset = new Point3D(0,0,-1);
+        Point3D left_offset = new Point3D(-1,0,0);
+        Point3D back_offset = new Point3D(0,-1,0);
+        
+        Point3D top_axis = Rotate.Z_AXIS;
+        Point3D right_axis = Rotate.X_AXIS;
+        Point3D front_axis = Rotate.Y_AXIS;
+        Point3D bottom_axis = Rotate.Z_AXIS;
+        Point3D left_axis = Rotate.X_AXIS;
+        Point3D back_axis = Rotate.Y_AXIS;
+
+        Transform top_transform = new Translate(top_offset.getX(), top_offset.getY(), top_offset.getZ())
+            .createConcatenation(new Translate(-top_rect.getX(), -top_rect.getY(), center.getZ() * 2.0))
+        ;
+        Transform right_transform = new Translate(right_offset.getX(), right_offset.getY(), right_offset.getZ())
+        .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
+        .createConcatenation(new Translate(-right_rect.getX(), -right_rect.getY()))
+        ;
+        Transform front_transform = new Translate(front_offset.getX(), front_offset.getY(), front_offset.getZ())
+        .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+        .createConcatenation(new Translate(-front_rect.getX(), -front_rect.getY()))
+        ;
+        Transform bottom_transform = new Translate(bottom_offset.getX(), bottom_offset.getY(), bottom_offset.getZ() - center.getZ() * 2.0)
             .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-            .createConcatenation(new Translate(-50, -100))
-        );
-        box = Point3DUtils.getBoundingBox(topPts.keySet());
-        Map<Point3D, Boolean> leftPts = parseSide(map, left, 
-            new Translate(-1, 0, 0)
+            .createConcatenation(new Translate(-bottom_rect.getX(), -bottom_rect.getY()))
+        ;
+        Transform left_transform = new Translate(left_offset.getX(), left_offset.getY(), left_offset.getZ())
             .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
             .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-            .createConcatenation(new Translate(0, -100))
-        );
-        box = Point3DUtils.getBoundingBox(leftPts.keySet());
-        Map<Point3D, Boolean> backPts = parseSide(map, back, 
-            new Translate(0, 1, 0)
+            .createConcatenation(new Translate(-left_rect.getX(), -left_rect.getY()))
+        ;
+        Transform back_transform = new Translate(back_offset.getX(), back_offset.getY(), back_offset.getZ())
             .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Z_AXIS).createInverse())
-            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
+            .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
             .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
-            .createConcatenation(new Translate(0, -150))
-        );
-        box = Point3DUtils.getBoundingBox(backPts.keySet());
-        grid.putAll(bottomPts);
-        grid.putAll(rightPts);
-        grid.putAll(frontPts);
-        grid.putAll(topPts);
-        grid.putAll(leftPts);
-        grid.putAll(backPts);
-        box = Point3DUtils.getBoundingBox(grid.keySet());
-        return grid;
+            .createConcatenation(new Translate(-back_rect.getX(), -back_rect.getY()))
+        ;
+
+        sides.add(new Side("top", top_transform, top_offset, top_axis, top_rect));
+        sides.add(new Side("right", right_transform, right_offset, right_axis, right_rect));
+        sides.add(new Side("front", front_transform, front_offset, front_axis, front_rect));
+        sides.add(new Side("bottom", bottom_transform, bottom_offset, bottom_axis, bottom_rect));
+        sides.add(new Side("left", left_transform, left_offset, left_axis, left_rect));
+        sides.add(new Side("back", back_transform, back_offset, back_axis, back_rect));
+        return sides;
     }
 
-    private Map<Point3D, Boolean> parseSide(List<List<String>> map, Rectangle rect, Transform transform) {
-        return Point2DUtils.generateGrid(rect.getX(), rect.getY(), rect.getX() + rect.getWidth(), rect.getY() + rect.getHeight())
-            .collect(Collectors.toMap(
-                p -> transform(p.getX(), p.getY(), 0, transform),
-                p -> getValue(map, d2i(p.getX()), d2i(p.getY()))
-            ));
-    }
-    
-    private Point3D transform(double x, double y, double z, Transform t) {
-        Point3D transformed = t.transform(x, y, z);
-        return new Point3D(Math.round(transformed.getX()), Math.round(transformed.getY()), Math.round(transformed.getZ()));
-    }
+    private static class Side {
+        private final String name;
+        private final Transform transform;
+        private final Point3D offsetVector;
+        private final Point3D axis;
+        private final Rectangle mapRectangle;
+        private Set<Point3D> transformedPts;
+        private Point3DUtils.BoundingBox box;
 
-    private boolean getValue(List<List<String>> map, int x, int y) {
-        return map.get(y).get(x).equals(".");
-    }
+        public Side(String name, Transform transform, Point3D offsetVector, Point3D axis, Rectangle mapRectangle) {
+            this.name = name;
+            this.transform = transform;
+            this.offsetVector = offsetVector;
+            this.axis = axis;
+            this.mapRectangle = mapRectangle;
+        }
+        
+        public Map<Point3D, Boolean> parseSide(List<List<String>> map) {
+            Map<Point3D, Boolean> pts = Point2DUtils.generateGrid(mapRectangle.getX(), mapRectangle.getY(), mapRectangle.getX() + mapRectangle.getWidth(), mapRectangle.getY() + mapRectangle.getHeight())
+                .collect(Collectors.toMap(
+                    p -> transform(p.getX(), p.getY(), 0, transform),
+                    p -> getValue(map, d2i(p.getX()), d2i(p.getY()))
+                ));
+            this.transformedPts = pts.keySet();
+            this.box = Point3DUtils.getBoundingBox(transformedPts);
+            return pts;
+        }
+
+        private Point3D transform(double x, double y, double z, Transform t) {
+            Point3D transformed = t.transform(x, y, z);
+            return new Point3D(Math.round(transformed.getX()), Math.round(transformed.getY()), Math.round(transformed.getZ()));
+        }
     
-    private int d2i(Double d) {
-        return d.intValue();
+        private boolean getValue(List<List<String>> map, int x, int y) {
+            return map.get(y).get(x).equals(".");
+        }
+        
+        private int d2i(Double d) {
+            return d.intValue();
+        }
+
+        public boolean containsPt(Point3D p) {
+            return transformedPts.contains(p);
+        }
+
+        public Point3D reverseMapPt(Point3D p) throws NonInvertibleTransformException {
+            return transform.inverseTransform(p);
+        }
+
+        public Point3D getAxis() {
+            return axis;
+        }
     }
 
     record Position2(Point3D pt, Point3D v){}
