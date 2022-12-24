@@ -3,6 +3,7 @@ package com.jeffrpowell.adventofcode;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -177,11 +178,11 @@ public class Point2DUtils
         );
     }	
 
-    public static void printPoints(Set<Point2D> pts) {
+    public static void printPoints(Collection<Point2D> pts) {
         System.out.println(pointsToString(pts));
     }
 
-    public static String pointsToString(Set<Point2D> pts) {
+    public static String pointsToString(Collection<Point2D> pts) {
         Point2D min = pts.stream().reduce(new Point2D.Double(Integer.MAX_VALUE, Integer.MAX_VALUE), (accum, next) -> new Point2D.Double(Math.min(accum.getX(), next.getX()), Math.min(accum.getY(), next.getY())));
         Point2D max = pts.stream().reduce(new Point2D.Double(Integer.MIN_VALUE, Integer.MIN_VALUE), (accum, next) -> new Point2D.Double(Math.max(accum.getX(), next.getX()), Math.max(accum.getY(), next.getY())));
         StringBuilder builder = new StringBuilder("(").append(min.getX()).append(",").append(min.getY()).append(") -> (").append(max.getX()).append(",").append(min.getY()).append(")\n");
@@ -233,4 +234,28 @@ public class Point2DUtils
         };
         return applyVectorToPtNTimes(vector, source, amount);
     }
+
+    public record BoundingBox(Point2D min, Point2D max){};
+
+	public static BoundingBox getBoundingBox(Collection<Point2D> pts) {
+		double minX = Double.MAX_VALUE;
+		double minY = Double.MAX_VALUE;
+		double maxX = -Double.MAX_VALUE;
+		double maxY = -Double.MAX_VALUE;
+		for (Point2D p : pts) {
+			if (p.getX() > maxX) {
+				maxX = p.getX();
+			}
+			if (p.getY() > maxY) {
+				maxY = p.getY();
+			}
+			if (p.getX() < minX) {
+				minX = p.getX();
+			}
+			if (p.getY() < minY) {
+				minY = p.getY();
+			}
+		}
+		return new BoundingBox(new Point2D.Double(minX, minY), new Point2D.Double(maxX, maxY));
+	}
 }
