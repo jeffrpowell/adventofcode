@@ -308,8 +308,7 @@ public class Day22 extends Solution2022<Section>{
         }
 
         private Point3D transform(double x, double y, double z, Transform t) {
-            Point3D transformed = t.transform(x, y, z);
-            return new Point3D(Math.round(transformed.getX()), Math.round(transformed.getY()), Math.round(transformed.getZ()));
+            return roundPt(t.transform(x, y, z));
         }
     
         private boolean getValue(List<List<String>> map, int x, int y) {
@@ -333,20 +332,25 @@ public class Day22 extends Solution2022<Section>{
         }
     }
 
+    private static Point3D roundPt(Point3D p) {
+        return new Point3D(Math.round(p.getX()), Math.round(p.getY()), Math.round(p.getZ()));
+    }
+
     record Position2(Point3D pt, Point3D v){}
     private Position2 walk2(Position2 p, int distance, Map<Point3D, Boolean> grid, List<Position2> visited) {
         for (int i = 0; i < distance; i++) {
-            Point3D explore = Point3DUtils.applyVectorToPt(p.v, p.pt);
+            Point3D explore = roundPt(Point3DUtils.applyVectorToPt(p.v, p.pt));
             Point3D vector = p.v;
             if (!grid.containsKey(explore)) {
                 //wrap around
                 Point3D oldExplore = explore;
                 final Position2 oldP = p;
+                // System.out.println("Wrapping while walking " + distance + ". Exited " + p.pt + " in direction " + p.v + " onto " + explore);
                 explore = Point3DUtils.getAdjacentPts(explore, false).stream()
                     .filter(pt -> !oldP.pt.equals(pt))
                     .filter(grid::containsKey)
                     .findFirst().get();
-                vector = explore.subtract(oldExplore);
+                vector = roundPt(explore.subtract(oldExplore));
             }
             if (Boolean.TRUE.equals(grid.get(explore))) {
                 //walk

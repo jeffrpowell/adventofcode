@@ -17,7 +17,7 @@ public class Day22Test
 	@BeforeEach
 	public void setUp()
 	{
-		day = new Day22();
+		day = new Day22(false);
 	}
 
 	@Test
@@ -25,5 +25,12 @@ public class Day22Test
 	{
 		List<String> input = TestDataLoader.getTestData(day, 1);
 		assertEquals("6032.0", day.parseAndRunPart1(input));
+	}
+
+	@Test
+	public void testPart2()
+	{
+		List<String> input = TestDataLoader.getTestData(day, 1);
+		assertEquals("5031.0", day.parseAndRunPart2(input));
 	}
 }
