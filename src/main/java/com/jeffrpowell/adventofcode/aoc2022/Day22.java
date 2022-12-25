@@ -219,16 +219,6 @@ public class Day22 extends Solution2022<Section>{
         Rectangle left_rect = new Rectangle(0, 100, 50, 50);
         Rectangle back_rect = new Rectangle(0, 150, 50, 50);
 
-        if (!real) {
-            center = new Point3D(2, 2, 2);
-            top_rect = new Rectangle(50, 0, 4, 4);
-            right_rect = new Rectangle(100, 0, 4, 4);
-            front_rect = new Rectangle(50, 50, 4, 4);
-            bottom_rect = new Rectangle(50, 100, 4, 4);
-            left_rect = new Rectangle(0, 100, 4, 4);
-            back_rect = new Rectangle(0, 150, 4, 4);
-        }
-
         Point3D top_offset = new Point3D(0,0,1);
         Point3D right_offset = new Point3D(1,0,0);
         Point3D front_offset = new Point3D(0,1,0);
@@ -243,14 +233,20 @@ public class Day22 extends Solution2022<Section>{
         Point3D left_axis = Rotate.X_AXIS;
         Point3D back_axis = Rotate.Y_AXIS;
 
+        /*
+         *   ##
+         *   #
+         *  ##
+         *  #
+         */
         Transform top_transform = new Translate(top_offset.getX(), top_offset.getY(), top_offset.getZ())
             .createConcatenation(new Translate(-top_rect.getX(), -top_rect.getY(), center.getZ() * 2.0))
         ;
-        Transform right_transform = new Translate(right_offset.getX(), right_offset.getY(), right_offset.getZ())
-        .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS).createInverse())
+        Transform right_transform = new Translate(right_offset.getX() + center.getX() * 2.0, right_offset.getY(), right_offset.getZ())
+        .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
         .createConcatenation(new Translate(-right_rect.getX(), -right_rect.getY()))
         ;
-        Transform front_transform = new Translate(front_offset.getX(), front_offset.getY(), front_offset.getZ())
+        Transform front_transform = new Translate(front_offset.getX(), front_offset.getY() + center.getY() * 2.0, front_offset.getZ())
         .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
         .createConcatenation(new Translate(-front_rect.getX(), -front_rect.getY()))
         ;
@@ -269,6 +265,48 @@ public class Day22 extends Solution2022<Section>{
             .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
             .createConcatenation(new Translate(-back_rect.getX(), -back_rect.getY()))
         ;
+
+        if (!real) {
+            center = new Point3D(1.5, 1.5, 1.5);
+            top_rect = new Rectangle(8, 0, 4, 4);
+            right_rect = new Rectangle(12, 8, 4, 4);
+            front_rect = new Rectangle(8, 4, 4, 4);
+            bottom_rect = new Rectangle(8, 8, 4, 4);
+            left_rect = new Rectangle(4, 4, 4, 4);
+            back_rect = new Rectangle(0, 4, 4, 4);
+
+            /*
+             *   #
+             * ###
+             *   ##
+             */
+            top_transform = new Translate(top_offset.getX(), top_offset.getY(), top_offset.getZ())
+                .createConcatenation(new Translate(-top_rect.getX(), -top_rect.getY(), center.getZ() * 2.0))
+            ;
+            right_transform = new Translate(right_offset.getX(), right_offset.getY(), right_offset.getZ())
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
+                .createConcatenation(new Translate(-right_rect.getX(), -right_rect.getY()))
+            ;
+            front_transform = new Translate(front_offset.getX(), front_offset.getY(), front_offset.getZ())
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+                .createConcatenation(new Translate(-front_rect.getX(), -front_rect.getY()))
+            ;
+            bottom_transform = new Translate(bottom_offset.getX(), bottom_offset.getY(), bottom_offset.getZ() - center.getZ() * 2.0)
+                .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+                .createConcatenation(new Translate(-bottom_rect.getX(), -bottom_rect.getY()))
+            ;
+            left_transform = new Translate(left_offset.getX(), left_offset.getY(), left_offset.getZ())
+                .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
+                .createConcatenation(new Translate(-left_rect.getX(), -left_rect.getY()))
+            ;
+            back_transform = new Translate(back_offset.getX(), back_offset.getY(), back_offset.getZ())
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Z_AXIS).createInverse())
+                .createConcatenation(new Rotate(90, center.getX(), center.getY(), center.getZ(), Rotate.Y_AXIS))
+                .createConcatenation(new Rotate(180, center.getX(), center.getY(), center.getZ(), Rotate.X_AXIS))
+                .createConcatenation(new Translate(-back_rect.getX(), -back_rect.getY()))
+            ;
+        }
 
         sides.add(new Side("top", top_transform, top_offset, top_axis, top_rect));
         sides.add(new Side("right", right_transform, right_offset, right_axis, right_rect));
