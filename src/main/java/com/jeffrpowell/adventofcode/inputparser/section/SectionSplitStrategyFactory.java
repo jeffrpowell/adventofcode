@@ -1,5 +1,8 @@
 package com.jeffrpowell.adventofcode.inputparser.section;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 public class SectionSplitStrategyFactory {
     private SectionSplitStrategyFactory(){}
 
@@ -13,5 +16,9 @@ public class SectionSplitStrategyFactory {
 
     public static SectionSplitStrategy emptyLines(int count, boolean repeat) {
         return new SplitEmptyLinesStrategy(count, repeat);
+    }
+
+    public static SectionSplitStrategy regexDelimiters(List<Pattern> patterns, boolean includeMatchingLines, boolean matchAsHeader) {
+        return new RegexDelimitersStrategy(patterns, includeMatchingLines, matchAsHeader);
     }
 }
