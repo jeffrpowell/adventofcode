@@ -1,0 +1,56 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/java
+{
+	"name": "Java",
+	// Explicitly declaring which source-code folder to mount and where to mount it in the container
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+	"workspaceFolder": "/workspace",
+	"build": {
+		// https://containers.dev/guide/dockerfile
+		"dockerfile": "Dockerfile"
+	},
+
+	"features": {
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "none",
+			"installMaven": "true",
+			"installGradle": "false"
+		}
+	},
+
+	"mounts": [
+		"source=m2volume,target=/usr/local/.m2/repository,type=volume" // Establishing a persistent volume for maven local repository downloads
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "java -version",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"vscjava.vscode-java-pack"
+			],
+			"settings": {
+				"java.configuration.maven.userSettings": "/usr/local/.m2/mvnsettings.xml",
+				"maven.settingsFile": "/usr/local/.m2/mvnsettings.xml",
+				"maven.terminal.favorites": [
+					{
+						"alias": "build",
+						"command": "clean install -e"
+					},
+					{
+						"alias": "quick build",
+						"command": "clean install -e -DskipTests=true"
+					}
+				]
+			}
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
