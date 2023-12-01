@@ -3,12 +3,13 @@ package com.jeffrpowell.adventofcode.inputparser;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 import com.jeffrpowell.adventofcode.inputparser.rule.RuleParser;
-import com.jeffrpowell.adventofcode.inputparser.section.SectionInputParser;
 import com.jeffrpowell.adventofcode.inputparser.section.Section;
+import com.jeffrpowell.adventofcode.inputparser.section.SectionInputParser;
 import com.jeffrpowell.adventofcode.inputparser.section.SectionSplitStrategy;
 
 public class InputParserFactory
@@ -64,5 +65,9 @@ public class InputParserFactory
 
 	public static InputParser<Section> getSectionParser(SectionSplitStrategy strategy) {
 		return new SectionInputParser(strategy);
+	}
+
+	public static <T> InputParser<T> getPreParser(Function<String, String> fn, InputParser<T> delegate) {
+		return new PreParser<>(delegate, fn);
 	}
 }

@@ -14,7 +14,7 @@ public class Rule {
     private final Map<Integer, Object> cache;
     private final String rulePatternKey;
     private final Integer sortKey;
-    // private final String line;
+    private final String line;
     
 // 6V8)T2J\n
 // R1009,
@@ -28,12 +28,24 @@ public class Rule {
 // [1518-10-13 00:03] Guard #2539 begins shift\n
 // ##.## => #\n
 
-    public Rule(List<String> tokens, String rulePatternKey, Integer sortKey/*, String line*/) {
+    public Rule(List<String> tokens, String rulePatternKey, Integer sortKey) {
         this.tokens = tokens;
         this.cache = new HashMap<>();
         this.rulePatternKey = rulePatternKey;
         this.sortKey = sortKey;
-        //this.line = line;
+        this.line = "";
+    }
+
+    public Rule(List<String> tokens, String rulePatternKey, Integer sortKey, String line) {
+        this.tokens = tokens;
+        this.cache = new HashMap<>();
+        this.rulePatternKey = rulePatternKey;
+        this.sortKey = sortKey;
+        this.line = line;
+    }
+
+    public String getLine() {
+        return line;
     }
 
     public String getRulePatternKey() {

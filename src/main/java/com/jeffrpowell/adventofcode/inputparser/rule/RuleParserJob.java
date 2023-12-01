@@ -26,6 +26,7 @@ public class RuleParserJob implements Callable<Rule>{
 
     @Override
     public Rule call() throws Exception {
+        // String line = "";
         try {
             Map<String, Matcher> matchers = rulePatterns.entrySet().stream()
                 .collect(Collectors.toMap(
@@ -37,16 +38,19 @@ public class RuleParserJob implements Callable<Rule>{
                 .filter(entry -> entry.getValue().matches())
                 .findAny().get();
 
+            // line = m.getValue().group(0);
             List<String> tokens = new ArrayList<>();
             for (int i = 1; i < m.getValue().groupCount() + 1; i++) {
                 tokens.add(m.getValue().group(i));
             }
             return new Rule(tokens, m.getKey(), sortKey);
+            // return new Rule(tokens, m.getKey(), sortKey, line);
         }
         catch (Exception e) {
             log.error(sortKey + ": exception in rule parser job while looking at " + input, e);
         }
         return new Rule(Collections.emptyList(), "", sortKey);
+        // return new Rule(Collections.emptyList(), "", sortKey, line);
     }
 
 }
