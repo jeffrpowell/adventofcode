@@ -1,8 +1,10 @@
 package com.jeffrpowell.adventofcode.aoc2023;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -35,30 +37,62 @@ public class Day1 extends Solution2023<Rule>{
     }
 
     private String preprocess(String line) {
-        return line
-            .replaceAll("one", "1")
-            .replaceAll("two", "2")
-            .replaceAll("three", "3")
-            .replaceAll("four", "4")
-            .replaceAll("five", "5")
-            .replaceAll("six", "6")
-            .replaceAll("seven", "7")
-            .replaceAll("eight", "8")
-            .replaceAll("nine", "9");
+        String runningLine = line;
+        while(true) {
+            final String runningLine_ro = runningLine;
+            Map<Integer, String> numberMap = Map.of(
+                1, "one",
+                2, "two",
+                3, "three",
+                4, "four",
+                5, "five",
+                6, "six",
+                7, "seven",
+                8, "eight",
+                9, "nine"
+            );
+            Map<Integer, String> replaceMap = Map.of(
+                1, "1e", //oneight
+                2, "2o", //twone
+                3, "3e", //threeight
+                4, "4r",
+                5, "5e", //fiveight
+                6, "6x",
+                7, "7n", //sevenine
+                8, "8t", //eightwo, eighthree
+                9, "9e" //nineight
+            );
+            Map<Integer, Integer> findMap = numberMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey, 
+                    e -> runningLine_ro.indexOf(e.getValue())));
+            Map<Integer, List<Integer>> groupMap = findMap.entrySet().stream()
+                .filter(e -> e.getValue() != -1)
+                .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+            if (groupMap.isEmpty()){
+                System.out.println(line + " => " + runningLine_ro);
+                return runningLine_ro;
+            }
+            Integer firstFind = groupMap.get(groupMap.keySet().stream().min(Comparator.naturalOrder()).get()).get(0);
+            runningLine = runningLine_ro.replaceFirst(numberMap.get(firstFind), replaceMap.get(firstFind));
+        }
     }
 
     @Override
     protected String part1(List<Rule> input) {
         Map<String, List<Rule>> rules = RuleListUtil.groupByRulePatternKey(input);
-        debugPart1(rules);
+        // debugPart1(rules);
         long multi = rules.get("multi").stream()
             .map(r -> r.getLong(0) + "" + r.getLong(1))
             .map(Long::parseLong)
             .reduce(0L, Math::addExact);
-        long one = rules.get("one").stream()
-            .map(r -> r.getLong(0) + "" + r.getLong(0))
-            .map(Long::parseLong)
-            .reduce(0L, Math::addExact);
+        long one = 0L;
+        if (rules.containsKey("one")) {
+            one = rules.get("one").stream()
+                .map(r -> r.getLong(0) + "" + r.getLong(0))
+                .map(Long::parseLong)
+                .reduce(0L, Math::addExact);
+        }
         return Long.toString(multi + one);
     }
 
