@@ -70,7 +70,7 @@ public class Day1 extends Solution2023<Rule>{
                 .filter(e -> e.getValue() != -1)
                 .collect(Collectors.groupingBy(Map.Entry::getValue, Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
             if (groupMap.isEmpty()){
-                System.out.println(line + " => " + runningLine_ro);
+                // System.out.println(line + " => " + runningLine_ro);
                 return runningLine_ro;
             }
             Integer firstFind = groupMap.get(groupMap.keySet().stream().min(Comparator.naturalOrder()).get()).get(0);

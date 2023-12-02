@@ -10,34 +10,20 @@ import org.junit.jupiter.api.Test;
 import com.jeffrpowell.adventofcode.Solution;
 import com.jeffrpowell.adventofcode.TestDataLoader;
 
-public class Day1Test
+public class Day2Test
 {
 	private Solution<?> day;
 
 	@BeforeEach
 	public void setUp()
 	{
-		day = new Day1();
+		day = new Day2();
 	}
 
 	@Test
 	public void testPart1()
 	{
 		List<String> input = TestDataLoader.getTestData(day, 1);
-		assertEquals("142", day.parseAndRunPart1(input));
-	}
-
-	@Test
-	public void testPart2()
-	{
-		List<String> input = TestDataLoader.getTestData(day, 2);
-		assertEquals("281", day.parseAndRunPart2(input));
-	}
-	
-	@Test
-	public void testPart2_custom()
-	{
-		List<String> input = TestDataLoader.getTestData(day, 3);
-		assertEquals("94", day.parseAndRunPart2(input));
+		assertEquals("8", day.parseAndRunPart1(input));
 	}
 }
