@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/java
 {
-	"name": "Java",
+	"name": "Advent of Code devcontainer",
 	// Explicitly declaring which source-code folder to mount and where to mount it in the container
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
 	"workspaceFolder": "/workspace",
@@ -37,6 +37,7 @@
 			"settings": {
 				"java.configuration.maven.userSettings": "/usr/local/.m2/mvnsettings.xml",
 				"maven.settingsFile": "/usr/local/.m2/mvnsettings.xml",
+				"java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current",
 				"maven.terminal.favorites": [
 					{
 						"alias": "build",
