@@ -158,6 +158,7 @@ public class Day3 extends Solution2023<List<String>>{
         Map<Point2D, List<Long>> gearPtMap = partNumbers.stream()
             .collect(Collectors.groupingBy(GearPt::gearPt, Collectors.mapping(GearPt::partNumber, Collectors.toList())));
         return Long.toString(gearPtMap.values().stream()
+            .filter(l -> l.size() == 2)
             .map(l -> l.stream().reduce(1L, Math::multiplyExact))
             .reduce(0L, Math::addExact)
         );
