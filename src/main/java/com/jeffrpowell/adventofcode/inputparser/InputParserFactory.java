@@ -54,6 +54,10 @@ public class InputParserFactory
 	public static InputParser<List<Integer>> getIntegerTokenSVParser(String delimiter) {
 		return new IntegerTokenSVParser(delimiter);
 	}
+	
+	public static InputParser<List<Long>> getLongTokenSVParser(String delimiter) {
+		return new LongTokenSVParser(delimiter);
+	}
     
     public static InputParser<Rule> getRuleParser(String ruleDelimiter, Pattern singleRegexPattern) {
         return new RuleParser(ruleDelimiter, Map.of("pattern", singleRegexPattern));
