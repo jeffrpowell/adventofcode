@@ -1,7 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;

@@ -1,7 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2022;
 
 import java.awt.geom.Point2D;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
