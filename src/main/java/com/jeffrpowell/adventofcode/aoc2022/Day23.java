@@ -31,11 +31,7 @@ public class Day23 extends Solution2022<List<String>>{
     protected String part1(List<List<String>> input) {
         int height = input.size();
         int width = input.get(0).size();
-        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, width, height)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#")
-            ));
+        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, width, height, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
         List<Point2D> elves = grid.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList());
         List<Direction> directions = Stream.of(Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT).collect(Collectors.toList());
         for (int i = 0; i < 10; i++) {
@@ -95,11 +91,7 @@ public class Day23 extends Solution2022<List<String>>{
     protected String part2(List<List<String>> input) {
         int height = input.size();
         int width = input.get(0).size();
-        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, width, height)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#")
-            ));
+        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, width, height, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
         List<Point2D> elves = grid.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList());
         List<Direction> directions = Stream.of(Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT).collect(Collectors.toList());
         long rounds = 0;

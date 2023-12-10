@@ -33,11 +33,7 @@ public class Day8 extends Solution2022<List<Integer>>{
     protected String part1(List<List<Integer>> input) {
         int width = input.get(0).size();
         int height = input.size();
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                p -> input.get(d2i(p.getY())).get(d2i(p.getX()))
-            ));
+        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height, p -> input.get(d2i(p.getY())).get(d2i(p.getX())));
         Set<Point2D> visible = new HashSet<>();
         for (int x = 0; x < width; x++) {
             //TOP-DOWN
@@ -102,11 +98,7 @@ public class Day8 extends Solution2022<List<Integer>>{
     protected String part2(List<List<Integer>> input) {
         int width = input.get(0).size();
         int height = input.size();
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                p -> input.get(d2i(p.getY())).get(d2i(p.getX()))
-            ));
+        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height, p -> input.get(d2i(p.getY())).get(d2i(p.getX())));
         return Long.toString(grid.entrySet().stream()
             .map(e -> calcScenicScore(e, grid, width, height))
             .max(Comparator.naturalOrder()).get());

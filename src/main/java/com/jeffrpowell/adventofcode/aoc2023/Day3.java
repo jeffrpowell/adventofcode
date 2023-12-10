@@ -98,11 +98,7 @@ public class Day3 extends Solution2023<List<String>>{
     protected String part2(List<List<String>> input) {
         final int rightBoundary = input.get(0).size();
         final int bottomBoundary = input.size();
-        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX()))
-            ));
+        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())));
         Set<Point2D> symbolPts = grid.entrySet().stream()
             .filter(e -> GEAR_REGEX.matcher(e.getValue()).find())
             .map(Map.Entry::getKey)

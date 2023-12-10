@@ -24,6 +24,14 @@ public class Point2DUtils
         }
         return pointStream.build();
     }
+
+    public static <T> Map<Point2D, T> generateGrid(double leftBoundary, double topBoundary, double rightBoundary, double bottomBoundary, Function<Point2D, T> mapFn) {
+        return generateGrid(0, 0, rightBoundary, bottomBoundary)
+            .collect(Collectors.toMap(
+                Function.identity(),
+                mapFn
+            ));
+    }
 	
 	public static double getManhattenDistance(Point2D pt1, Point2D pt2) {
 		return Math.abs(pt1.getY() - pt2.getY()) + Math.abs(pt1.getX() - pt2.getX());
