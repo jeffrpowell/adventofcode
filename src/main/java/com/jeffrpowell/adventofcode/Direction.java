@@ -1,6 +1,8 @@
 package com.jeffrpowell.adventofcode;
 
 import java.awt.geom.Point2D;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Function;
 
 public enum Direction
@@ -121,4 +123,19 @@ public enum Direction
         }
         return distance;
     }
+
+	/**
+	 * Returns the `Direction` to travel to get from `start` to `end`.
+	 * Does not implement snapping. i.e. if the line is not aligned perfectly to one of the 8 axes, it returns `Optional.empty()`.
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public static Optional<Direction> getDirectionThisLineTravels(Point2D start, Point2D end) {
+		Double distance = start.distance(end);
+		if (Math.abs(distance - Math.round(distance)) > 0.0001) {
+			return Optional.empty();
+		}
+		return Arrays.stream(values()).filter(d -> d.travelFromNTimes(start, distance.intValue()).equals(end)).findFirst();
+	}
 }
