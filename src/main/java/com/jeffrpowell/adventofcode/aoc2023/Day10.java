@@ -2,6 +2,7 @@ package com.jeffrpowell.adventofcode.aoc2023;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
 import com.jeffrpowell.adventofcode.Direction;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -131,7 +133,22 @@ public class Day10 extends Solution2023<List<String>>{
                 .filter(pt -> !zoomMainLoop.contains(pt) && !visited.contains(pt))
                 .forEach(bfs::add);
         }
-        return Long.toString((zoomGrid.size() - zoomMainLoop.size() - visited.size()) / 4);
+        zoomMainLoop.stream()
+            .peek(visited::add)
+            .map(loopPt -> Point2DUtils.getBoundedAdjacentPts(loopPt, 0, zoomRightBoundary-1, zoomBottomBoundary-1, 0, true, false))
+            .flatMap(Set::stream)
+            .forEach(visited::add);
+        Set<Point2D> keepers = new HashSet<>();
+        Sets.difference(zoomGrid.keySet(), visited)
+            .stream()
+            .sorted(Comparator.comparing(Point2D::getY).thenComparing(Point2D::getX))
+            .forEach(pt -> {
+                if (visited.add(pt)) {
+                    keepers.add(pt);
+                    visited.addAll(Point2DUtils.getBoundedAdjacentPts(pt, 0, zoomRightBoundary-1, zoomBottomBoundary-1, 0, true, false));
+                }
+            });
+        return Long.toString(keepers.size());
     }
 
     private int d2i(Double d) {
