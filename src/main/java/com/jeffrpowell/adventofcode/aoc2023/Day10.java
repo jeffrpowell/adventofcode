@@ -89,6 +89,9 @@ public class Day10 extends Solution2023<List<String>>{
                 .peek(traversal -> mainLoop.add(traversal.pt))
                 .collect(Collectors.toList());
         }
+        // VISUALIZE
+        // Point2DUtils.printPoints(mainLoop);
+        // END VISUALIZE
         /*
          * ...
          * ...
@@ -133,9 +136,15 @@ public class Day10 extends Solution2023<List<String>>{
                 .filter(pt -> !zoomMainLoop.contains(pt) && !visited.contains(pt))
                 .forEach(bfs::add);
         }
+        // VISUALIZE
+        // Map<Point2D, String> printGrid = new HashMap<>();
+        // visited.stream().forEach(pt -> printGrid.put(pt, "O"));
+        // zoomMainLoop.stream().forEach(pt -> printGrid.put(pt, "#"));
+        // Point2DUtils.printPoints(printGrid);
+        // END VISUALIZE
         zoomMainLoop.stream()
             .peek(visited::add)
-            .map(loopPt -> Point2DUtils.getBoundedAdjacentPts(loopPt, 0, zoomRightBoundary-1, zoomBottomBoundary-1, 0, true, false))
+            .map(loopPt -> Point2DUtils.getBoundedAdjacentPts(loopPt, 0, zoomRightBoundary-1, zoomBottomBoundary-1, 0, true, true))
             .flatMap(Set::stream)
             .forEach(visited::add);
         Set<Point2D> keepers = new HashSet<>();
@@ -145,9 +154,13 @@ public class Day10 extends Solution2023<List<String>>{
             .forEach(pt -> {
                 if (visited.add(pt)) {
                     keepers.add(pt);
-                    visited.addAll(Point2DUtils.getBoundedAdjacentPts(pt, 0, zoomRightBoundary-1, zoomBottomBoundary-1, 0, true, false));
+                    visited.addAll(Point2DUtils.getBoundedAdjacentPts(pt, 0, zoomRightBoundary-1, zoomBottomBoundary-1, 0, true, true));
                 }
             });
+        // VISUALIZE
+        // keepers.stream().forEach(pt -> printGrid.put(pt, "I"));
+        // Point2DUtils.printPoints(printGrid);
+        // END VISUALIZE
         return Long.toString(keepers.size());
     }
 
@@ -174,6 +187,9 @@ public class Day10 extends Solution2023<List<String>>{
         Map<Point2D, Pipe> zoomIn(Point2D pt) {
             Map<Point2D, Pipe> zoomGrid = new HashMap<>();
             zoomGrid.put(pt, this);
+            if (this.equals(START_PIPE)) {
+                return zoomGrid;
+            }
             Pipe extensionPipe1 = d1 == Direction.LEFT || d1 == Direction.RIGHT ? HORIZONTAL : VERTICAL;
             zoomGrid.put(d1.travelFrom(pt), extensionPipe1);
             Pipe extensionPipe2 = d1 == Direction.LEFT || d2 == Direction.RIGHT ? HORIZONTAL : VERTICAL;
