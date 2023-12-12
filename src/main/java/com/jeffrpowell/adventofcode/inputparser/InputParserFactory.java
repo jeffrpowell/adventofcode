@@ -74,4 +74,8 @@ public class InputParserFactory
 	public static <T> InputParser<T> getPreParser(Function<String, String> fn, InputParser<T> delegate) {
 		return new PreParser<>(delegate, fn);
 	}
+
+	public static <A,B> InputParser<SplitPartParser.Part<A,B>> getSplitPartParser(Pattern splitterRegex, InputParser<A> aParser, InputParser<B> bParser) {
+		return new SplitPartParser<>(splitterRegex, aParser, bParser);
+	}
 }
