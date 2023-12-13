@@ -199,6 +199,7 @@ public class Day12 extends Solution2023<SplitPartParser.Part<String, List<Intege
             }
             return numWays;
         }
+        return -1;
     }
 
     private static enum State {
