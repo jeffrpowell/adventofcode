@@ -1,9 +1,9 @@
 package com.jeffrpowell.adventofcode.aoc2023;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Deque;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -37,40 +37,54 @@ public class Day13 extends Solution2023<Section>{
     }
 
     private long findCenterAndCountColsRows(List<List<String>> input) {
-        Set<List<String>> cache = new HashSet<>();
-        int lastFailedIndex = 0;
-        int mirroredIndices = 0;
+        Deque<List<String>> history = new ArrayDeque<>();
+        Deque<List<String>> mirrorCheck = new ArrayDeque<>();
         for (int i = 0; i < input.size(); i++) {
-            if (cache.add(input.get(i))) {
-                lastFailedIndex = i;
-            }
-            else {
-                mirroredIndices++;
-                if (mirroredIndices - 1 == lastFailedIndex) {
+            if (!history.isEmpty() && history.peek().equals(input.get(i))) {
+                mirrorCheck.push(history.pop());
+                if (history.isEmpty()) {
                     break;
                 }
             }
+            else if (!mirrorCheck.isEmpty()) {
+                while (!mirrorCheck.isEmpty()) {
+                    mirrorCheck.stream().forEach(history::push);
+                    mirrorCheck.reversed().stream().forEach(history::push);
+                    mirrorCheck.clear();
+                }
+                history.push(input.get(i));
+            }
+            else {
+                history.push(input.get(i));
+            }
         }
-        if (lastFailedIndex < input.size() - 1) {
-            return lastFailedIndex + 1;
+        if (!mirrorCheck.isEmpty()) {
+            return 100 * (history.size() + mirrorCheck.size());
         }
-        cache.clear();
+        history.clear();
+        mirrorCheck.clear();
         List<List<String>> pivotedInput = pivotList(input);
-        lastFailedIndex = 0;
-        mirroredIndices = 0;
         for (int i = 0; i < pivotedInput.size(); i++) {
-            if (cache.add(pivotedInput.get(i))) {
-                lastFailedIndex = i;
-            }
-            else {
-                mirroredIndices++;
-                if (mirroredIndices - 1 == lastFailedIndex) {
+            if (!history.isEmpty() && history.peek().equals(pivotedInput.get(i))) {
+                mirrorCheck.push(history.pop());
+                if (history.isEmpty()) {
                     break;
                 }
             }
+            else if (!mirrorCheck.isEmpty()) {
+                while (!mirrorCheck.isEmpty()) {
+                    mirrorCheck.stream().forEach(history::push);
+                    mirrorCheck.reversed().stream().forEach(history::push);
+                    mirrorCheck.clear();
+                }
+                history.push(pivotedInput.get(i));
+            }
+            else {
+                history.push(pivotedInput.get(i));
+            }
         }
-        if (lastFailedIndex < pivotedInput.size() - 1) {
-            return 100 * (lastFailedIndex + 1);
+        if (!mirrorCheck.isEmpty()) {
+            return history.size() + mirrorCheck.size();
         }
         input.stream()
             .map(line -> line.stream().collect(Collectors.joining()))
