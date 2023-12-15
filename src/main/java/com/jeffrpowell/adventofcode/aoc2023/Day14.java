@@ -1,11 +1,11 @@
 package com.jeffrpowell.adventofcode.aoc2023;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 
@@ -22,17 +22,53 @@ public class Day14 extends Solution2023<List<String>>{
 
     @Override
     protected String part1(List<List<String>> input) {
-        List<List<String>> pivotedInput = pivotList(input);
+        List<List<RockType>> rockGrid = input.stream()
+            .map(list -> list.stream().map(RockType::parse).collect(Collectors.toList()))
+            .collect(Collectors.toList());
+        return measureWeight(pivotList(rockGrid));
+        
+    }
+
+    @Override
+    protected String part2(List<List<String>> input) {
+        List<List<RockType>> rockGrid = input.stream()
+            .map(list -> list.stream().map(RockType::parse).collect(Collectors.toList()))
+            .collect(Collectors.toList());
+        Map<List<List<RockType>>, List<List<RockType>>> pivotCache = new HashMap<>();
+        Map<List<List<RockType>>, List<List<RockType>>> gridRollCache = new HashMap<>();
+        Map<List<List<RockType>>, String> measurementCache = new HashMap<>();
+        Map<List<RockType>, List<RockType>> rollCache = new HashMap<>();
+        for (int i = 0; i < 1_000_000_001; i++) {
+            rockGrid = pivotCache.computeIfAbsent(rockGrid, this::pivotList);
+            rockGrid = gridRollCache.computeIfAbsent(rockGrid, grid -> {
+                List<List<RockType>> rolledGrid = grid.stream()
+                    .map(list -> list.stream().collect(Collectors.toList()))
+                    .collect(Collectors.toList());
+                for (int col = 0; col < rolledGrid.size(); col++) {
+                    rolledGrid.set(col, rollCache.computeIfAbsent(grid.get(col), this::rollLine));
+                }
+                return rolledGrid;
+            });
+            System.out.println(i + ": " + measurementCache.computeIfAbsent(rockGrid, this::measureWeight));
+            // if (i > 1_000_000) {
+                rockGrid.stream().forEach(line -> System.out.println(line.stream().map(RockType::toString).collect(Collectors.joining())));
+                System.out.println();
+            // }
+        }
+        return measureWeight(rockGrid);
+    }
+
+    private String measureWeight(List<List<RockType>> rockGrid) {
         long totalWeight = 0;
-        for (int col = 0; col < pivotedInput.size(); col++) {
-            List<String> column = pivotedInput.get(col);
+        for (int col = 0; col < rockGrid.size(); col++) {
+            List<RockType> column = rockGrid.get(col);
             int nextOpenSpot = column.size();
             for (int row = 0; row < column.size(); row++) {
-                if (column.get(row).equals("O")) {
+                if (column.get(row) == RockType.ROUND) {
                     totalWeight += nextOpenSpot;
                     nextOpenSpot--;
                 }
-                else if (column.get(row).equals("#")) {
+                else if (column.get(row) == RockType.SQUARE) {
                     nextOpenSpot = column.size() - row - 1;
                 }
             }
@@ -40,12 +76,22 @@ public class Day14 extends Solution2023<List<String>>{
         return Long.toString(totalWeight);
     }
 
-    @Override
-    protected String part2(List<List<String>> input) {
-        final int rightBoundary = input.get(0).size();
-        final int bottomBoundary = input.size();
-        Map<Point2D, RockType> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> RockType.parse(input.get(d2i(pt.getY())).get(d2i(pt.getX()))));
-        return "";
+    private List<RockType> rollLine(List<RockType> line) {
+        int nextOpenSpot = 0;
+        List<RockType> rolledLine = line.stream().collect(Collectors.toList());
+        for (int row = 0; row < rolledLine.size(); row++) {
+            if (rolledLine.get(row) == RockType.ROUND) {
+                rolledLine.set(nextOpenSpot, RockType.ROUND);
+                if (nextOpenSpot != row) {
+                    rolledLine.set(row, RockType.BLANK);
+                }
+                nextOpenSpot++;
+            }
+            else if (rolledLine.get(row) == RockType.SQUARE) {
+                nextOpenSpot = row + 1;
+            }
+        }
+        return rolledLine;
     }
 
     enum RockType{
@@ -58,26 +104,35 @@ public class Day14 extends Solution2023<List<String>>{
                 default -> ROUND;
             };
         }
+
+        @Override
+        public String toString() {
+            if (this == ROUND) {
+                return "O";
+            }
+            else if (this == SQUARE) {
+                return "#";
+            }
+            else {
+                return ".";
+            }
+        }
     }
 
-    private int d2i(Double d) {
-        return d.intValue();
-    }
-
-    public static List<List<String>> pivotList(List<List<String>> inputList) {
-        List<List<String>> outputList = new ArrayList<>();
+    public <T> List<List<T>> pivotList(List<List<T>> inputList) {
+        List<List<T>> rotatedList = new ArrayList<>();
 
         int numRows = inputList.size();
         int numCols = inputList.get(0).size();
 
         for (int i = 0; i < numCols; i++) {
-            List<String> newRow = new ArrayList<>();
+            List<T> newColumn = new ArrayList<>();
             for (int j = 0; j < numRows; j++) {
-                newRow.add(inputList.get(j).get(i));
+                newColumn.add(inputList.get(j).get(i));
             }
-            outputList.add(newRow);
+            rotatedList.add(newColumn);
         }
 
-        return outputList;
+        return rotatedList;
     }
 }
