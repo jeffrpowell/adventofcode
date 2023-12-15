@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -34,6 +35,8 @@ public class Day14 extends Solution2023<List<String>>{
         List<List<RockType>> rockGrid = input.stream()
             .map(list -> list.stream().map(RockType::parse).collect(Collectors.toList()))
             .collect(Collectors.toList());
+        rockGrid = pivotList(rockGrid);
+        rockGrid = pivotList(rockGrid);
         Map<List<List<RockType>>, List<List<RockType>>> pivotCache = new HashMap<>();
         Map<List<List<RockType>>, List<List<RockType>>> gridRollCache = new HashMap<>();
         Map<List<List<RockType>>, String> measurementCache = new HashMap<>();
@@ -120,17 +123,14 @@ public class Day14 extends Solution2023<List<String>>{
     }
 
     public <T> List<List<T>> pivotList(List<List<T>> inputList) {
-        List<List<T>> rotatedList = new ArrayList<>();
-
         int numRows = inputList.size();
         int numCols = inputList.get(0).size();
-
-        for (int i = 0; i < numCols; i++) {
-            List<T> newColumn = new ArrayList<>();
-            for (int j = 0; j < numRows; j++) {
-                newColumn.add(inputList.get(j).get(i));
+        List<List<T>> rotatedList = Stream.generate(() -> new ArrayList<T>()).limit(numCols).collect(Collectors.toList());
+        for (int rowI = numRows - 1; rowI >= 0; rowI--) {
+            List<T> row = inputList.get(rowI);
+            for (int colI = 0; colI < numCols; colI++) {
+                rotatedList.get(colI).add(row.get(colI));
             }
-            rotatedList.add(newColumn);
         }
 
         return rotatedList;
