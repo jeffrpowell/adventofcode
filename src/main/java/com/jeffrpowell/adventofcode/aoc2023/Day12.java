@@ -161,7 +161,7 @@ public class Day12 extends Solution2023<SplitPartParser.Part<String, List<Intege
         amendedSplitIndices.add(0, 0);
         amendedSplitIndices.add(requirements.size());
         for (int i = 0; i < amendedSplitIndices.size() - 1; i++) {
-            result.add(requirements.subList(amendedSplitIndices.get(i), amendedSplitIndices.get(i+1)));
+            result.add(requirements.subList(amendedSplitIndices.get(i), amendedSplitIndices.get(i+1)).stream().collect(Collectors.toList()));
         }
         return result;
     }
@@ -186,20 +186,14 @@ public class Day12 extends Solution2023<SplitPartParser.Part<String, List<Intege
             return CACHE.get(cacheKey);
         }
         long numWays = 0L;
-        if (requirements.size() == 1 && group.size() == requirements.get(0)) {
-            CACHE.put(cacheKey, 1L);
-            return 1;
+        if (group.hasUnknowns()) {
+            numWays += group.generateNextPair(requirements.size()).stream().map(g -> resolve(g, requirements)).reduce(0L, Math::addExact);
         }
-        else if (group.size() > getRequirementsLength(requirements)) {
-            if (group.startsWithUnknown()) {
-                numWays += resolve(group.generateTrimmedBeginning(), requirements);
-            }
-            if (group.endsWithUnknown()) {
-                numWays += resolve(group.generateTrimmedEnding(), requirements);
-            }
-            return numWays;
+        else {
+            numWays = group.matchesRequirements(requirements) ? 1 : 0;
         }
-        return -1;
+        CACHE.put(cacheKey, numWays);
+        return numWays;
     }
 
     private static enum State {
@@ -233,24 +227,64 @@ public class Day12 extends Solution2023<SplitPartParser.Part<String, List<Intege
             return states.size();
         }
 
-        public boolean startsWithUnknown() {
-            return states.get(0) == State.UNKNOWN;
+        public boolean hasUnknowns() {
+            return states.stream().anyMatch(s -> s == State.UNKNOWN);
         }
 
-        public boolean endsWithUnknown() {
-            return states.get(states.size() - 1) == State.UNKNOWN;
-        }
-
-        public SpringGroup generateTrimmedBeginning() {
-            return new SpringGroup(states.stream().skip(1).collect(Collectors.toList()));
-        }
-
-        public SpringGroup generateTrimmedEnding() {
-            return new SpringGroup(states.stream().limit(states.size() - 1).collect(Collectors.toList()));
+        public List<SpringGroup> generateNextPair(int requirementsSize) {
+            List<SpringGroup> next = new ArrayList<>();
+            int nextUnknownIndex = states.indexOf(State.UNKNOWN);
+            List<State> nextStates = states.stream().collect(Collectors.toList());
+            nextStates.set(nextUnknownIndex, State.WORKING);
+            next.add(new SpringGroup(nextStates));
+            // if (states.stream().filter(s -> s == State.BROKEN).count() < requirementsSize - 1) {
+                List<State> nextBrokenStates = nextStates.stream().collect(Collectors.toList());
+                nextBrokenStates.set(nextUnknownIndex, State.BROKEN);
+                next.add(new SpringGroup(nextBrokenStates));
+            // }
+            return next;
         }
 
         public CacheKey generateCacheKey(List<Integer> requirements) {
             return new CacheKey(this, requirements);
+        }
+
+        public boolean matchesRequirements(List<Integer> requirements) {
+            if (requirements.isEmpty() || requirements.get(0) == 0) {
+                if (states.stream().anyMatch(s -> s == State.WORKING)) {
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+            if (states.stream().filter(s -> s == State.BROKEN).count() != requirements.size() - 1) {
+                return false;
+            }
+            int nextRequirement = requirements.removeFirst();
+            boolean slide = true;
+            for (int i = 0; i < states.size(); i++) {
+                if (states.get(i) == State.WORKING) {
+                    slide = false;
+                    nextRequirement--;
+                    if (nextRequirement < 0) {
+                        return false;
+                    }
+                }
+                else if (states.get(i) == State.BROKEN) {
+                    if (slide) {
+                        continue;
+                    }
+                    if (nextRequirement == 0 && !requirements.isEmpty()) {
+                        nextRequirement = requirements.removeFirst();
+                        slide = true;
+                    }
+                    else if (nextRequirement != 0) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         @Override
