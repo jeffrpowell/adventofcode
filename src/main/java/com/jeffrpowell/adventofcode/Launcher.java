@@ -20,11 +20,12 @@ import com.jeffrpowell.adventofcode.aoc2023.*;
 
 public class Launcher
 {
-	public static final Solution<?> DAY = new Day15();
+	public static final Solution<?> DAY = new Day14();
 	
     public static void main(String[] args) {
 		List<String> puzzleInput = getPuzzleInput();
 		
+		System.out.println();
 		System.out.println(DAY.getYear() + " Day " + DAY.getDay());
 		System.out.println("\nPart 1");
 		System.out.println("--------------------------");

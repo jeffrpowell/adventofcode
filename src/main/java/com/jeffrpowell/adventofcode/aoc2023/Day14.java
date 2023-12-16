@@ -26,42 +26,9 @@ public class Day14 extends Solution2023<List<String>>{
         List<List<RockType>> rockGrid = input.stream()
             .map(list -> list.stream().map(RockType::parse).collect(Collectors.toList()))
             .collect(Collectors.toList());
-        return measureWeight(pivotList(rockGrid));
-        
-    }
-
-    @Override
-    protected String part2(List<List<String>> input) {
-        List<List<RockType>> rockGrid = input.stream()
-            .map(list -> list.stream().map(RockType::parse).collect(Collectors.toList()))
-            .collect(Collectors.toList());
         rockGrid = pivotList(rockGrid);
         rockGrid = pivotList(rockGrid);
-        Map<List<List<RockType>>, List<List<RockType>>> pivotCache = new HashMap<>();
-        Map<List<List<RockType>>, List<List<RockType>>> gridRollCache = new HashMap<>();
-        Map<List<List<RockType>>, String> measurementCache = new HashMap<>();
-        Map<List<RockType>, List<RockType>> rollCache = new HashMap<>();
-        for (int i = 0; i < 1_000_000_001; i++) {
-            rockGrid = pivotCache.computeIfAbsent(rockGrid, this::pivotList);
-            rockGrid = gridRollCache.computeIfAbsent(rockGrid, grid -> {
-                List<List<RockType>> rolledGrid = grid.stream()
-                    .map(list -> list.stream().collect(Collectors.toList()))
-                    .collect(Collectors.toList());
-                for (int col = 0; col < rolledGrid.size(); col++) {
-                    rolledGrid.set(col, rollCache.computeIfAbsent(grid.get(col), this::rollLine));
-                }
-                return rolledGrid;
-            });
-            System.out.println(i + ": " + measurementCache.computeIfAbsent(rockGrid, this::measureWeight));
-            // if (i > 1_000_000) {
-                rockGrid.stream().forEach(line -> System.out.println(line.stream().map(RockType::toString).collect(Collectors.joining())));
-                System.out.println();
-            // }
-        }
-        return measureWeight(rockGrid);
-    }
-
-    private String measureWeight(List<List<RockType>> rockGrid) {
+        rockGrid = pivotList(rockGrid);
         long totalWeight = 0;
         for (int col = 0; col < rockGrid.size(); col++) {
             List<RockType> column = rockGrid.get(col);
@@ -77,6 +44,70 @@ public class Day14 extends Solution2023<List<String>>{
             }
         }
         return Long.toString(totalWeight);
+    }
+
+    // 98889 < x < 106849
+    @Override
+    protected String part2(List<List<String>> input) {
+        List<List<RockType>> rockGrid = input.stream()
+            .map(list -> list.stream().map(RockType::parse).collect(Collectors.toList()))
+            .collect(Collectors.toList());
+        // rockGrid.stream().forEach(line -> System.out.println(line.stream().map(RockType::toString).collect(Collectors.joining())));
+        // System.out.println();
+        rockGrid = pivotList(rockGrid);
+        rockGrid = pivotList(rockGrid);
+        Map<List<List<RockType>>, List<List<RockType>>> pivotCache = new HashMap<>();
+        Map<List<List<RockType>>, List<List<RockType>>> gridRollCache = new HashMap<>();
+        Map<MeasurementKey, Long> measurementCache = new HashMap<>();
+        Map<List<RockType>, List<RockType>> rollCache = new HashMap<>();
+        // int printRotations = 1;
+        int measurementRotations = 0;
+        for (int i = 0; i < 1_000_000_000; i++) {
+            rockGrid = pivotCache.computeIfAbsent(rockGrid, this::pivotList);
+            rockGrid = gridRollCache.computeIfAbsent(rockGrid, grid -> {
+                List<List<RockType>> rolledGrid = grid.stream()
+                    .map(list -> list.stream().collect(Collectors.toList()))
+                    .collect(Collectors.toList());
+                for (int col = 0; col < rolledGrid.size(); col++) {
+                    rolledGrid.set(col, rollCache.computeIfAbsent(grid.get(col), this::rollLine));
+                }
+                return rolledGrid;
+            });
+            long measurement = measurementCache.computeIfAbsent(new MeasurementKey(rockGrid, measurementRotations), key -> measureWeightPart2(key.rockGrid(), key.rotationsRequired()));
+            measurementRotations--;
+            if (measurementRotations == -1) {
+                measurementRotations = 3;
+            }
+            // List<List<RockType>> printGrid = rockGrid;
+            // for (int rotations = 0; rotations < printRotations; rotations++) {
+            //     printGrid = pivotList(printGrid);
+            // }
+            // printRotations--;
+            // if (printRotations == -1) {
+            //     printRotations = 3;
+            // }
+            // printGrid.stream().forEach(line -> System.out.println(line.stream().map(RockType::toString).collect(Collectors.joining())));
+            // System.out.println();
+        }
+        return Long.toString(measureWeightPart2(rockGrid, measurementRotations));
+    }
+
+    record MeasurementKey(List<List<RockType>> rockGrid, int rotationsRequired){}
+
+    private long measureWeightPart2(List<List<RockType>> rockGrid, int rotationsRequired) {
+        for (int i = 0; i < rotationsRequired; i++) {
+            rockGrid = pivotList(rockGrid);
+        }
+        long totalWeight = 0;
+        for (int col = 0; col < rockGrid.size(); col++) {
+            List<RockType> column = rockGrid.get(col);
+            for (int row = 0; row < column.size(); row++) {
+                if (column.get(row) == RockType.ROUND) {
+                    totalWeight += column.size() - row;
+                }
+            }
+        }
+        return totalWeight;
     }
 
     private List<RockType> rollLine(List<RockType> line) {
