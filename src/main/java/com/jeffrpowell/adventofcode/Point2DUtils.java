@@ -69,6 +69,10 @@ public class Point2DUtils
 				y > topBoundary;
 		}
 	}
+
+    public static boolean pointInsideBoundary(Point2D pt, boolean inclusive, BoundingBox boundingBox) {
+        return pointInsideBoundary(pt, inclusive, boundingBox.min().getY(), boundingBox.max().getX(), boundingBox.max().getY(), boundingBox.min().getX());
+    }
 	
 	public static boolean pointInsideLine(Point2D pt, boolean inclusive, Point2D start, Point2D end) {
 		if (!inclusive && (pt.equals(start) || pt.equals(end))) {
