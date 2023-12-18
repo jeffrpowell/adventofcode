@@ -270,4 +270,43 @@ public class Point2DUtils
 		}
 		return new BoundingBox(new Point2D.Double(minX, minY), new Point2D.Double(maxX, maxY));
 	}
+
+    /**
+     * Leverages the even-odd rule for solving point-in-polygon
+     * @param pt
+     * @param poly
+     * @return
+     */
+    public static boolean isPointInPolygon(Point2D pt, List<Point2D> poly) {
+        double x = pt.getX();
+        double y = pt.getY();
+        int num = poly.size();
+        int j = num - 1;
+        boolean c = false;
+        
+        for (int i = 0; i < num; i++) {
+            if (x == poly.get(i).getX() && y == poly.get(i).getY()) {
+                // point is a corner
+                return true;
+            }
+            
+            if ((poly.get(i).getY() > y) != (poly.get(j).getY() > y)) {
+                double slope = (x - poly.get(i).getX()) * (poly.get(j).getY() - poly.get(i).getY()) -
+                        (poly.get(j).getX() - poly.get(i).getX()) * (y - poly.get(i).getY());
+                
+                if (slope == 0) {
+                    // point is on boundary
+                    return true;
+                }
+                
+                if ((slope < 0) != (poly.get(j).getY() < poly.get(i).getY())) {
+                    c = !c;
+                }
+            }
+            
+            j = i;
+        }
+        
+        return c;
+    }
 }

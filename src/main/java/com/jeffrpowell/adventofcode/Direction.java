@@ -124,6 +124,10 @@ public enum Direction
         return distance;
     }
 
+	public Point2D asVector() {
+		return travelFrom(new Point2D.Double(0, 0));
+	}
+
 	/**
 	 * Returns the `Direction` to travel to get from `start` to `end`.
 	 * Does not implement snapping. i.e. if the line is not aligned perfectly to one of the 8 axes, it returns `Optional.empty()`.
