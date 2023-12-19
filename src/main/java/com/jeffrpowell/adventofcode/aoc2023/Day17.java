@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.Direction;
 import com.jeffrpowell.adventofcode.Point2DUtils;
@@ -72,10 +71,6 @@ public class Day17 extends Solution2023<List<Integer>>{
             }
         }
         return "-1";
-    }
-
-    private List<Point2D> addPtToList(List<Point2D> l, Point2D pt) {
-        return Stream.concat(l.stream(), Stream.of(pt)).collect(Collectors.toList());
     }
 
     @Override
