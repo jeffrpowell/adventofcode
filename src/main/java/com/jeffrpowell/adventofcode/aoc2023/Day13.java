@@ -3,7 +3,9 @@ package com.jeffrpowell.adventofcode.aoc2023;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -12,6 +14,7 @@ import com.jeffrpowell.adventofcode.inputparser.section.Section;
 import com.jeffrpowell.adventofcode.inputparser.section.SectionSplitStrategyFactory;
 
 public class Day13 extends Solution2023<Section>{
+    private static final Map<List<List<String>>, Integer> solutionCache = new HashMap<>();
     @Override
     public int getDay() {
         return 13;
@@ -27,20 +30,26 @@ public class Day13 extends Solution2023<Section>{
     protected String part1(List<Section> input) {
         return Long.toString(input.stream()
             .map(section -> section.getInput(InputParserFactory.getTokenSVParser("")))
-            .map(this::findCenterAndCountColsRows)
+            .map(in -> findCenterAndCountColsRows(in, 0))
             .reduce(0L, Math::addExact));
     }
 
     @Override
     protected String part2(List<Section> input) {
-        return part1(input);
+        part1(input);
+        return Long.toString(input.stream()
+            .map(section -> section.getInput(InputParserFactory.getTokenSVParser("")))
+            .map(in -> findCenterAndCountColsRows(in, 1))
+            .reduce(0L, Math::addExact));
     }
 
-    private long findCenterAndCountColsRows(List<List<String>> input) {
+    private long findCenterAndCountColsRows(List<List<String>> input, int tolerance) {
         Deque<List<String>> history = new ArrayDeque<>();
         Deque<List<String>> mirrorCheck = new ArrayDeque<>();
+        int winningIndex = 0;
         for (int i = 0; i < input.size(); i++) {
-            if (!history.isEmpty() && history.peek().equals(input.get(i))) {
+            winningIndex = i;
+            if (!history.isEmpty() && distance(history.peek(), input.get(i)) <= tolerance && (tolerance == 0 || (tolerance == 1 && (!solutionCache.containsKey(input) || i != solutionCache.get(input))))) {
                 mirrorCheck.push(history.pop());
                 if (history.isEmpty()) {
                     break;
@@ -59,13 +68,15 @@ public class Day13 extends Solution2023<Section>{
             }
         }
         if (!mirrorCheck.isEmpty()) {
+            solutionCache.put(input, winningIndex);
             return 100 * (history.size() + mirrorCheck.size());
         }
         history.clear();
         mirrorCheck.clear();
         List<List<String>> pivotedInput = pivotList(input);
         for (int i = 0; i < pivotedInput.size(); i++) {
-            if (!history.isEmpty() && history.peek().equals(pivotedInput.get(i))) {
+            winningIndex = i;
+            if (!history.isEmpty() && distance(history.peek(), pivotedInput.get(i)) <= tolerance && (tolerance == 0 || (tolerance == 1 && (!solutionCache.containsKey(input) || i != solutionCache.get(input))))) {
                 mirrorCheck.push(history.pop());
                 if (history.isEmpty()) {
                     break;
@@ -84,6 +95,7 @@ public class Day13 extends Solution2023<Section>{
             }
         }
         if (!mirrorCheck.isEmpty()) {
+            solutionCache.put(pivotedInput, winningIndex);
             return history.size() + mirrorCheck.size();
         }
         input.stream()
@@ -108,5 +120,15 @@ public class Day13 extends Solution2023<Section>{
         }
 
         return outputList;
+    }
+
+    private int distance(List<String> a, List<String> b) {
+        int distance = 0;
+        for (int i = 0; i < a.size(); i++) {
+            if (!a.get(i).equals(b.get(i))) {
+                distance++;
+            }
+        }
+        return distance;
     }
 }
