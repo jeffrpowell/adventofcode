@@ -79,7 +79,7 @@ public class Day13 extends Solution2023<Section>{
             List<String> next = pivotedInput.get(i);
             int distance = distance(prior, next);
             if (distance <= tolerance 
-                && (!solutionCache.containsKey(pivotedInput) || solutionCache.get(pivotedInput) == i)) {
+                && (!solutionCache.containsKey(pivotedInput) || solutionCache.get(pivotedInput) != i)) {
                     List<List<String>> left = pivotedInput.subList(0, i).reversed();
                     List<List<String>> right = pivotedInput.subList(i, pivotedInput.size());
                     int toleranceBudget = tolerance - distance;
