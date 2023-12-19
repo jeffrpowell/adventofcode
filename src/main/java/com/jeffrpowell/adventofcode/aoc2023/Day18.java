@@ -55,27 +55,26 @@ public class Day18 extends Solution2023<Rule>{
     protected String part2(List<Rule> input) {
         Point2D lastPt = new Point2D.Double(0, 0);
         List<Point2D> polygonCorners = new ArrayList<>();
-        Set<Point2D> insideSet = new HashSet<>();
         polygonCorners.add(lastPt);
+        long edgeCount = 0;
         for (Rule rule : input) {
             Direction d = parseDirection(rule.getInt(3));
             String distanceHex = rule.getString(2);
             int distance = Integer.parseInt(distanceHex, 16);
-            Point2DUtils.repeatVectorToPtNTimes(d.asVector(), lastPt, distance).forEach(insideSet::add);
             lastPt = d.travelFromNTimes(lastPt, distance);
             polygonCorners.add(lastPt);
+            edgeCount += distance;
         }
-        long inside = 0;
-        Point2DUtils.BoundingBox box = Point2DUtils.getBoundingBox(polygonCorners);
-        for (double row = box.min().getY(); row <= box.max().getY(); row++) {
-            for (double col = box.min().getX(); col <= box.max().getX(); col++) {
-                Point2D pt = new Point2D.Double(col, row);
-                if (insideSet.contains(pt) || Point2DUtils.isPointInPolygon(pt, polygonCorners)) {
-                    inside++;
-                }
-            }
+        polygonCorners.add(polygonCorners.get(0));
+        double area = 0;
+        lastPt = polygonCorners.get(0);
+        for (int i = 0; i < polygonCorners.size(); i++) {
+            Point2D pt = polygonCorners.get(i);
+            area = area + lastPt.getX() * pt.getY() - pt.getX() * lastPt.getY();
+            lastPt = pt;
         }
-        return Long.toString(inside);
+        //combine shoelace and pick's theorums to account for interior area and outer edge
+        return Long.toString(Double.valueOf(Math.abs(area) * 0.5).longValue() - edgeCount/2 + 1 + edgeCount);
     }
 
     private Direction parseDirection(String s) {
