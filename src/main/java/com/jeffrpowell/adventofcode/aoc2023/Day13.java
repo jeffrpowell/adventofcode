@@ -30,7 +30,7 @@ public class Day13 extends Solution2023<Section>{
     protected String part1(List<Section> input) {
         return Long.toString(input.stream()
             .map(section -> section.getInput(InputParserFactory.getTokenSVParser("")))
-            .map(in -> findCenterAndCountColsRows(in, 0))
+            .map(in -> findCenterAndCountColsRows2(in, 0))
             .reduce(0L, Math::addExact));
     }
 
@@ -39,8 +39,75 @@ public class Day13 extends Solution2023<Section>{
         part1(input);
         return Long.toString(input.stream()
             .map(section -> section.getInput(InputParserFactory.getTokenSVParser("")))
-            .map(in -> findCenterAndCountColsRows(in, 1))
+            .map(in -> findCenterAndCountColsRows2(in, 1))
             .reduce(0L, Math::addExact));
+    }
+
+    private long findCenterAndCountColsRows2(List<List<String>> input, int tolerance) { 
+        List<String> prior = input.get(0);
+        for (int i = 1; i < input.size(); i++) {
+            List<String> next = input.get(i);
+            int distance = distance(prior, next);
+            if (distance <= tolerance 
+                && (!solutionCache.containsKey(input) || solutionCache.get(input) != i)) {
+                    List<List<String>> left = input.subList(0, i).reversed();
+                    List<List<String>> right = input.subList(i, input.size());
+                    int toleranceBudget = tolerance - distance;
+                    boolean foundSolution = true;
+                    for (int j = 1; j < Math.min(left.size(), right.size()); j++) {
+                        List<String> leftList = left.get(j);
+                        List<String> rightList = right.get(j);
+                        distance = distance(leftList, rightList);
+                        if (distance <= toleranceBudget) {
+                            toleranceBudget -= distance;
+                        }
+                        else {
+                            foundSolution = false;
+                            break;
+                        }
+                    }
+                    if (foundSolution) {
+                        solutionCache.put(input, i);
+                        return 100 * left.size();
+                    }
+            }
+            prior = next;
+        }
+        List<List<String>> pivotedInput = pivotList(input);
+        prior = pivotedInput.get(0);
+        for (int i = 1; i < pivotedInput.size(); i++) {
+            List<String> next = pivotedInput.get(i);
+            int distance = distance(prior, next);
+            if (distance <= tolerance 
+                && (!solutionCache.containsKey(pivotedInput) || solutionCache.get(pivotedInput) == i)) {
+                    List<List<String>> left = pivotedInput.subList(0, i).reversed();
+                    List<List<String>> right = pivotedInput.subList(i, pivotedInput.size());
+                    int toleranceBudget = tolerance - distance;
+                    boolean foundSolution = true;
+                    for (int j = 1; j < Math.min(left.size(), right.size()); j++) {
+                        List<String> leftList = left.get(j);
+                        List<String> rightList = right.get(j);
+                        distance = distance(leftList, rightList);
+                        if (distance <= toleranceBudget) {
+                            toleranceBudget -= distance;
+                        }
+                        else {
+                            foundSolution = false;
+                            break;
+                        }
+                    }
+                    if (foundSolution) {
+                        solutionCache.put(pivotedInput, i);
+                        return left.size();
+                    }
+            }
+            prior = next;
+        }
+        input.stream()
+            .map(line -> line.stream().collect(Collectors.joining()))
+            .forEach(System.out::println);
+        System.out.println();
+        return Long.MIN_VALUE;
     }
 
     private long findCenterAndCountColsRows(List<List<String>> input, int tolerance) {
