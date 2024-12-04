@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public enum Direction
 {
@@ -141,5 +142,9 @@ public enum Direction
 			return Optional.empty();
 		}
 		return Arrays.stream(values()).filter(d -> d.travelFromNTimes(start, distance.intValue()).equals(end)).findFirst();
+	}
+
+	public static Stream<Direction> getAllDirections() {
+		return Arrays.stream(values());
 	}
 }
