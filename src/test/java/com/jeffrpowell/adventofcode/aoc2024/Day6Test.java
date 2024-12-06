@@ -26,4 +26,11 @@ public class Day6Test
 		List<String> input = TestDataLoader.getTestData(day, 1);
 		assertEquals("6", day.parseAndRunPart2(input));
 	}
+
+	@Test
+	public void testPart2_overlapping()
+	{
+		List<String> input = TestDataLoader.getTestData(day, 2);
+		assertEquals("1", day.parseAndRunPart2(input));
+	}
 }

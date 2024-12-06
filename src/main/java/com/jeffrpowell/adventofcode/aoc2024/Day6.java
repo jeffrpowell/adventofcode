@@ -1,9 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2024;
 
 import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,18 +58,17 @@ public class Day6 extends Solution2024<List<String>>{
             }
             guard = next;
         }
-        // printGrid(guard, guard, obstacles, visited, bb, Optional.empty());
         return Integer.toString(visited.size());
-        
     }
 
-    private void printGrid(Point2D startGuard, Point2D guard, Set<Point2D> obstacles, Set<Point2D> visited, Point2DUtils.BoundingBox bb, Optional<Point2D> newObstacle) {
+    private void printGrid(Point2D startGuard, Point2D guard, Set<Point2D> obstacles, Set<Point2D> initialVisited, Set<Point2D> newVisited, Point2DUtils.BoundingBox bb, Optional<Point2D> newObstacle) {
         Map<Point2D, String> printVals = new HashMap<>();
         printVals.put(bb.min(), ".");
         printVals.put(bb.max(), ".");
         obstacles.stream().forEach(p -> printVals.put(p, "#"));
-        visited.stream().forEach(p -> printVals.put(p, "*"));
-        newObstacle.ifPresent(p -> printVals.put(p, "O"));
+        initialVisited.stream().forEach(p -> printVals.put(p, "*"));
+        newVisited.stream().forEach(p -> printVals.put(p, "o"));
+        newObstacle.ifPresent(p -> printVals.put(p, "$"));
         printVals.put(startGuard, "^");
         printVals.put(guard, "G");
         log.append("\n");
@@ -108,12 +104,17 @@ public class Day6 extends Solution2024<List<String>>{
         Point2DUtils.BoundingBox bb = new Point2DUtils.BoundingBox(topLeft, bottomRight);
         Set<Point2D> loopObstaclePts = new HashSet<>();
         while(Point2DUtils.pointInsideBoundary(guard, false, bb)){ 
-            Point2D next = Point2DUtils.applyVectorToPt(d.asVector(), guard);
-            if (obstacles.contains(next)) {
+            Point2D tempNext = Point2DUtils.applyVectorToPt(d.asVector(), guard);
+            if (obstacles.contains(tempNext)) {
                 d = d.rotateRight90();
-                next = Point2DUtils.applyVectorToPt(d.asVector(), guard);
+                tempNext = Point2DUtils.applyVectorToPt(d.asVector(), guard);
+                if (obstacles.contains(tempNext)) {
+                    d = d.rotateRight90();
+                    tempNext = Point2DUtils.applyVectorToPt(d.asVector(), guard);
+                }
             }
-            if (!obstacles.contains(next)) {
+            final Point2D next = tempNext;
+            if (Point2DUtils.pointInsideBoundary(next, false, bb) && !obstacles.contains(next) && Direction.getAllCardinalDirections().map(cardinalD -> new CacheKey(next, cardinalD)).noneMatch(visited::contains)) {
                 Set<Point2D> simulatedObstacles = Stream.concat(Stream.of(next), obstacles.stream()).collect(Collectors.toSet());
                 Set<CacheKey> visitedCopy = visited.stream().collect(Collectors.toSet());
                 if (obstacleProducesLoop(startGuard, guard, d, visitedCopy, simulatedObstacles, next, bb)) {
@@ -123,24 +124,32 @@ public class Day6 extends Solution2024<List<String>>{
             visited.add(new CacheKey(guard, d));
             guard = next;
         }
-        try {
-            Files.writeString(Path.of("output.txt"), log.toString());
-        } catch (IOException e) {}
+        // try {
+        //     Files.writeString(Path.of("output.txt"), log.toString());
+        // } catch (IOException e) {}
         return Integer.toString(loopObstaclePts.size());
     }
 
     private boolean obstacleProducesLoop(Point2D startGuard, Point2D guard, Direction d, Set<CacheKey> visited, Set<Point2D> obstacles, Point2D newObstacle, Point2DUtils.BoundingBox bb) {
+        Set<Point2D> initialVisited = visited.stream().map(CacheKey::p).collect(Collectors.toSet());
+        Set<Point2D> newVisited = new HashSet<>();
+        initialVisited.add(guard);
         while(Point2DUtils.pointInsideBoundary(guard, false, bb)){ 
             if (!visited.add(new CacheKey(guard, d))) {
-                printGrid(startGuard, guard, obstacles, visited.stream().map(CacheKey::p).collect(Collectors.toSet()), bb, Optional.of(newObstacle));
+                printGrid(startGuard, guard, obstacles, initialVisited, newVisited, bb, Optional.of(newObstacle));
                 return true;
             };
             Point2D next = Point2DUtils.applyVectorToPt(d.asVector(), guard);
             if (obstacles.contains(next)) {
                 d = d.rotateRight90();
                 next = Point2DUtils.applyVectorToPt(d.asVector(), guard);
+                if (obstacles.contains(next)) {
+                    d = d.rotateRight90();
+                    next = Point2DUtils.applyVectorToPt(d.asVector(), guard);
+                }
             }
             guard = next;
+            newVisited.add(next);
         }
         return false;
     }

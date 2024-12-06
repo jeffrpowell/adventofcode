@@ -147,4 +147,8 @@ public enum Direction
 	public static Stream<Direction> getAllDirections() {
 		return Arrays.stream(values());
 	}
+
+	public static Stream<Direction> getAllCardinalDirections() {
+		return getAllDirections().filter(Direction::isCardinal);
+	}
 }
