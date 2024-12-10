@@ -122,6 +122,13 @@ public class Point2DUtils
 			.filter(pt -> Point2DUtils.pointInsideBoundary(pt, inclusiveBoundary, topBoundary, rightBoundary, bottomBoundary, leftBoundary))
 			.collect(Collectors.toSet());
 	}
+	
+	public static Set<Point2D> getBoundedAdjacentPts(Point2D point, BoundingBox bb, boolean inclusiveBoundary, boolean includeDiagonalNeighbors) {
+		Set<Point2D> adjacentPoints = getAdjacentPts(point, includeDiagonalNeighbors);
+		return adjacentPoints.stream()
+			.filter(pt -> Point2DUtils.pointInsideBoundary(pt, inclusiveBoundary, bb))
+			.collect(Collectors.toSet());
+	}
     
     public static Map<Direction, List<Point2D>> getPointsFromSource(Point2D point, double topBoundary, double rightBoundary, double bottomBoundary, double leftBoundary, boolean inclusiveBoundary, boolean includeDiagonalNeighbors) {
         return Arrays.stream(Direction.values())
