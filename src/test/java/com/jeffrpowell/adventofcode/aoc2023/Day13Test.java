@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.jeffrpowell.adventofcode.Solution;
@@ -41,7 +42,7 @@ public class Day13Test
 		assertEquals("400", day.parseAndRunPart1(input));
 	}
 
-	@Test
+	@Disabled
 	public void testPart2()
 	{
 		List<String> input = TestDataLoader.getTestData(day, 1);

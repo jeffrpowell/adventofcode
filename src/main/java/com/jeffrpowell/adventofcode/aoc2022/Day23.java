@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -28,9 +29,7 @@ public class Day23 extends Solution2022<List<String>>{
     
     @Override
     protected String part1(List<List<String>> input) {
-        int height = input.size();
-        int width = input.get(0).size();
-        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, width, height, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
+        Grid<Boolean> grid = new Grid<>(input, (in, pt) -> in.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
         List<Point2D> elves = grid.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList());
         List<Direction> directions = Stream.of(Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT).collect(Collectors.toList());
         for (int i = 0; i < 10; i++) {
@@ -75,7 +74,7 @@ public class Day23 extends Solution2022<List<String>>{
             directions.add(directions.remove(0));
         }
         Point2DUtils.BoundingBox box = Point2DUtils.getBoundingBox(grid.entrySet().stream().filter(e -> e.getValue().equals(true)).map(Map.Entry::getKey).collect(Collectors.toList()));
-        return Long.toString(Point2DUtils.generateGrid(box.min().getX(), box.min().getY(), box.max().getX() + 1, box.max().getY() + 1)
+        return Long.toString(Grid.generatePointStream(box.min().getX(), box.min().getY(), box.max().getX() + 1, box.max().getY() + 1)
             .filter(p -> grid.computeIfAbsent(p, k -> false).equals(false))
             .count());
     }
@@ -88,9 +87,7 @@ public class Day23 extends Solution2022<List<String>>{
 
     @Override
     protected String part2(List<List<String>> input) {
-        int height = input.size();
-        int width = input.get(0).size();
-        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, width, height, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
+        Grid<Boolean> grid = new Grid<>(input, (in, pt) -> in.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
         List<Point2D> elves = grid.entrySet().stream().filter(Map.Entry::getValue).map(Map.Entry::getKey).collect(Collectors.toList());
         List<Direction> directions = Stream.of(Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT).collect(Collectors.toList());
         long rounds = 0;

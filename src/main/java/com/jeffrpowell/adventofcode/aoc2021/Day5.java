@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -27,7 +28,7 @@ public class Day5 extends Solution2021<Rule>{
         List<Line> lines = input.stream().map(Line::new).filter(Line::qualifiesForPt1).collect(Collectors.toList());
         Point2D upperLeft = lines.stream().map(Line::getUpperLeftCorner).reduce((accum, next) -> new Point2D.Double(Math.min(accum.getX(), next.getX()), Math.min(accum.getY(), next.getY()))).get();
         Point2D bottomRight = lines.stream().map(Line::getBottomRightCorner).reduce((accum, next) -> new Point2D.Double(Math.max(accum.getX(), next.getX()), Math.max(accum.getY(), next.getY()))).get();
-        return Long.toString(Point2DUtils.generateGrid(upperLeft.getX(), upperLeft.getY(), bottomRight.getX(), bottomRight.getY())
+        return Long.toString(Grid.generatePointStream(upperLeft.getX(), upperLeft.getY(), bottomRight.getX(), bottomRight.getY())
             .map(pt -> lines.stream().filter(line -> line.containsPt(pt)).count())
             .filter(ct -> ct > 1)
             .count());
@@ -38,7 +39,7 @@ public class Day5 extends Solution2021<Rule>{
         List<Line> lines = input.stream().map(Line::new).collect(Collectors.toList());
         Point2D upperLeft = lines.stream().map(Line::getUpperLeftCorner).reduce((accum, next) -> new Point2D.Double(Math.min(accum.getX(), next.getX()), Math.min(accum.getY(), next.getY()))).get();
         Point2D bottomRight = lines.stream().map(Line::getBottomRightCorner).reduce((accum, next) -> new Point2D.Double(Math.max(accum.getX(), next.getX()), Math.max(accum.getY(), next.getY()))).get();
-        return Long.toString(Point2DUtils.generateGrid(upperLeft.getX(), upperLeft.getY(), bottomRight.getX(), bottomRight.getY())
+        return Long.toString(Grid.generatePointStream(upperLeft.getX(), upperLeft.getY(), bottomRight.getX(), bottomRight.getY())
             .map(pt -> lines.stream().filter(line -> line.containsPt(pt)).count())
             .filter(ct -> ct > 1)
             .count());

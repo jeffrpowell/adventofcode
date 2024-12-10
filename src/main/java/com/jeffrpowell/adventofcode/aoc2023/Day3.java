@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -31,16 +31,11 @@ public class Day3 extends Solution2023<List<String>>{
         return InputParserFactory.getTokenSVParser("");
     }
 
-
     @Override
     protected String part1(List<List<String>> input) {
         final int rightBoundary = input.get(0).size();
         final int bottomBoundary = input.size();
-        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX()))
-            ));
+        Grid<String> grid = new Grid<>(input);
         Set<Point2D> symbolPts = grid.entrySet().stream()
             .filter(e -> SYMBOL_REGEX.matcher(e.getValue()).find())
             .map(Map.Entry::getKey)
@@ -88,17 +83,13 @@ public class Day3 extends Solution2023<List<String>>{
         return Integer.toString(partNumbers.stream().reduce(0, Math::addExact));
     }
 
-    private int d2i(double d) {
-        return Double.valueOf(d).intValue();
-    }
-
     private record GearPt(Point2D startPt, Point2D gearPt, Long partNumber){}
 
     @Override
     protected String part2(List<List<String>> input) {
         final int rightBoundary = input.get(0).size();
         final int bottomBoundary = input.size();
-        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())));
+        Grid<String> grid = new Grid<>(input);
         Set<Point2D> symbolPts = grid.entrySet().stream()
             .filter(e -> GEAR_REGEX.matcher(e.getValue()).find())
             .map(Map.Entry::getKey)

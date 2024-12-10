@@ -7,12 +7,12 @@ import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -31,17 +31,15 @@ public class Day16 extends Solution2023<List<String>>{
 
     @Override
     protected String part1(List<List<String>> input) {
-        final int rightBoundary = input.get(0).size();
-        final int bottomBoundary = input.size();
-        Map<Point2D, GridType> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> GridType.parse(input.get(d2i(pt.getY())).get(d2i(pt.getX()))));
-        return Long.toString(getEnergyLevel(rightBoundary, bottomBoundary, grid, new Vector(new Point2D.Double(0, 0), Direction.RIGHT)));
+        Grid<GridType> grid = new Grid<>(input, (in, pt) -> GridType.parse(in.get(d2i(pt.getY())).get(d2i(pt.getX()))));
+        return Long.toString(getEnergyLevel(grid, new Vector(new Point2D.Double(0, 0), Direction.RIGHT)));
     }
 
     @Override
     protected String part2(List<List<String>> input) {
         final int rightBoundary = input.get(0).size();
         final int bottomBoundary = input.size();
-        Map<Point2D, GridType> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> GridType.parse(input.get(d2i(pt.getY())).get(d2i(pt.getX()))));
+        Grid<GridType> grid = new Grid<>(input, (in, pt) -> GridType.parse(in.get(d2i(pt.getY())).get(d2i(pt.getX()))));
         return Long.toString(
             grid.keySet().stream()
                 .filter(pt -> pt.getX() == 0 || pt.getX() == rightBoundary - 1 || pt.getY() == 0 || pt.getY() == bottomBoundary - 1)
@@ -59,7 +57,7 @@ public class Day16 extends Solution2023<List<String>>{
                         return new Vector(pt, Direction.LEFT);
                     }
                 })
-                .map(v -> getEnergyLevel(rightBoundary, bottomBoundary, grid, v))
+                .map(v -> getEnergyLevel(grid, v))
                 .max(Comparator.naturalOrder()).get()
         );
     }
@@ -68,14 +66,14 @@ public class Day16 extends Solution2023<List<String>>{
         return d.intValue();
     }
 
-    private long getEnergyLevel(final int rightBoundary, final int bottomBoundary, Map<Point2D, GridType> grid, Vector startV) {
+    private long getEnergyLevel(Grid<GridType> grid, Vector startV) {
         Set<Point2D> energized = new HashSet<>();
         Set<Vector> visitedReflectors = new HashSet<>();
         Deque<Vector> beamQ = new ArrayDeque<>();
         beamQ.push(startV);
         while(!beamQ.isEmpty()) {
             Vector v = beamQ.pop();
-            while(visitedReflectors.add(v) && Point2DUtils.pointInsideBoundary(v.pt, false, -1, rightBoundary, bottomBoundary, -1)) {
+            while(visitedReflectors.add(v) && Point2DUtils.pointInsideBoundary(v.pt, true, grid.inclusiveBoundingBox)) {
                 energized.add(v.pt);
                 GridType gridType = grid.get(v.pt);
                 gridType.splitFn.apply(v).ifPresent(beamQ::add);

@@ -4,12 +4,10 @@ import java.awt.geom.Point2D;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -32,25 +30,20 @@ public class Day12 extends Solution2022<List<String>>{
     protected String part1(List<List<String>> input) {
         int width = input.get(0).size();
         int height = input.size();
-        
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                pt -> {
-                    String c = input.get(d2i(pt.getY())).get(d2i(pt.getX()));
-                    if (c.equals("S")){
-                        start = pt;
-                        return 0;
-                    }
-                    else if (c.equals("E")){
-                        end = pt;
-                        return 25;
-                    }
-                    else {
-                        return c.charAt(0) - 'a';
-                    }
-                }
-            ));
+        Grid<Integer> grid = new Grid<>(input, (in, pt) -> {
+            String c = in.get(d2i(pt.getY())).get(d2i(pt.getX()));
+            if (c.equals("S")){
+                start = pt;
+                return 0;
+            }
+            else if (c.equals("E")){
+                end = pt;
+                return 25;
+            }
+            else {
+                return c.charAt(0) - 'a';
+            }
+        });
         PriorityQueue<Branch> q = new PriorityQueue<>(Comparator.comparing(Branch::heuristic));
         q.add(new Branch(0, start, 0));
         Set<Point2D> visited = new HashSet<>();
@@ -86,24 +79,20 @@ public class Day12 extends Solution2022<List<String>>{
         int width = input.get(0).size();
         int height = input.size();
         
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                pt -> {
-                    String c = input.get(d2i(pt.getY())).get(d2i(pt.getX()));
-                    if (c.equals("S")){
-                        start = pt;
-                        return 0;
-                    }
-                    else if (c.equals("E")){
-                        end = pt;
-                        return 25;
-                    }
-                    else {
-                        return c.charAt(0) - 'a';
-                    }
-                }
-            ));
+        Grid<Integer> grid = new Grid<>(input, (in, pt) -> {
+            String c = in.get(d2i(pt.getY())).get(d2i(pt.getX()));
+            if (c.equals("S")){
+                start = pt;
+                return 0;
+            }
+            else if (c.equals("E")){
+                end = pt;
+                return 25;
+            }
+            else {
+                return c.charAt(0) - 'a';
+            }
+        });
         PriorityQueue<Branch> q = new PriorityQueue<>(Comparator.comparing(Branch::heuristic));
         //hard-coded assumption: can just start looking from all b-elevations, which happen to all be on x=1
         for (int y = 0; y < height; y++) {

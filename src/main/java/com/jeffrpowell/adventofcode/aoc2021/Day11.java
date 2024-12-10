@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -29,7 +30,7 @@ public class Day11 extends Solution2021<List<Integer>>{
     protected String part1(List<List<Integer>> input) {
         rightBoundary = input.get(0).size() - 1;
         bottomBoundary = input.size() - 1;
-        grid = Point2DUtils.generateGrid(0, 0, rightBoundary + 1, bottomBoundary + 1).collect(Collectors.toMap(
+        grid = Grid.generatePointStream(0, 0, rightBoundary + 1, bottomBoundary + 1).collect(Collectors.toMap(
             Function.identity(),
             pt -> input.get(Double.valueOf(pt.getX()).intValue()).get(Double.valueOf(pt.getY()).intValue())
         ));
@@ -80,7 +81,7 @@ public class Day11 extends Solution2021<List<Integer>>{
     protected String part2(List<List<Integer>> input) {
         rightBoundary = input.get(0).size() - 1;
         bottomBoundary = input.size() - 1;
-        grid = Point2DUtils.generateGrid(0, 0, rightBoundary + 1, bottomBoundary + 1).collect(Collectors.toMap(
+        grid = Grid.generatePointStream(0, 0, rightBoundary + 1, bottomBoundary + 1).collect(Collectors.toMap(
             Function.identity(),
             pt -> input.get(Double.valueOf(pt.getX()).intValue()).get(Double.valueOf(pt.getY()).intValue())
         ));

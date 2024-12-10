@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -34,7 +35,7 @@ public class Day17 extends Solution2023<List<Integer>>{
         final int rightBoundary = input.get(0).size();
         final int bottomBoundary = input.size();
         END = new Point2D.Double(rightBoundary - 1, bottomBoundary - 1);
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())));
+        Grid<Integer> grid = new Grid<>(input);
         Map<Point2D, Integer> costToPts = new HashMap<>();
         PriorityQueue<Path> q = new PriorityQueue<>(Comparator.comparing(p -> p.heuristic(costToPts.get(p.tip()))));
         Set<Point2D> visited = new HashSet<>();
@@ -108,12 +109,8 @@ public class Day17 extends Solution2023<List<Integer>>{
         final int rightBoundary = input.get(0).size();
         final int bottomBoundary = input.size();
         END = new Point2D.Double(rightBoundary - 1, bottomBoundary - 1);
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())));
+        Grid<Integer> grid = new Grid<>(input);
         return "";
-    }
-
-    private int d2i(Double d) {
-        return d.intValue();
     }
 
     record Path(Point2D tip, Direction lastDirection, int sameDirectionCount){

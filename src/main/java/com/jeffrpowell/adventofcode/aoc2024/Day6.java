@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -31,7 +32,7 @@ public class Day6 extends Solution2024<List<String>>{
 
     @Override
     protected String part1(List<List<String>> input) {
-        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, input.get(0).size(), input.size())
+        Map<Point2D, String> grid = Grid.generatePointStream(0, 0, input.get(0).size(), input.size())
             .collect(Collectors.toMap(
                 Function.identity(), 
                 pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX()))
@@ -83,7 +84,7 @@ public class Day6 extends Solution2024<List<String>>{
 
     @Override
     protected String part2(List<List<String>> input) {
-        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, input.get(0).size(), input.size())
+        Map<Point2D, String> grid = Grid.generatePointStream(0, 0, input.get(0).size(), input.size())
             .collect(Collectors.toMap(
                 Function.identity(), 
                 pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX()))

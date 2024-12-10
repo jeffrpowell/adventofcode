@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -32,7 +33,7 @@ public class Day8 extends Solution2022<List<Integer>>{
     protected String part1(List<List<Integer>> input) {
         int width = input.get(0).size();
         int height = input.size();
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height, p -> input.get(d2i(p.getY())).get(d2i(p.getX())));
+        Grid<Integer> grid = new Grid<>(input);
         Set<Point2D> visible = new HashSet<>();
         for (int x = 0; x < width; x++) {
             //TOP-DOWN
@@ -89,15 +90,11 @@ public class Day8 extends Solution2022<List<Integer>>{
         return Integer.toString(visible.size());
     }
 
-    private int d2i(Double d) {
-        return d.intValue();
-    }
-
     @Override
     protected String part2(List<List<Integer>> input) {
         int width = input.get(0).size();
         int height = input.size();
-        Map<Point2D, Integer> grid = Point2DUtils.generateGrid(0, 0, width, height, p -> input.get(d2i(p.getY())).get(d2i(p.getX())));
+        Grid<Integer> grid = new Grid<>(input);
         return Long.toString(grid.entrySet().stream()
             .map(e -> calcScenicScore(e, grid, width, height))
             .max(Comparator.naturalOrder()).get());

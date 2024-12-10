@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.jeffrpowell.adventofcode.Point2DUtils;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import com.jeffrpowell.adventofcode.inputparser.section.Section;
@@ -65,7 +65,7 @@ public class Day20 extends Solution2021<Section> {
         currentMinY = -2D;
         currentMaxX = imageLines.get(0).length() + 1D;
         currentMaxY = imageLines.size() + 1D;
-        image = Point2DUtils.generateGrid(0, 0, imageLines.get(0).length(), imageLines.size()).collect(Collectors.toMap(
+        image = Grid.generatePointStream(0, 0, imageLines.get(0).length(), imageLines.size()).collect(Collectors.toMap(
             Function.identity(),
             pt -> imageLines.get(d2i(pt.getY())).charAt(d2i(pt.getX())) == '#'
         ));

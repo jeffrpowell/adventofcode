@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -28,13 +29,7 @@ public class Day8 extends Solution2024<List<String>>{
 
     @Override
     protected String part1(List<List<String>> input) {
-        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, input.get(0).size(), input.size())
-            .collect(Collectors.toMap(
-                Function.identity(), 
-                pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX()))
-            ));
-        Point2D topLeft = new Point2D.Double(0, 0);
-        Point2D bottomRight = new Point2D.Double(input.size(), input.get(0).size());
+        Grid<String> grid = new Grid<>(input);
         Map<String, List<Point2D>> signals = grid.entrySet().stream()
             .filter(e -> !e.getValue().equals("."))
             .collect(Collectors.toMap(
@@ -42,18 +37,13 @@ public class Day8 extends Solution2024<List<String>>{
                 e -> List.of(e.getKey()),
                 (a, b) -> Stream.concat(a.stream(), b.stream()).collect(Collectors.toList())
             ));
-        Point2DUtils.BoundingBox bb = new Point2DUtils.BoundingBox(topLeft, Point2DUtils.applyVectorToPt(new Point2D.Double(-1, -1), bottomRight));
         return Integer.toString(
             signals.values().stream()
-                .map(v -> findAntinodes(bb, v))
+                .map(v -> findAntinodes(grid.inclusiveBoundingBox, v))
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet())
                 .size()
         );
-    }
-
-    private int d2i(Double d) {
-        return d.intValue();
     }
 
     private Set<Point2D> findAntinodes(Point2DUtils.BoundingBox bb, List<Point2D> signals) {
@@ -101,13 +91,7 @@ public class Day8 extends Solution2024<List<String>>{
 
     @Override
     protected String part2(List<List<String>> input) {
-        Map<Point2D, String> grid = Point2DUtils.generateGrid(0, 0, input.get(0).size(), input.size())
-            .collect(Collectors.toMap(
-                Function.identity(), 
-                pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX()))
-            ));
-        Point2D topLeft = new Point2D.Double(0, 0);
-        Point2D bottomRight = new Point2D.Double(input.size(), input.get(0).size());
+        Grid<String> grid = new Grid<>(input);
         Map<String, List<Point2D>> signals = grid.entrySet().stream()
             .filter(e -> !e.getValue().equals("."))
             .collect(Collectors.toMap(
@@ -115,10 +99,9 @@ public class Day8 extends Solution2024<List<String>>{
                 e -> List.of(e.getKey()),
                 (a, b) -> Stream.concat(a.stream(), b.stream()).collect(Collectors.toList())
             ));
-        Point2DUtils.BoundingBox bb = new Point2DUtils.BoundingBox(topLeft, Point2DUtils.applyVectorToPt(new Point2D.Double(-1, -1), bottomRight));
         return Integer.toString(
             signals.values().stream()
-                .map(v -> findAntinodesPart2(bb, v))
+                .map(v -> findAntinodesPart2(grid.inclusiveBoundingBox, v))
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet())
                 .size()

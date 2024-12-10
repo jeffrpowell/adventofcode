@@ -15,24 +15,6 @@ public class Point2DUtils
 {
 	private Point2DUtils() {}
     
-    public static Stream<Point2D> generateGrid(double leftBoundary, double topBoundary, double rightBoundary, double bottomBoundary) {
-        Stream.Builder<Point2D> pointStream = Stream.<Point2D>builder();
-        for (double row = topBoundary; row < bottomBoundary; row += 1.0) {
-            for (double col = leftBoundary; col < rightBoundary; col += 1.0) {
-                pointStream.accept(new Point2D.Double(col, row));
-            }
-        }
-        return pointStream.build();
-    }
-
-    public static <T> Map<Point2D, T> generateGrid(double leftBoundary, double topBoundary, double rightBoundary, double bottomBoundary, Function<Point2D, T> mapFn) {
-        return generateGrid(0, 0, rightBoundary, bottomBoundary)
-            .collect(Collectors.toMap(
-                Function.identity(),
-                mapFn
-            ));
-    }
-	
 	public static double getManhattenDistance(Point2D pt1, Point2D pt2) {
 		return Math.abs(pt1.getY() - pt2.getY()) + Math.abs(pt1.getX() - pt2.getX());
 	}

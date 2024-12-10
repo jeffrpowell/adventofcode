@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -33,7 +34,7 @@ public class Day15 extends Solution2021<List<Integer>> {
     @Override
     protected String part1(List<List<Integer>> input) {
         Point2D destination = new Point2D.Double(input.get(0).size() - 1, input.size() - 1);
-        grid = Point2DUtils.generateGrid(0, 0, input.get(0).size(), input.size())
+        grid = Grid.generatePointStream(0, 0, input.get(0).size(), input.size())
             .collect(Collectors.toMap(
                 Function.identity(), 
                 pt -> new Node(pt, input.get(i2d(pt.getY())).get(i2d(pt.getX())), destination)
@@ -44,7 +45,7 @@ public class Day15 extends Solution2021<List<Integer>> {
     @Override
     protected String part2(List<List<Integer>> input) {
         Point2D destination = new Point2D.Double(input.get(0).size() * 5 - 1, input.size() * 5 - 1);
-        grid = Point2DUtils.generateGrid(0, 0, input.get(0).size(), input.size())
+        grid = Grid.generatePointStream(0, 0, input.get(0).size(), input.size())
             .collect(Collectors.toMap(
                 Function.identity(), 
                 pt -> new Node(pt, input.get(i2d(pt.getY())).get(i2d(pt.getX())), destination)

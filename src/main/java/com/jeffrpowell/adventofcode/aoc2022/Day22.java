@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.Point3DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -335,7 +336,7 @@ public class Day22 extends Solution2022<Section>{
         }
         
         public Map<Point3D, Boolean> parseSide(List<List<String>> map) {
-            Map<Point3D, Boolean> pts = Point2DUtils.generateGrid(mapRectangle.getX(), mapRectangle.getY(), mapRectangle.getX() + mapRectangle.getWidth(), mapRectangle.getY() + mapRectangle.getHeight())
+            Map<Point3D, Boolean> pts = Grid.generatePointStream(mapRectangle.getX(), mapRectangle.getY(), mapRectangle.getX() + mapRectangle.getWidth(), mapRectangle.getY() + mapRectangle.getHeight())
                 .collect(Collectors.toMap(
                     p -> transform(p.getX(), p.getY(), 0, transform),
                     p -> getValue(map, d2i(p.getX()), d2i(p.getY()))

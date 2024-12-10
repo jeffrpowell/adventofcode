@@ -1,5 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2020;
 
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -29,7 +30,7 @@ public class Day11 extends Solution2020<String> {
     protected String part1(List<String> input) {
         height = input.size();
         width = input.get(0).length();
-        Map<Point2D, Character> grid = Point2DUtils.generateGrid(0, 0, width, height).collect(Collectors.toMap(
+        Map<Point2D, Character> grid = Grid.generatePointStream(0, 0, width, height).collect(Collectors.toMap(
             Function.identity(),
             pt -> input.get(Double.valueOf(pt.getY()).intValue()).charAt(Double.valueOf(pt.getX()).intValue())
         ));
@@ -70,7 +71,7 @@ public class Day11 extends Solution2020<String> {
     protected String part2(List<String> input) {
         height = input.size();
         width = input.get(0).length();
-        Map<Point2D, Character> grid = Point2DUtils.generateGrid(0, 0, width, height).collect(Collectors.toMap(
+        Map<Point2D, Character> grid = Grid.generatePointStream(0, 0, width, height).collect(Collectors.toMap(
             Function.identity(),
             pt -> input.get(Double.valueOf(pt.getY()).intValue()).charAt(Double.valueOf(pt.getX()).intValue())
         ));

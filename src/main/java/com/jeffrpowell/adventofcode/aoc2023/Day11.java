@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -25,10 +26,8 @@ public class Day11 extends Solution2023<List<String>>{
 
     @Override
     protected String part1(List<List<String>> input) {
-        final int rightBoundary = input.get(0).size();
-        final int bottomBoundary = input.size();
-        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
-        List<Point2D> galaxies = expandUniverse(rightBoundary, bottomBoundary, grid, 1);
+        Grid<Boolean> grid = new Grid<>(input, (in, pt) -> in.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
+        List<Point2D> galaxies = expandUniverse(grid, 1);
         long distance = 0;
         for (int i = 0; i < galaxies.size(); i++) {
             for (int j = i + 1; j < galaxies.size(); j++) {
@@ -40,10 +39,8 @@ public class Day11 extends Solution2023<List<String>>{
 
     @Override
     protected String part2(List<List<String>> input) {
-        final int rightBoundary = input.get(0).size();
-        final int bottomBoundary = input.size();
-        Map<Point2D, Boolean> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> input.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
-        List<Point2D> galaxies = expandUniverse(rightBoundary, bottomBoundary, grid, 1_000_000L);
+        Grid<Boolean> grid = new Grid<>(input, (in, pt) -> in.get(d2i(pt.getY())).get(d2i(pt.getX())).equals("#"));
+        List<Point2D> galaxies = expandUniverse(grid, 1_000_000L);
         long distance = 0;
         for (int i = 0; i < galaxies.size(); i++) {
             for (int j = i + 1; j < galaxies.size(); j++) {
@@ -64,11 +61,11 @@ public class Day11 extends Solution2023<List<String>>{
      * @param grid
      * @return Just returns the transformed set of galaxy points; all other points are implied to be empty space
      */
-    private List<Point2D> expandUniverse(int width, int height, Map<Point2D, Boolean> grid, long expansionAmount) {
+    private List<Point2D> expandUniverse(Grid<Boolean> grid, long expansionAmount) {
         List<Integer> colsToExpand = new ArrayList<>();
-        for (int col = 0; col < width; col++) {
+        for (int col = 0; col < grid.inclusiveBoundingBox.max().getX() + 1; col++) {
             boolean allEmpty = true;
-            for (Point2D runner = new Point2D.Double(col, 0); runner.getY() < height; runner = Direction.DOWN.travelFrom(runner)) {
+            for (Point2D runner = new Point2D.Double(col, 0); runner.getY() < grid.inclusiveBoundingBox.max().getY() + 1; runner = Direction.DOWN.travelFrom(runner)) {
                 if (grid.get(runner)) {
                     allEmpty = false;
                     break;
@@ -79,9 +76,9 @@ public class Day11 extends Solution2023<List<String>>{
             }
         }
         List<Integer> rowsToExpand = new ArrayList<>();
-        for (int row = 0; row < height; row++) {
+        for (int row = 0; row < grid.inclusiveBoundingBox.max().getY() + 1; row++) {
             boolean allEmpty = true;
-            for (Point2D runner = new Point2D.Double(0, row); runner.getX() < width; runner = Direction.RIGHT.travelFrom(runner)) {
+            for (Point2D runner = new Point2D.Double(0, row); runner.getX() < grid.inclusiveBoundingBox.max().getX() + 1; runner = Direction.RIGHT.travelFrom(runner)) {
                 if (grid.get(runner)) {
                     allEmpty = false;
                     break;

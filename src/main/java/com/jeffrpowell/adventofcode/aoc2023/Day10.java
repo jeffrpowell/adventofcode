@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.Grid;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
@@ -32,9 +33,7 @@ public class Day10 extends Solution2023<List<String>>{
 
     @Override
     protected String part1(List<List<String>> input) {
-        final int rightBoundary = input.get(0).size();
-        final int bottomBoundary = input.size();
-        Map<Point2D, Pipe> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> parsePipe(input.get(d2i(pt.getY())).get(d2i(pt.getX()))));
+        Grid<Pipe> grid = new Grid<>(input, (in, pt) -> parsePipe(in.get(d2i(pt.getY())).get(d2i(pt.getX()))));
         Point2D startPt = grid.entrySet().stream().filter(e -> e.getValue() == START_PIPE).map(Map.Entry::getKey).findFirst().get();
         List<PipeTraversal> neighbors = Point2DUtils.getAdjacentPts(startPt, false).stream()
             .map(pt -> {
@@ -64,7 +63,7 @@ public class Day10 extends Solution2023<List<String>>{
     protected String part2(List<List<String>> input) {
         final int rightBoundary = input.get(0).size();
         final int bottomBoundary = input.size();
-        Map<Point2D, Pipe> grid = Point2DUtils.generateGrid(0, 0, rightBoundary, bottomBoundary, pt -> parsePipe(input.get(d2i(pt.getY())).get(d2i(pt.getX()))));
+        Grid<Pipe> grid = new Grid<>(input, (in, pt) -> parsePipe(in.get(d2i(pt.getY())).get(d2i(pt.getX()))));
         Point2D startPt = grid.entrySet().stream().filter(e -> e.getValue() == START_PIPE).map(Map.Entry::getKey).findFirst().get();
         List<PipeTraversal> neighbors = Point2DUtils.getAdjacentPts(startPt, false).stream()
             .map(pt -> {
@@ -112,7 +111,8 @@ public class Day10 extends Solution2023<List<String>>{
          */
         final int zoomRightBoundary = rightBoundary * 2 + 2;
         final int zoomBottomBoundary = bottomBoundary * 2 + 2;
-        Map<Point2D, Pipe> zoomGrid = Point2DUtils.generateGrid(0, 0, zoomRightBoundary, zoomBottomBoundary, pt -> GROUND_PIPE);
+        
+        Grid<Pipe> zoomGrid = new Grid<>(0, 0, zoomRightBoundary, zoomBottomBoundary, pt -> GROUND_PIPE);
         mainLoop.stream()
             .forEach(pipePt -> {
                 double newX = pipePt.getX() * 2 + 1;
