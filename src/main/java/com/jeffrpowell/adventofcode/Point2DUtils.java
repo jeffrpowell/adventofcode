@@ -40,6 +40,10 @@ public class Point2DUtils
 	public static double getEuclideanDistance(Point2D pt1, Point2D pt2) {
 		return pt1.distance(pt2);
 	}
+
+    public static Point2D getVector(Point2D start, Point2D end) {
+        return new Point2D.Double(end.getX() - start.getX(), end.getY() - start.getY());
+    }
     
     public static Point2D applyVectorToPt(Point2D vector, Point2D pt) {
         return new Point2D.Double(pt.getX() + vector.getX(), pt.getY() + vector.getY());
