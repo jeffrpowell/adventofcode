@@ -2,23 +2,19 @@ package com.jeffrpowell.adventofcode.aoc2024;
 
 import java.awt.geom.Point2D;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.jeffrpowell.adventofcode.Direction;
 import com.jeffrpowell.adventofcode.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 
 public class Day8 extends Solution2024<List<String>>{
-    private static final StringBuilder log = new StringBuilder();
 
     @Override
     public int getDay() {
