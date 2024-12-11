@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -79,38 +80,60 @@ public class Day9 extends Solution2024<List<Integer>>{
     protected String part2(List<List<Integer>> input) {
         List<Integer> disk = input.get(0);
         List<File> files = new ArrayList<>();
-        Map<Integer, Map<Integer, Boolean>> freeSpaces = new HashMap<>();
-        IntStream.range(0, 10).forEach(i -> freeSpaces.put(i, new HashMap<>()));
+        Map<Integer, File> freeSpaces = new HashMap<>();
         boolean freeSpace = false;
         int position = 0;
         int fileId = 0;
+        List<Integer> compressedDisk = new ArrayList<>();
         for (Integer block : disk) {
             if (freeSpace) {
-                freeSpaces.get(block).put(position, false);
+                freeSpaces.put(position, new File(position, -1, block));
+                IntStream.range(0, block).forEach(i -> compressedDisk.add(-1));
             }
             else {
+                final int _fileId = fileId;
                 files.add(new File(position, fileId++, block));
+                IntStream.range(0, block).forEach(i -> compressedDisk.add(_fileId));
             }
             position += block;
             freeSpace = !freeSpace;
         }
         files = files.reversed();
         for (File file : files) {
-            // freeSpaces.keySet().stream()
-            //     .filter(k -> k >= file.size())
-            //     .map(freeSpaces::get)
-            //     .filter(freeSpacesOfSize -> freeSpacesOfSize.values().stream()
-            //         .anyMatch(v -> Boolean.FALSE.equals(v))
-            //     )
-            //     .map(freeSpacesOfSize -> freeSpacesOfSize.entrySet().stream()
-            //         .filter(e -> Boolean.FALSE.equals(e.getValue()))
-            //         .map(Map.Entry::getKey)
-            //         .sorted()
-            //         .findFirst().get()
-            //     )
-            //     .so
+            position = 0;
+            while (position < file.position()) {
+                if (compressedDisk.get(position) == -1) {
+                    File emptySpace = freeSpaces.get(position);
+                    if (emptySpace.size() >= file.size()) {
+                        int _position = position;
+                        IntStream.range(0, file.size()).forEach(i -> compressedDisk.set(_position+i, file.fileId()));
+                        IntStream.range(0, file.size()).forEach(i -> compressedDisk.set(file.position()+i, -1));
+                        freeSpaces.remove(position);
+                        if (emptySpace.size() != file.size()) {
+                            int newEmptySize = emptySpace.size() - file.size();
+                            int newEmptyPosition = position + file.size();
+                            freeSpaces.put(newEmptyPosition, new File(newEmptyPosition, -1, newEmptySize));
+                        }
+                        position += file.size();
+                        break;
+                    }
+                    else {
+                        position += emptySpace.size();
+                    }
+                }
+                else {
+                    position++;
+                }
+            }
         }
-        return null;
+        List<Integer> finalCompressedDisk = compressedDisk.stream()
+            .map(block -> block == -1 ? 0 : block)
+            .collect(Collectors.toList());
+        long checksum = 0;
+        for (int i = 0; i < finalCompressedDisk.size(); i++) {
+            checksum += finalCompressedDisk.get(i) * i;
+        }
+        return Long.toString(checksum);
     }
 
     record File(int position, int fileId, int size){}
