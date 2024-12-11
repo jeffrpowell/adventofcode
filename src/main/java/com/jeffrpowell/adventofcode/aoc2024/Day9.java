@@ -1,7 +1,9 @@
 package com.jeffrpowell.adventofcode.aoc2024;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -75,6 +77,41 @@ public class Day9 extends Solution2024<List<Integer>>{
 
     @Override
     protected String part2(List<List<Integer>> input) {
-        return part1(input);
+        List<Integer> disk = input.get(0);
+        List<File> files = new ArrayList<>();
+        Map<Integer, Map<Integer, Boolean>> freeSpaces = new HashMap<>();
+        IntStream.range(0, 10).forEach(i -> freeSpaces.put(i, new HashMap<>()));
+        boolean freeSpace = false;
+        int position = 0;
+        int fileId = 0;
+        for (Integer block : disk) {
+            if (freeSpace) {
+                freeSpaces.get(block).put(position, false);
+            }
+            else {
+                files.add(new File(position, fileId++, block));
+            }
+            position += block;
+            freeSpace = !freeSpace;
+        }
+        files = files.reversed();
+        for (File file : files) {
+            // freeSpaces.keySet().stream()
+            //     .filter(k -> k >= file.size())
+            //     .map(freeSpaces::get)
+            //     .filter(freeSpacesOfSize -> freeSpacesOfSize.values().stream()
+            //         .anyMatch(v -> Boolean.FALSE.equals(v))
+            //     )
+            //     .map(freeSpacesOfSize -> freeSpacesOfSize.entrySet().stream()
+            //         .filter(e -> Boolean.FALSE.equals(e.getValue()))
+            //         .map(Map.Entry::getKey)
+            //         .sorted()
+            //         .findFirst().get()
+            //     )
+            //     .so
+        }
+        return null;
     }
+
+    record File(int position, int fileId, int size){}
 }
