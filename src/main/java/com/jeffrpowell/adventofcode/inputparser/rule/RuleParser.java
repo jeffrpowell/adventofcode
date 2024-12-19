@@ -31,9 +31,14 @@ public class RuleParser implements InputParser<Rule>{
         List<Future<Rule>> ruleJobs = new ArrayList<>();
         int inlineCounter = 0;
         for (String input: inputs) {
-            String[] splitInputs = input.split(ruleDelimiter);
-            for (String splitInput : splitInputs) {
-                ruleJobs.add(executor.submit(new RuleParserJob(inlineCounter++, splitInput, patterns)));
+            if (ruleDelimiter == null || ruleDelimiter.equals("")) {
+                ruleJobs.add(executor.submit(new RuleParserJob(inlineCounter++, input, patterns)));
+            }
+            else {
+                String[] splitInputs = input.split(ruleDelimiter);
+                for (String splitInput : splitInputs) {
+                    ruleJobs.add(executor.submit(new RuleParserJob(inlineCounter++, splitInput, patterns)));
+                }
             }
         }
         List<Rule> rules = ruleJobs.stream().parallel()
