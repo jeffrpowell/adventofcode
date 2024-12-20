@@ -45,7 +45,7 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
     protected String part1(List<Part<Rule, Rule>> input) {
         List<Robot> robots = input.stream()
             .map(part -> new Robot(part.firstPart().getPoint2D(0), part.secondPart().getPoint2D(0)))
-            .map(r -> new Robot(transformPoint(r), r.v()))
+            .map(r -> new Robot(transformPoint(r, 100), r.v()))
             .collect(Collectors.toList());
         // Point2DUtils.printPoints(robots.stream().map(Robot::pt).collect(Collectors.toList()));
         double xMid = bb.max().getX() / 2;
@@ -72,9 +72,9 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
         return Long.toString(quadrants.values().stream().reduce(1L, Math::multiplyExact));
     }
 
-    private Point2D transformPoint(Robot r) {
+    private Point2D transformPoint(Robot r, int iterations) {
         Point2D pt = r.pt();
-        pt = Point2DUtils.applyVectorToPtNTimes(r.v(), r.pt(), 100);
+        pt = Point2DUtils.applyVectorToPtNTimes(r.v(), r.pt(), iterations);
         double newX;
         if (pt.getX() >= 0) {
             newX = pt.getX() % (bb.max().getX() + 1);
@@ -101,6 +101,67 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
 
     @Override
     protected String part2(List<Part<Rule, Rule>> input) {
-        return part1(input);
+        List<Robot> robots = input.stream()
+            .map(part -> new Robot(part.firstPart().getPoint2D(0), part.secondPart().getPoint2D(0)))
+            .collect(Collectors.toList());
+        long highestScore = Long.MIN_VALUE;
+        GridScoring gs = new GridScoring(bb.max().getY(), bb.max().getX());
+        for (int i = 1; i < Integer.MAX_VALUE; i++) {
+            robots = robots.stream()
+                .map(r -> new Robot(transformPoint(r, 1), r.v()))
+                .collect(Collectors.toList());
+            long newScore = getCentralDistanceScores(robots, gs);
+            Point2DUtils.printPoints(robots.stream().map(Robot::pt).collect(Collectors.toList()));
+            if (newScore > highestScore) {
+                highestScore = newScore;
+                System.out.println("Seconds: " + i);
+                Point2DUtils.printPoints(robots.stream().map(Robot::pt).collect(Collectors.toList()));
+            }
+        }
+        return "";
+    }
+
+    private long getCentralDistanceScores(List<Robot> robots, GridScoring gs) {
+        return robots.stream()
+            .map(r -> gs.calculateScore(r.pt()))
+            .map(Double::longValue)
+            .reduce(0L, Math::addExact);
+    }
+
+    public class GridScoring {
+        private int rows;
+        private int cols;
+        private Point2D center;
+        private double maxCenterDistance;
+        private double maxEdgeDistance;
+    
+        public GridScoring(Double rows, Double cols) {
+            this.rows = rows.intValue();
+            this.cols = cols.intValue();
+            this.center = new Point2D.Double(rows / 2.0, cols / 2.0);
+            this.maxCenterDistance = calculateDistance(center, new Point2D.Double(0, 0));
+            this.maxEdgeDistance = Math.min(rows / 2.0, cols / 2.0);
+        }
+    
+        public double calculateScore(Point2D point) {
+            double centerDistance = calculateDistance(point, center);
+            double edgeDistance = calculateEdgeDistance(point);
+    
+            double normalizedCenterScore = 1 - (centerDistance / maxCenterDistance);
+            double normalizedEdgeScore = edgeDistance / maxEdgeDistance;
+    
+            // Combine the scores; adjust weights if needed
+            return normalizedCenterScore + (1 - normalizedEdgeScore);
+        }
+    
+        private double calculateDistance(Point2D p1, Point2D p2) {
+            return p1.distance(p2);
+        }
+    
+        private double calculateEdgeDistance(Point2D point) {
+            double x = point.getX();
+            double y = point.getY();
+            return Math.min(Math.min(x, rows - 1 - x), Math.min(y, cols - 1 - y));
+        }
     }
 }
