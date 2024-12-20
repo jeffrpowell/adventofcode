@@ -43,7 +43,7 @@ public class Day18 extends Solution2024<Rule>{
         return InputParserFactory.getRuleParser("\n", Pattern.compile("(\\d+),(\\d+)"));
     }
 
-    record WalkState(Point2D pt, int distanceWalked) implements Comparable<WalkState> {
+    record WalkState(WalkState prior, Point2D pt, int distanceWalked) implements Comparable<WalkState> {
         private Double heuristic() {
             return distanceWalked + Point2DUtils.getEuclideanDistance(pt, end);
         }
@@ -67,7 +67,7 @@ public class Day18 extends Solution2024<Rule>{
         }
 
         public WalkState generateNext(Point2D next) {
-            return new WalkState(next, distanceWalked + 1);
+            return new WalkState(this, next, distanceWalked + 1);
         }
 
         @Override
@@ -109,7 +109,7 @@ public class Day18 extends Solution2024<Rule>{
             .collect(Collectors.toList());
         Set<Point2D> visited = new HashSet<>();
         PriorityQueue<WalkState> q = new PriorityQueue<>();
-        q.add(new WalkState(start, 0));
+        q.add(new WalkState(null, start, 0));
         WalkState w = null;
         // int printThreshold = 100;
         while(!q.peek().pt().equals(end)) {
@@ -140,6 +140,68 @@ public class Day18 extends Solution2024<Rule>{
 
     @Override
     protected String part2(List<Rule> input) {
-        return part1(input);
+        List<Point2D> startingCorruptedPts = input.stream()
+            .limit(limit)
+            .map(r -> new Point2D.Double(r.getDouble(0), r.getDouble(1)))
+            .collect(Collectors.toList());
+        List<Point2D> remainingCorruptedPts = input.stream()
+            .skip(limit)
+            .map(r -> new Point2D.Double(r.getDouble(0), r.getDouble(1)))
+            .collect(Collectors.toList());
+        WalkState w = findSolution(startingCorruptedPts);
+        Set<Point2D> solution = new HashSet<>();
+        solution.add(w.pt());
+        while(w.prior() != null) {
+            w = w.prior();
+            solution.add(w.pt());
+        }
+        int loopTimes = remainingCorruptedPts.size();
+        for (int i = 0; i < loopTimes; i++) {
+            Point2D nextByte = remainingCorruptedPts.removeFirst();
+            startingCorruptedPts.add(nextByte);
+            if (solution.contains(nextByte)) {
+                solution.clear();
+                w = findSolution(startingCorruptedPts);
+                if (w == null) {
+                    return nextByte.getX() + "," + nextByte.getY(); //manually drop the ".0" at the end of each number
+                }
+                solution.add(w.pt());
+                while(w.prior() != null) {
+                    w = w.prior();
+                    solution.add(w.pt());
+                }
+            }
+        }
+        return "Solution not found";
+    }
+
+    private WalkState findSolution(List<Point2D> startingCorruptedPts) {
+        Point2DUtils.BoundingBox bb = new Point2DUtils.BoundingBox(start, end);
+        Set<Point2D> visited = new HashSet<>();
+        PriorityQueue<WalkState> q = new PriorityQueue<>();
+        q.add(new WalkState(null, start, 0));
+        WalkState w = null;
+        // int printThreshold = 100;
+        while(!q.isEmpty() && !q.peek().pt().equals(end)) {
+            w = q.poll();
+            WalkState _w = w;
+            visited.add(w.pt());
+            // if (visited.size() > printThreshold) {
+            //     printThreshold += 100;
+            //     printGrid(allCorruptedPts, visited);
+            // }
+            Point2DUtils.getBoundedAdjacentPts(w.pt(), bb, true, false).stream()
+                .filter(p -> !visited.contains(p) && _w.nextPointWillBeSafe(p, startingCorruptedPts))
+                .map(w::generateNext)
+                .forEach(nextW -> {
+                    if (!q.contains(nextW)) {
+                        q.add(nextW);
+                    }
+                });
+        }
+        if (q.isEmpty()) {
+            return null;
+        }
+        return q.poll();
     }
 }
