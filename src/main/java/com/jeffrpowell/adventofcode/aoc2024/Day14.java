@@ -3,6 +3,7 @@ package com.jeffrpowell.adventofcode.aoc2024;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -105,13 +106,11 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
             .map(part -> new Robot(part.firstPart().getPoint2D(0), part.secondPart().getPoint2D(0)))
             .collect(Collectors.toList());
         long highestScore = Long.MIN_VALUE;
-        GridScoring gs = new GridScoring(bb.max().getY(), bb.max().getX());
         for (int i = 1; i < Integer.MAX_VALUE; i++) {
             robots = robots.stream()
                 .map(r -> new Robot(transformPoint(r, 1), r.v()))
                 .collect(Collectors.toList());
-            long newScore = getCentralDistanceScores(robots, gs);
-            Point2DUtils.printPoints(robots.stream().map(Robot::pt).collect(Collectors.toList()));
+            long newScore = getCentralDistanceScores(robots);
             if (newScore > highestScore) {
                 highestScore = newScore;
                 System.out.println("Seconds: " + i);
@@ -121,47 +120,13 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
         return "";
     }
 
-    private long getCentralDistanceScores(List<Robot> robots, GridScoring gs) {
+    private long getCentralDistanceScores(List<Robot> robots) {
+        Set<Point2D> bots = robots.stream().map(Robot::pt).collect(Collectors.toSet());
         return robots.stream()
-            .map(r -> gs.calculateScore(r.pt()))
-            .map(Double::longValue)
-            .reduce(0L, Math::addExact);
-    }
-
-    public class GridScoring {
-        private int rows;
-        private int cols;
-        private Point2D center;
-        private double maxCenterDistance;
-        private double maxEdgeDistance;
-    
-        public GridScoring(Double rows, Double cols) {
-            this.rows = rows.intValue();
-            this.cols = cols.intValue();
-            this.center = new Point2D.Double(rows / 2.0, cols / 2.0);
-            this.maxCenterDistance = calculateDistance(center, new Point2D.Double(0, 0));
-            this.maxEdgeDistance = Math.min(rows / 2.0, cols / 2.0);
-        }
-    
-        public double calculateScore(Point2D point) {
-            double centerDistance = calculateDistance(point, center);
-            double edgeDistance = calculateEdgeDistance(point);
-    
-            double normalizedCenterScore = 1 - (centerDistance / maxCenterDistance);
-            double normalizedEdgeScore = edgeDistance / maxEdgeDistance;
-    
-            // Combine the scores; adjust weights if needed
-            return normalizedCenterScore + (1 - normalizedEdgeScore);
-        }
-    
-        private double calculateDistance(Point2D p1, Point2D p2) {
-            return p1.distance(p2);
-        }
-    
-        private double calculateEdgeDistance(Point2D point) {
-            double x = point.getX();
-            double y = point.getY();
-            return Math.min(Math.min(x, rows - 1 - x), Math.min(y, cols - 1 - y));
-        }
+            .map(Robot::pt)
+            .map(pt -> Point2DUtils.getAdjacentPts(pt, false))
+            .flatMap(Set::stream)
+            .filter(bots::contains)
+            .count();
     }
 }
