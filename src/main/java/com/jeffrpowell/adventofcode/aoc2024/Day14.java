@@ -47,7 +47,7 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
             .map(part -> new Robot(part.firstPart().getPoint2D(0), part.secondPart().getPoint2D(0)))
             .map(r -> new Robot(transformPoint(r), r.v()))
             .collect(Collectors.toList());
-        Point2DUtils.printPoints(robots.stream().map(Robot::pt).collect(Collectors.toList()));
+        // Point2DUtils.printPoints(robots.stream().map(Robot::pt).collect(Collectors.toList()));
         double xMid = bb.max().getX() / 2;
         double yMid = bb.max().getY() / 2;
         Map<Integer, Long> quadrants = robots.stream()
@@ -61,10 +61,14 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
                 else if (r.pt().getX() < xMid && r.pt().getY() > yMid) {
                     return 3;
                 }
-                else {
+                else if (r.pt().getX() > xMid && r.pt().getY() > yMid) {
                     return 4;
                 }
+                else {
+                    return 0;
+                }
             }, Collectors.counting()));
+        quadrants.remove(0);
         return Long.toString(quadrants.values().stream().reduce(1L, Math::multiplyExact));
     }
 
@@ -73,7 +77,7 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
         pt = Point2DUtils.applyVectorToPtNTimes(r.v(), r.pt(), 100);
         double newX;
         if (pt.getX() >= 0) {
-            newX = pt.getX() % bb.max().getX();
+            newX = pt.getX() % (bb.max().getX() + 1);
         }
         else {
             /*
@@ -82,14 +86,14 @@ public class Day14 extends Solution2024<Part<Rule, Rule>>{
                 Mod grid size
                 Grid size - #
              */
-            newX = bb.max().getX() - (Math.abs(pt.getX() - bb.max().getX()) % bb.max().getX());
+            newX = bb.max().getX() - (Math.abs(pt.getX() - bb.max().getX()) % (bb.max().getX() + 1));
         }
         double newY;
         if (pt.getY() >= 0) {
-            newY = pt.getY() % bb.max().getY();
+            newY = pt.getY() % (bb.max().getY() + 1);
         }
         else {
-            newY = bb.max().getY() - (Math.abs(pt.getY() - bb.max().getY()) % bb.max().getY());
+            newY = bb.max().getY() - (Math.abs(pt.getY() - bb.max().getY()) % (bb.max().getY() + 1));
         }
         return new Point2D.Double(newX, newY);
     }
