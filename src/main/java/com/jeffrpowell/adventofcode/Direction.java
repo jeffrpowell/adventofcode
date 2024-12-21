@@ -8,22 +8,24 @@ import java.util.stream.Stream;
 
 public enum Direction
 {
-	LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY()), true),
-	RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY()), true),
-	UP(pt->new Point2D.Double(pt.getX(), pt.getY() - 1), true),
-	DOWN(pt->new Point2D.Double(pt.getX(), pt.getY() + 1), true),
-    UP_LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY() - 1), false),
-    UP_RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY() - 1), false),
-    DOWN_LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY() + 1), false),
-    DOWN_RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY() + 1), false);
+	LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY()), true, "←"),
+	RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY()), true, "→"),
+	UP(pt->new Point2D.Double(pt.getX(), pt.getY() - 1), true, "↑"),
+	DOWN(pt->new Point2D.Double(pt.getX(), pt.getY() + 1), true, "↓"),
+    UP_LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY() - 1), false, "↖"),
+    UP_RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY() - 1), false, "↗"),
+    DOWN_LEFT(pt->new Point2D.Double(pt.getX() - 1, pt.getY() + 1), false, "↙"),
+    DOWN_RIGHT(pt->new Point2D.Double(pt.getX() + 1, pt.getY() + 1), false, "↘");
 	
 	private final Function<Point2D, Point2D> travelFn;
     private final boolean cardinal;
+	private final String printChar;
 
-	private Direction(Function<Point2D, Point2D> travelFn, boolean cardinal)
+	private Direction(Function<Point2D, Point2D> travelFn, boolean cardinal, String printChar)
 	{
 		this.travelFn = travelFn;
         this.cardinal = cardinal;
+		this.printChar = printChar;
 	}
     
     public boolean isCardinal() {
@@ -150,5 +152,10 @@ public enum Direction
 
 	public static Stream<Direction> getAllCardinalDirections() {
 		return getAllDirections().filter(Direction::isCardinal);
+	}
+
+	@Override
+	public String toString() {
+		return printChar;
 	}
 }
