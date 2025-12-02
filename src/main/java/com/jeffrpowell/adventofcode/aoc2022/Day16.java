@@ -77,35 +77,35 @@ public class Day16 extends Solution2022<Rule>{
         return Integer.toString(maxScore);
     }
 
-    private String getMaxPressure2(Map<String, Valve> valveIndex) {
-        Deque<Traversal> q = new ArrayDeque<>();
-        valveIndex.get("AA").getNeighbors().entrySet().stream()
-            .forEach(e -> {
-                q.push(new Traversal(e.getKey().getTotalPressure(30 - e.getValue() - 1), Collections.emptySet(), e.getKey().name, 30 - e.getValue() - 1));
-            });
-        int maxScore = 0;
-        while (!q.isEmpty()) {
-            Traversal t = q.pop();
-            if (t.pressureScore() > maxScore) {
-                maxScore = t.pressureScore();
-            }
-            for (var entry : valveIndex.get(t.head()).getNeighbors().entrySet()) {
-                if (entry.getValue() >= t.timeLeft() || t.openedValves().contains(entry.getKey().name)) {
-                    continue;
-                }
-                if (!t.openedValves().contains(t.head())) {
-                    Set<String> newOpenedValves = Stream.of(Set.of(t.head), t.openedValves()).flatMap(Set::stream).collect(Collectors.toSet());
-                    q.push(new Traversal(
-                        t.pressureScore() + entry.getKey().getTotalPressure(t.timeLeft() - entry.getValue() - 1), 
-                        newOpenedValves, 
-                        entry.getKey().name, 
-                        t.timeLeft() - entry.getValue() - 1)
-                    ); //choose to open the valve
-                }
-            }
-        }
-        return Integer.toString(maxScore);
-    }
+    // private String getMaxPressure2(Map<String, Valve> valveIndex) {
+    //     Deque<Traversal> q = new ArrayDeque<>();
+    //     valveIndex.get("AA").getNeighbors().entrySet().stream()
+    //         .forEach(e -> {
+    //             q.push(new Traversal(e.getKey().getTotalPressure(30 - e.getValue() - 1), Collections.emptySet(), e.getKey().name, 30 - e.getValue() - 1));
+    //         });
+    //     int maxScore = 0;
+    //     while (!q.isEmpty()) {
+    //         Traversal t = q.pop();
+    //         if (t.pressureScore() > maxScore) {
+    //             maxScore = t.pressureScore();
+    //         }
+    //         for (var entry : valveIndex.get(t.head()).getNeighbors().entrySet()) {
+    //             if (entry.getValue() >= t.timeLeft() || t.openedValves().contains(entry.getKey().name)) {
+    //                 continue;
+    //             }
+    //             if (!t.openedValves().contains(t.head())) {
+    //                 Set<String> newOpenedValves = Stream.of(Set.of(t.head), t.openedValves()).flatMap(Set::stream).collect(Collectors.toSet());
+    //                 q.push(new Traversal(
+    //                     t.pressureScore() + entry.getKey().getTotalPressure(t.timeLeft() - entry.getValue() - 1), 
+    //                     newOpenedValves, 
+    //                     entry.getKey().name, 
+    //                     t.timeLeft() - entry.getValue() - 1)
+    //                 ); //choose to open the valve
+    //             }
+    //         }
+    //     }
+    //     return Integer.toString(maxScore);
+    // }
 
     record Traversal(int pressureScore, Set<String> openedValves, String head, int timeLeft){};
 

@@ -154,6 +154,7 @@ public class Day7 extends Solution2022<Rule>{
             return size;
         }
 
+        @SuppressWarnings("unused")
         public void printDirectory() {
             System.out.println(name + "("+size+")");
             int tabs = 1;

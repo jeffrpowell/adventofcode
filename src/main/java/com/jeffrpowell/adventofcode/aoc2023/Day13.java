@@ -110,6 +110,7 @@ public class Day13 extends Solution2023<Section>{
         return Long.MIN_VALUE;
     }
 
+    @SuppressWarnings("unused")
     private long findCenterAndCountColsRows(List<List<String>> input, int tolerance) {
         Deque<List<String>> history = new ArrayDeque<>();
         Deque<List<String>> mirrorCheck = new ArrayDeque<>();

@@ -96,19 +96,19 @@ public class Day1 extends Solution2023<Rule>{
         return Long.toString(multi + one);
     }
 
-    private void debugPart1(Map<String, List<Rule>> rules) {
-        rules.values().stream().flatMap(List::stream).forEach(r -> {
-            System.out.print(r.getLine());
-            System.out.print(": " + r.getLong(0));
-            if (r.getRulePatternKey().equals("multi")) {
-                System.out.print(" " + r.getLong(1));
-            }
-            else {
-                System.out.print(" " + r.getLong(0));
-            }
-            System.out.println();
-        });
-    }
+    // private void debugPart1(Map<String, List<Rule>> rules) {
+    //     rules.values().stream().flatMap(List::stream).forEach(r -> {
+    //         System.out.print(r.getLine());
+    //         System.out.print(": " + r.getLong(0));
+    //         if (r.getRulePatternKey().equals("multi")) {
+    //             System.out.print(" " + r.getLong(1));
+    //         }
+    //         else {
+    //             System.out.print(" " + r.getLong(0));
+    //         }
+    //         System.out.println();
+    //     });
+    // }
 
     @Override
     protected String part2(List<Rule> input) {

@@ -64,7 +64,6 @@ public class Day17 extends Solution2022<List<String>>{
         Set<Visit> visited = new HashSet<>();
         Set<Point2D> settledPts = new HashSet<>();
         double heightAtFirstRepeat = 0;
-        long multiplier = 0;
         long targetPieces = 1_000_000_000_000L;
         long piecesAtFirstRepeat = 0;
         double lastHeightAchieved = floor;
@@ -118,10 +117,7 @@ public class Day17 extends Solution2022<List<String>>{
         return Double.toString(floor - minY);
     }
 
-    private long calculateHeight(int i, double minY) {
-        return -1;
-    }
-
+    @SuppressWarnings("unused")
     private void printPts(Tetris piece, Set<Point2D> settledPts, double minY) {
         Point2DUtils.printPoints(
             Stream.concat(
@@ -152,10 +148,6 @@ public class Day17 extends Solution2022<List<String>>{
         public abstract Stream<Point2D> getLeftPts();
         public abstract Stream<Point2D> getRightPts();
         public abstract Stream<Point2D> getBottomPts();
-
-        public Point2D getBottomLeft() {
-            return bottomLeft;
-        }
 
         protected double nextY(double minY) {
             return Math.min(minY, bottomLeft.getY()) - 4;

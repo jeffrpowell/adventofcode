@@ -56,6 +56,7 @@ public class Rule {
         return sortKey;
     }
     
+    @SuppressWarnings("unchecked")
     public <T> T getCustomType(int i, Function<String, T> fn) {
         this.cache.putIfAbsent(i, fn.apply(tokens.get(i)));
         return (T) this.cache.get(i);

@@ -39,6 +39,7 @@ public class Day20 extends Solution2022<Long>{
     }
     record Mover(long num, int originalIndex){}
 
+    @SuppressWarnings("unused")
     private void printList(List<Mover> copy) {
         for (int i = 0; i < copy.size(); i++) {
             Mover m = copy.get(i);

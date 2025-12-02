@@ -184,10 +184,6 @@ public class Day11 extends Solution2022<Section>{
             return id;
         }
 
-        public List<Long> getItems() {
-            return items;
-        }
-
         public Long getDivisibleBy() {
             return divisibleBy;
         }

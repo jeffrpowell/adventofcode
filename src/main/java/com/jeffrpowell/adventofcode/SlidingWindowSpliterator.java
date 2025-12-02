@@ -50,6 +50,7 @@ public class SlidingWindowSpliterator<T> implements Spliterator<Stream<T>> {
         rightPadCountdown = windowSize - 1;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean tryAdvance(Consumer<? super Stream<T>> action) {
         if (windowSize < 1) {

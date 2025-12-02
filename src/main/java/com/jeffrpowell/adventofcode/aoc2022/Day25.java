@@ -55,6 +55,7 @@ public class Day25 extends Solution2022<List<String>>{
         return sum;
     }
 
+    @SuppressWarnings("unused")
     private String longToSnafu(Long lng) {
         Deque<Double> maxRanges = new ArrayDeque<>();
         double maxRange = 2;

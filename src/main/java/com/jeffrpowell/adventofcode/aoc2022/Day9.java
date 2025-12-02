@@ -65,6 +65,7 @@ public class Day9 extends Solution2022<Rule>{
         return tail;
     }
 
+    @SuppressWarnings("unused")
     private void printPts(Set<Point2D> pts) {
         Point2DUtils.printPoints(pts);
     }
