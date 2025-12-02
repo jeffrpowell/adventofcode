@@ -1,11 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2019;
 
-import com.jeffrpowell.adventofcode.aoc2019.intcode.IntCodeComputer;
-import com.jeffrpowell.adventofcode.inputparser.InputParser;
-import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
@@ -14,6 +10,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
+
+import com.jeffrpowell.adventofcode.Permutations;
+import com.jeffrpowell.adventofcode.aoc2019.intcode.IntCodeComputer;
+import com.jeffrpowell.adventofcode.inputparser.InputParser;
+import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 
 public class Day7 extends Solution2019<List<BigInteger>>{
 
@@ -70,31 +71,7 @@ public class Day7 extends Solution2019<List<BigInteger>>{
 	}
 	
 	private static List<BigInteger[]> generatePhasePermutations(BigInteger[] elements) {
-		List<BigInteger[]> permutations = new ArrayList<>();
-		perm(elements, elements.length, permutations);
-		return permutations;
-	}
-	
-	public static void perm(BigInteger[] list, int n, List<BigInteger[]> permutations)
-	{
-		if(n == 1)
-		{
-			permutations.add(Arrays.copyOf(list, list.length));
-		} 
-		else 
-		{
-			for(int i=0; i<n-1; i++)
-			{
-				perm(list,n-1, permutations);
-
-				int j = ( n % 2 == 0 ) ? i : 0; 
-
-				BigInteger t = list[n-1];              
-				list[n-1] = list[j];
-				list[j] = t;                
-			}
-			perm(list,n-1, permutations);
-		}
+		return Permutations.getAllPermutations(elements);
 	}
 	
 	@Override
