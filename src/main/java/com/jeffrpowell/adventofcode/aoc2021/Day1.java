@@ -1,6 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2021;
 
-import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;
+import com.jeffrpowell.adventofcode.algorithms.SlidingWindowSpliterator;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.List;

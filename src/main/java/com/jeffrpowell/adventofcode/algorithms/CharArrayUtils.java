@@ -1,4 +1,4 @@
-package com.jeffrpowell.adventofcode;
+package com.jeffrpowell.adventofcode.algorithms;
 
 import java.util.ArrayList;
 import java.util.List;

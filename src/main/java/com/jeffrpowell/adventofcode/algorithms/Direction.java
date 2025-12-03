@@ -1,4 +1,4 @@
-package com.jeffrpowell.adventofcode;
+package com.jeffrpowell.adventofcode.algorithms;
 
 import java.awt.geom.Point2D;
 import java.util.Arrays;

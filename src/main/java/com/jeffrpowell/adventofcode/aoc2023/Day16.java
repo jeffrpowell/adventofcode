@@ -11,9 +11,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.jeffrpowell.adventofcode.Direction;
-import com.jeffrpowell.adventofcode.Grid;
-import com.jeffrpowell.adventofcode.Point2DUtils;
+import com.jeffrpowell.adventofcode.algorithms.Direction;
+import com.jeffrpowell.adventofcode.algorithms.Grid;
+import com.jeffrpowell.adventofcode.algorithms.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 

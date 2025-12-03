@@ -1,7 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2020;
 
 import com.google.common.collect.Lists;
-import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;
+import com.jeffrpowell.adventofcode.algorithms.SlidingWindowSpliterator;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.HashSet;

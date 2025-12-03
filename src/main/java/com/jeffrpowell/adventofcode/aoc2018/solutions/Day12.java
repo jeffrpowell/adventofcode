@@ -1,8 +1,9 @@
 package com.jeffrpowell.adventofcode.aoc2018.solutions;
 
+import com.jeffrpowell.adventofcode.algorithms.SlidingWindowSpliterator;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
-import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

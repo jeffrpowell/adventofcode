@@ -1,5 +1,10 @@
 package com.jeffrpowell.adventofcode.aoc2024;
 
+import static com.jeffrpowell.adventofcode.algorithms.Direction.DOWN;
+import static com.jeffrpowell.adventofcode.algorithms.Direction.LEFT;
+import static com.jeffrpowell.adventofcode.algorithms.Direction.RIGHT;
+import static com.jeffrpowell.adventofcode.algorithms.Direction.UP;
+
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,12 +15,8 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.jeffrpowell.adventofcode.Direction;
-import static com.jeffrpowell.adventofcode.Direction.UP;
-import static com.jeffrpowell.adventofcode.Direction.DOWN;
-import static com.jeffrpowell.adventofcode.Direction.LEFT;
-import static com.jeffrpowell.adventofcode.Direction.RIGHT;
-import com.jeffrpowell.adventofcode.Point2DUtils;
+import com.jeffrpowell.adventofcode.algorithms.Direction;
+import com.jeffrpowell.adventofcode.algorithms.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 

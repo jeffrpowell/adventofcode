@@ -3,7 +3,7 @@ package com.jeffrpowell.adventofcode.aoc2022;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jeffrpowell.adventofcode.SlidingWindowSpliterator;
+import com.jeffrpowell.adventofcode.algorithms.SlidingWindowSpliterator;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 

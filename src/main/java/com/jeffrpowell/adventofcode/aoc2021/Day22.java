@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.jeffrpowell.adventofcode.Point3DUtils;
+import com.jeffrpowell.adventofcode.algorithms.Point3DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;

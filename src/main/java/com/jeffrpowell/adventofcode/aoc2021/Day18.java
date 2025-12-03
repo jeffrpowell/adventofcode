@@ -5,7 +5,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jeffrpowell.adventofcode.CharArrayUtils;
+import com.jeffrpowell.adventofcode.algorithms.CharArrayUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 

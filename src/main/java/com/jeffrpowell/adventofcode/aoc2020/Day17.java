@@ -1,6 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2020;
 
-import com.jeffrpowell.adventofcode.PointND;
+import com.jeffrpowell.adventofcode.algorithms.PointND;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import java.util.Collection;

@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.jeffrpowell.adventofcode.Point2DUtils;
+import com.jeffrpowell.adventofcode.algorithms.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;

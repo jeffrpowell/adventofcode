@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import com.jeffrpowell.adventofcode.Grid;
-import com.jeffrpowell.adventofcode.Point2DUtils;
+import com.jeffrpowell.adventofcode.algorithms.Grid;
+import com.jeffrpowell.adventofcode.algorithms.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 

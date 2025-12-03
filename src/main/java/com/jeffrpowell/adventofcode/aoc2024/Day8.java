@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.jeffrpowell.adventofcode.Grid;
-import com.jeffrpowell.adventofcode.Point2DUtils;
+import com.jeffrpowell.adventofcode.algorithms.Grid;
+import com.jeffrpowell.adventofcode.algorithms.Point2DUtils;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 

@@ -1,4 +1,4 @@
-package com.jeffrpowell.adventofcode;
+package com.jeffrpowell.adventofcode.algorithms;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

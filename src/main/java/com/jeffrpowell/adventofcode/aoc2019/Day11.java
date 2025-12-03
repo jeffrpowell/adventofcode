@@ -1,6 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2019;
 
-import com.jeffrpowell.adventofcode.Direction;
+import com.jeffrpowell.adventofcode.algorithms.Direction;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.IntCodeComputer;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;

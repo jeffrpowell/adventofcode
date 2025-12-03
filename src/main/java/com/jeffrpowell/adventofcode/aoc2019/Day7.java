@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
-import com.jeffrpowell.adventofcode.Permutations;
+import com.jeffrpowell.adventofcode.algorithms.Permutations;
 import com.jeffrpowell.adventofcode.aoc2019.intcode.IntCodeComputer;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;

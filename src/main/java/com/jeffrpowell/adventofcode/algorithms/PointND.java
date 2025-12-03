@@ -1,4 +1,4 @@
-package com.jeffrpowell.adventofcode;
+package com.jeffrpowell.adventofcode.algorithms;
 
 import com.google.common.collect.Sets;
 import java.util.ArrayList;

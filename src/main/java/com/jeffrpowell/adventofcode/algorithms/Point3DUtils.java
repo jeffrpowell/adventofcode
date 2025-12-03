@@ -1,4 +1,4 @@
-package com.jeffrpowell.adventofcode;
+package com.jeffrpowell.adventofcode.algorithms;
 
 import java.util.Collection;
 import java.util.Set;

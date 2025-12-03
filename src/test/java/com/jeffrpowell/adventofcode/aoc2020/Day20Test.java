@@ -1,15 +1,18 @@
 package com.jeffrpowell.adventofcode.aoc2020;
 
-import com.jeffrpowell.adventofcode.Direction;
-import com.jeffrpowell.adventofcode.Solution;
-import com.jeffrpowell.adventofcode.TestDataLoader;
-import com.jeffrpowell.adventofcode.aoc2020.Day20.Tile;
-import java.util.List;
-import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+
+import com.jeffrpowell.adventofcode.Solution;
+import com.jeffrpowell.adventofcode.TestDataLoader;
+import com.jeffrpowell.adventofcode.algorithms.Direction;
+import com.jeffrpowell.adventofcode.aoc2020.Day20.Tile;
 
 public class Day20Test
 {
