@@ -66,4 +66,15 @@ public class Grid<T> extends HashMap<Point2D, T>{
         Point2D bottomRight = new Point2D.Double(input.size() - 1, input.get(0).size() - 1);
         this.inclusiveBoundingBox = new Point2DUtils.BoundingBox(topLeft, bottomRight);
     }
+
+    private Grid() {
+        super();
+    }
+
+    public Grid<T> copy() {
+        Grid<T> newGrid = new Grid<>();
+        newGrid.putAll(this);
+        newGrid.inclusiveBoundingBox = this.inclusiveBoundingBox;
+        return newGrid;
+    }
 }
