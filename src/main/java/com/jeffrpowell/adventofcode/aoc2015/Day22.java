@@ -33,6 +33,8 @@ public class Day22 extends Solution2015<Rule>{
     @Override
     protected String part2(List<Rule> input) {
         return simulate(input, true);
+        //1289 too low
+        //1362 too high
     }
 
     private String simulate(List<Rule> input, boolean part2) {
@@ -116,7 +118,7 @@ public class Day22 extends Solution2015<Rule>{
                 // Boss's turn: attack
                 int damageToPlayer = Math.max(1, boss.damage() - armor);
                 Stats newPlayer = new Stats(player.hitPoints() - damageToPlayer, player.damage(), player.mana());
-                if (newPlayer.hitPoints() > 0) {
+                if (newPlayer.hitPoints() > (part2 ? 1 : 0)) {
                     queue.add(new GameState(
                         newPlayer,
                         boss,
