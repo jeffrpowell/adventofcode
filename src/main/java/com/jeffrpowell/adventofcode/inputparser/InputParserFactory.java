@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.inputparser.rule.Rule;
 import com.jeffrpowell.adventofcode.inputparser.rule.RuleParser;
@@ -58,6 +59,10 @@ public class InputParserFactory
 	public static InputParser<List<Long>> getLongTokenSVParser(String delimiter) {
 		return new LongTokenSVParser(delimiter);
 	}
+    
+    public static InputParser<Rule> getRuleParser(String ruleDelimiter, String singleRegexString) {
+        return getRuleParser(ruleDelimiter, Pattern.compile(singleRegexString));
+    }
     
     public static InputParser<Rule> getRuleParser(String ruleDelimiter, Pattern singleRegexPattern) {
         return new RuleParser(ruleDelimiter, Map.of("pattern", singleRegexPattern));
