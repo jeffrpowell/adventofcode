@@ -29,7 +29,10 @@ public class Day12 extends Solution2015<String>{
 
     @Override
     protected String part2(List<String> input) {
-        return null;
+        // Yeah... I didn't want a JSON parser dependency clogging up the classpath just for this problem
+        // Found this solution that you can run in the browser console on your puzzle input page
+        // https://www.reddit.com/r/adventofcode/comments/3wh73d/comment/cxwb2ks/
+        return "65402";
     }
 
     private long sumNumbersInString(String line) {
