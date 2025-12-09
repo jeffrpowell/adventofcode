@@ -38,6 +38,24 @@ public class Point2DUtils
     public static Stream<Point2D> repeatVectorToPtNTimes(Point2D vector, Point2D pt, int n) {
         return Stream.iterate(applyVectorToPt(vector, pt), lastPt -> true, lastPt -> applyVectorToPt(vector, lastPt)).limit(n);
     }
+
+    public static List<Point2D> getPointsBetweenTwoPoints(Point2D pt1, Point2D pt2, boolean includeEndPts) {
+        double xDiff = pt2.getX() - pt1.getX();
+        double yDiff = pt2.getY() - pt1.getY();
+        double xKernel = xDiff == 0 ? 0 : xDiff / Math.abs(xDiff);
+        double yKernel = yDiff == 0 ? 0 : yDiff / Math.abs(yDiff);
+        Point2D vector = new Point2D.Double(xKernel, yKernel);
+        List<Point2D> innerPts = Point2DUtils.repeatVectorToPtNTimes(
+            vector, 
+            pt1, 
+            Double.valueOf(Math.max(Math.abs(xDiff), Math.abs(yDiff))).intValue() - 1
+        ).collect(Collectors.toList());
+        if (includeEndPts) {
+            innerPts.add(0, pt1);
+            innerPts.add(pt2);
+        }
+        return innerPts;
+    }
 	
 	public static boolean pointInsideBoundary(Point2D pt, boolean inclusive, double topBoundary, double rightBoundary, double bottomBoundary, double leftBoundary) {
 		double x = pt.getX();
@@ -274,32 +292,37 @@ public class Point2DUtils
         double x = pt.getX();
         double y = pt.getY();
         int num = poly.size();
-        int j = num - 1;
         boolean c = false;
         
-        for (int i = 0; i < num; i++) {
-            if (x == poly.get(i).getX() && y == poly.get(i).getY()) {
+        for (int i = 0, j = num - 1; i < num; j = i++) {
+            Point2D priorPt = poly.get(j);
+            Point2D currentPt = poly.get(i);
+            if (x == currentPt.getX() && y == currentPt.getY()) {
                 // point is a corner
                 return true;
             }
             
-            if ((poly.get(i).getY() > y) != (poly.get(j).getY() > y)) {
-                double slope = (x - poly.get(i).getX()) * (poly.get(j).getY() - poly.get(i).getY()) -
-                        (poly.get(j).getX() - poly.get(i).getX()) * (y - poly.get(i).getY());
+            if ((currentPt.getY() > y) != (priorPt.getY() > y)) {
+                double slope = (x - currentPt.getX()) * (priorPt.getY() - currentPt.getY()) -
+                        (priorPt.getX() - currentPt.getX()) * (y - currentPt.getY());
                 
                 if (slope == 0) {
                     // point is on boundary
                     return true;
                 }
                 
-                if ((slope < 0) != (poly.get(j).getY() < poly.get(i).getY())) {
+                if ((slope < 0) != (priorPt.getY() < currentPt.getY())) {
                     c = !c;
                 }
             }
-            
-            j = i;
         }
         
         return c;
+    }
+
+    public static Point2D midpoint(Point2D pt1, Point2D pt2) {
+        double xMid = (pt1.getX() + pt2.getX()) / 2;
+        double yMid = (pt1.getY() + pt2.getY()) / 2;
+        return new Point2D.Double(xMid, yMid);
     }
 }
