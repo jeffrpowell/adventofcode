@@ -2,12 +2,12 @@ package com.jeffrpowell.adventofcode.aoc2025;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.jeffrpowell.adventofcode.algorithms.Grid;
 import com.jeffrpowell.adventofcode.algorithms.PointTransform;
@@ -71,42 +71,47 @@ public class Day7 extends Solution2025<List<String>>{
         }
     }
 
-    private List<Point2D> attemptSplit2(Point2D beamTip, Grid<WhatsThere> g) {
-        if (g.get(beamTip) == WhatsThere.SPLITTER) {
-            return List.of(SPLIT_LEFT.apply(beamTip), SPLIT_RIGHT.apply(beamTip));
-        }
-        else {
-            return List.of(beamTip);
-        }
-    }
-
     record BeamStack(Point2D beamTip, int duplicateBeams){}
 
     @Override
     protected String part2(List<List<String>> input) {
-        Grid<WhatsThere> g = new Grid<>(input, (rows, pt) -> WhatsThere.fromString(rows.get(Grid.d2i(pt.getY())).get(Grid.d2i(pt.getX()))));
+        Grid<WhatsThere> g = new Grid<>(input, (rows, pt) -> 
+            WhatsThere.fromString(
+                rows.get(Grid.d2i(pt.getY())).get(Grid.d2i(pt.getX()))
+            ));
+        List<Point2D> splitters = g.entrySet().stream()
+            .filter(entry -> entry.getValue() == WhatsThere.SPLITTER)
+            .map(Map.Entry::getKey)
+            .sorted(this::compareSplitterPoints)
+            .collect(Collectors.toList());
+        int maxSplitterX = splitters.stream()
+            .mapToDouble(Point2D::getX)
+            .mapToInt(d -> Double.valueOf(d).intValue())
+            .max().orElseThrow();
+        List<Long> beamColumns = Stream.generate(() -> 0L).limit(maxSplitterX + 2).collect(Collectors.toList());
         Point2D start = g.entrySet().stream().filter(entry -> entry.getValue() == WhatsThere.START).map(Map.Entry::getKey).findFirst().orElseThrow();
-        Map<Point2D, Integer> stacks = new HashMap<>();
-        stacks.put(start, 1);
-        for (int i = 0; i < input.size(); i++) {
-            Map<Point2D, Integer> tempStacks = new HashMap<>();
-            for (Map.Entry<Point2D, Integer> entry : stacks.entrySet()) {
-                Point2D downPt = MOVE_DOWN.apply(entry.getKey());
-                tempStacks.put(downPt, stacks.getOrDefault(entry.getKey(), 0) + stacks.get(entry.getKey()));
-                List<Point2D> split = attemptSplit2(downPt, g);
-                if (split.size() > 1) {
-                    int incomingBeamSize = tempStacks.get(downPt);
-                    for (Point2D splitPt : split) {
-                        tempStacks.put(splitPt, stacks.getOrDefault(splitPt, 0) + incomingBeamSize);
-                    }
-                }
+        beamColumns.set(d2i(start.getX()), 1L);
+        for (Point2D splitter : splitters) {
+            int column = d2i(splitter.getX());
+            long priorBeams = beamColumns.get(column);
+            if (priorBeams > 0L) {
+                beamColumns.set(column, 0L);
+                beamColumns.set(column-1, priorBeams + beamColumns.get(column-1));
+                beamColumns.set(column+1, priorBeams + beamColumns.get(column+1));
             }
-            stacks.putAll(tempStacks);
         }
-        return Integer.toString(stacks.entrySet().stream()
-            .filter(entry -> entry.getKey().getY() == input.size() - 1)
-            .mapToInt(Map.Entry::getValue)
-            .sum()
-        );
+        return Long.toString(beamColumns.stream().reduce(0L, Math::addExact));
+    }
+
+    private int d2i (Double d) {
+        return d.intValue();
+    }
+
+    private int compareSplitterPoints(Point2D pt1, Point2D pt2) {
+        int c = Double.compare(pt1.getY(), pt2.getY());
+        if (c == 0) {
+            c = Double.compare(pt1.getX(), pt2.getX());
+        }
+        return c;
     }
 }
