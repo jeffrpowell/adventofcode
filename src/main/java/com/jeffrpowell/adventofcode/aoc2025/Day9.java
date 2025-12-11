@@ -29,6 +29,10 @@ public class Day9 extends Solution2025<Rule>{
         List<Point2D> redPts = input.stream()
             .map(r -> r.getPoint2D(0))
             .collect(Collectors.toList());
+        return Long.toString(runPart1(redPts));
+    }
+
+    private long runPart1(List<Point2D> redPts) {
         long largestArea = Long.MIN_VALUE;
         for (int i = 0; i < redPts.size() - 1; i++) {
             Point2D pt1 = redPts.get(i);
@@ -41,7 +45,7 @@ public class Day9 extends Solution2025<Rule>{
                 largestArea = Math.max(largestArea, area);
             }
         }
-        return Long.toString(largestArea);
+        return largestArea;
     }
 
     @Override
@@ -49,8 +53,26 @@ public class Day9 extends Solution2025<Rule>{
         List<Point2D> redPts = input.stream()
             .map(r -> r.getPoint2D(0))
             .collect(Collectors.toList());
-        redPts.add(redPts.get(0));
         // print(redPts);
+        // Massive spike runs horizontally across the middle of a large circle of points
+        // Cut the circle in half and run part 1 on both halves
+        // 94985,50114
+        // 94985,48652
+        List<Point2D> topRedPts = redPts.stream()
+            .filter(pt -> pt.getY() < 50114)
+            .collect(Collectors.toList());
+        List<Point2D> bottomRedPts = redPts.stream()
+            .filter(pt -> pt.getY() < 50114)
+            .collect(Collectors.toList());
+        // return Long.toString(Math.max(runPart1(topRedPts), runPart1(bottomRedPts)));
+        // 3000499218 TOO HIGH
+        // return Long.toString(runPart2(redPts));
+        // 1574649700 TOO LOW
+        return Long.toString(Math.max(runPart2(topRedPts), runPart2(bottomRedPts)));
+    }
+
+    private long runPart2(List<Point2D> redPts) {
+        redPts.add(redPts.get(0));
         List<Rectangle> rects = new ArrayList<>();
         List<Pairing> polygonEdges = new ArrayList<>();
         for (int i = 0; i < redPts.size() - 1; i++) {
@@ -65,15 +87,13 @@ public class Day9 extends Solution2025<Rule>{
         rects = rects.stream()
             .filter(rect -> polygonEdges.stream().noneMatch(edge -> rect.pathIntersectsInside(edge.pt1(), edge.pt2())))
             .collect(Collectors.toList());
-        return Long.toString(
-            rects.stream()
-                .filter(r -> Point2DUtils.isPointInPolygon(r.center(), redPts))
-                .map(Rectangle::area)
-                .sorted(Comparator.reverseOrder())
-                .findFirst().orElseThrow()
-        );
-        //1574649700 TOO LOW
+        return rects.stream()
+            .filter(r -> Point2DUtils.isPointInPolygon(r.center(), redPts))
+            .map(Rectangle::area)
+            .sorted(Comparator.reverseOrder())
+            .findFirst().orElseThrow();
     }
+
     record Pairing(Point2D pt1, Point2D pt2){}
 
     record Rectangle(Point2D corner1, Point2D corner2, Point2DUtils.BoundingBox bb){
