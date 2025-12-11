@@ -20,7 +20,7 @@ import com.jeffrpowell.adventofcode.aoc2025.*;
 
 public class Launcher
 {
-	public static final Solution<?> DAY = new Day9();
+	public static final Solution<?> DAY = new Day11();
 	
     public static void main(String[] args) {
 		List<String> puzzleInput = getPuzzleInput();

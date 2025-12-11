@@ -21,16 +21,6 @@ public class Day11 extends Solution2025<Part<String, List<String>>>{
         return InputParserFactory.getSplitPartParser(Pattern.compile(": "), InputParserFactory.getStringParser(), InputParserFactory.getTokenSVParser(" "));
     }
 
-    private record Path(String tip, boolean visitedDAC, boolean visitedFFT){
-        public boolean completed() {
-            return tip.equals("out");
-        }
-
-        public boolean winner() {
-            return visitedDAC && visitedFFT;
-        }
-    }
-    
     @Override
     protected String part1(List<Part<String, List<String>>> input) {
         Map<String, List<String>> outputs = new HashMap<>();
@@ -40,33 +30,9 @@ public class Day11 extends Solution2025<Part<String, List<String>>>{
                 outputs.get(part.firstPart()).add(down);
             }
         }
-        return runPart1(outputs, "you", "out");
+        Map<String, Map<String, Long>> cache = new HashMap<>();
+        return Long.toString(dig("you", "out", outputs, cache));
     }
-
-    private String runPart1(Map<String, List<String>> outputs, String start, String finish) {
-        List<String> tips = new ArrayList<>();
-        tips.add(start);
-        long count = 0;
-        // int debug = 0;
-        while (!tips.isEmpty()) {
-            List<String> newTips = new ArrayList<>();
-            for (String next : tips) {
-                if (next.equals(finish)) {
-                    count++;
-                }
-                else if (outputs.containsKey(next)){
-                    newTips.addAll(outputs.get(next));
-                }
-            }
-            tips = newTips;
-            // if (++debug == 6) {
-            //     System.out.println(tips.size());
-            //     debug = 0;
-            // }
-        }
-        return Long.toString(count);
-    }
-
 
     @Override
     protected String part2(List<Part<String, List<String>>> input) {
@@ -77,28 +43,33 @@ public class Day11 extends Solution2025<Part<String, List<String>>>{
                 outputs.get(part.firstPart()).add(down);
             }
         }
-        // return runPart1(outputs, "dac", "out");
-        List<Path> tips = new ArrayList<>();
-        tips.add(new Path("svr", false, false));
-        long count = 0;
-        while (!tips.isEmpty()) {
-            List<Path> newTips = new ArrayList<>();
-            for (Path next : tips) {
-                if (next.completed()) {
-                    if (next.winner()) {
-                        count++;
-                    }
-                }
-                else if (outputs.containsKey(next.tip())){
-                    for (String output : outputs.get(next.tip())) {
-                        boolean isFFT = output.equals("fft");
-                        boolean isDAC = output.equals("dac");
-                        newTips.add(new Path(output, isDAC || next.visitedDAC(), isFFT || next.visitedFFT()));
-                    }
-                }
+        Map<String, Map<String, Long>> cache = new HashMap<>();
+        return Long.toString(
+            dig("dac", "out", outputs, cache)
+            * dig("fft", "dac", outputs, cache)
+            * dig("svr", "fft", outputs, cache)
+        );
+    }
+
+    private long dig(String start, String target, Map<String, List<String>> outputs, Map<String, Map<String, Long>> cache) {
+        long winners = 0;
+        for (String down : outputs.get(start)) {
+            if (down.equals(target)) {
+                winners++;
             }
-            tips = newTips;
+            else if (!outputs.containsKey(down)) {
+                continue;
+            }
+            else if (cache.containsKey(down) && cache.get(down).containsKey(target)) {
+                winners += cache.get(down).get(target);
+            }
+            else {
+                long downstreamWinners = dig(down,target, outputs, cache);
+                cache.putIfAbsent(down, new HashMap<>());
+                cache.get(down).put(target, downstreamWinners);
+                winners += downstreamWinners;
+            }
         }
-        return Long.toString(count);
+        return winners;
     }
 }
