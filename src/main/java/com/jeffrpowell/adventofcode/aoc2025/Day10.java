@@ -1,5 +1,6 @@
 package com.jeffrpowell.adventofcode.aoc2025;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -8,6 +9,14 @@ import com.jeffrpowell.adventofcode.algorithms.CharArrayUtils;
 import com.jeffrpowell.adventofcode.algorithms.PowerSets;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
+import com.microsoft.z3.ArithExpr;
+import com.microsoft.z3.Context;
+import com.microsoft.z3.IntExpr;
+import com.microsoft.z3.IntNum;
+import com.microsoft.z3.IntSort;
+import com.microsoft.z3.Model;
+import com.microsoft.z3.Optimize;
+import com.microsoft.z3.Status;
 
 public class Day10 extends Solution2025<List<String>>{
     @Override
@@ -40,6 +49,22 @@ public class Day10 extends Solution2025<List<String>>{
         return Long.toString(minpresses);
     }
 
+    private List<Boolean> pressButtonsLights(List<List<Boolean>> buttonSequence) {
+        if (buttonSequence.isEmpty()) {
+            return List.of();
+        }
+        int size = buttonSequence.getFirst().size();
+        List<Boolean> state = Stream.generate(() -> false).limit(size).collect(Collectors.toList());
+        for (List<Boolean> button : buttonSequence) {
+            for (int i = 0; i < size; i++) {
+                if (button.get(i)) {
+                    state.set(i, !state.get(i));
+                }
+            }
+        }
+        return state;
+    }
+
     @Override
     protected String part2(List<List<String>> input) {
         List<Machine> machines = input.stream()
@@ -47,15 +72,7 @@ public class Day10 extends Solution2025<List<String>>{
             .collect(Collectors.toList());
         long minpresses = 0;
         for (Machine machine : machines) {
-            List<List<List<Boolean>>> buttonCombinations = PowerSets.getPowerSet(machine.buttons());
-            int presses = Integer.MAX_VALUE;
-            for (List<List<Boolean>> buttonSequence : buttonCombinations) {
-                List<Integer> buttonPressResult = pressButtonsJoltages(buttonSequence);
-                if (buttonPressResult.equals(machine.joltages())) {
-                    presses = Math.min(presses, buttonSequence.size());
-                }
-            }
-            minpresses += presses;
+            minpresses += minPressesForJoltages(machine);
         }
         return Long.toString(minpresses);
     }
@@ -94,36 +111,77 @@ public class Day10 extends Solution2025<List<String>>{
         }
     }
 
-    private List<Boolean> pressButtonsLights(List<List<Boolean>> buttonSequence) {
-        if (buttonSequence.isEmpty()) {
-            return List.of();
-        }
-        int size = buttonSequence.getFirst().size();
-        List<Boolean> state = Stream.generate(() -> false).limit(size).collect(Collectors.toList());
-        for (List<Boolean> button : buttonSequence) {
-            for (int i = 0; i < size; i++) {
-                if (button.get(i)) {
-                    state.set(i, !state.get(i));
-                }
+    @SuppressWarnings("unchecked")
+    private long minPressesForJoltages(Machine machine) {
+        int n = machine.joltages().size();
+        int m = machine.buttons().size();
+        int[] b = machine.joltages().stream().mapToInt(Integer::intValue).toArray();
+        int[][] a = new int[n][m];
+        for (int j = 0; j < m; j++) {
+            List<Boolean> button = machine.buttons().get(j);
+            for (int i = 0; i < n; i++) {
+                a[i][j] = button.get(i) ? 1 : 0;
             }
         }
-        return state;
+
+        long[] ub = computeUpperBounds(a, b);
+
+        try (Context ctx = new Context()) {
+            Optimize opt = ctx.mkOptimize();
+            IntExpr[] x = new IntExpr[m];
+            for (int j = 0; j < m; j++) {
+                x[j] = ctx.mkIntConst("x" + j);
+                opt.Add(ctx.mkGe(x[j], ctx.mkInt(0)));
+                if (ub[j] != Long.MAX_VALUE) {
+                    opt.Add(ctx.mkLe(x[j], ctx.mkInt((int) ub[j])));
+                }
+            }
+
+            for (int i = 0; i < n; i++) {
+                ArithExpr<IntSort> sum = ctx.mkInt(0);
+                for (int j = 0; j < m; j++) {
+                    if (a[i][j] == 1) {
+                        sum = ctx.mkAdd(sum, x[j]);
+                    }
+                }
+                opt.Add(ctx.mkEq(sum, ctx.mkInt(b[i])));
+            }
+
+            ArithExpr<IntSort> total = ctx.mkInt(0);
+            for (int j = 0; j < m; j++) {
+                total = ctx.mkAdd(total, x[j]);
+            }
+            opt.MkMinimize(total);
+
+            Status status = opt.Check();
+            if (status != Status.SATISFIABLE) {
+                throw new IllegalStateException("Z3 returned: " + status);
+            }
+            Model model = opt.getModel();
+            long presses = 0;
+            for (int j = 0; j < m; j++) {
+                IntNum val = (IntNum) model.evaluate(x[j], false);
+                presses += val.getInt64();
+            }
+            return presses;
+        }
     }
 
-    //DOESN'T ACCOUNT FOR PRESSING SAME BUTTON MULTIPLE TIMES
-    private List<Integer> pressButtonsJoltages(List<List<Boolean>> buttonSequence) {
-        if (buttonSequence.isEmpty()) {
-            return List.of();
-        }
-        int size = buttonSequence.getFirst().size();
-        List<Integer> state = Stream.generate(() -> 0).limit(size).collect(Collectors.toList());
-        for (List<Boolean> button : buttonSequence) {
-            for (int i = 0; i < size; i++) {
-                if (button.get(i)) {
-                    state.set(i, state.get(i)+1);
+    private static long[] computeUpperBounds(int[][] a, int[] b) {
+        int n = a.length;
+        int m = a[0].length;
+        long[] ub = new long[m];
+        Arrays.fill(ub, Long.MAX_VALUE);
+        for (int j = 0; j < m; j++) {
+            for (int i = 0; i < n; i++) {
+                if (a[i][j] == 1) {
+                    ub[j] = Math.min(ub[j], b[i]);
                 }
             }
+            if (ub[j] == Long.MAX_VALUE) {
+                ub[j] = 0;
+            }
         }
-        return state;
+        return ub;
     }
 }
