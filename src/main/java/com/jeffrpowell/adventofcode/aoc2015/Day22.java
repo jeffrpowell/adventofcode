@@ -101,7 +101,18 @@ public class Day22 extends Solution2015<Rule>{
                             boss.mana()
                         );
                         if (newBoss.hitPoints() <= 0) {
-                            return Integer.toString(state.manaSpent() + spell.cost());
+                            if (part2) {
+                                queue.add(new GameState(
+                                    newPlayer,
+                                    newBoss,
+                                    state.manaSpent() + spell.cost(),
+                                    effectsWithNew,
+                                    false
+                                ));
+                            }
+                            else {
+                                return Integer.toString(state.manaSpent() + spell.cost());
+                            }
                         }
                         else {
                             queue.add(new GameState(
