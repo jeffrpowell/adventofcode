@@ -1,11 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2015;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
-import com.jeffrpowell.adventofcode.algorithms.Permutations;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
 import com.jeffrpowell.adventofcode.inputparser.InputParserFactory;
 
@@ -23,64 +19,89 @@ public class Day24 extends Solution2015<Integer>{
 
     @Override
     protected String part1(List<Integer> input) {
-        List<Allocation> partitionGroups = permuteAndPartition(input);
-        int smallestSetSize = partitionGroups.stream()
-            .mapToInt(Allocation::smallestGroupSize)
-            .min()
-            .orElseThrow();
-        return Long.toString(partitionGroups.stream()
-            .filter(allocation -> allocation.smallestGroupSize() == smallestSetSize)
-            .mapToLong(Allocation::quantumEntanglement)
-            .min()
-            .orElseThrow());
+        int targetWeight = input.stream().reduce(0, Math::addExact) / 3;
+        return Long.toString(findMinQuantumEntanglementForTargetWeight(input, targetWeight));
     }
 
 
     @Override
     protected String part2(List<Integer> input) {
-        return null;
+        int targetWeight = input.stream().reduce(0, Math::addExact) / 4;
+        return Long.toString(findMinQuantumEntanglementForTargetWeight(input, targetWeight));
     }
 
-    List<Allocation> permuteAndPartition(List<Integer> input) {
-        List<List<Integer>> permutations = Permutations.getAllPermutations(input);
-        List<Allocation> allPartitionGroups = new ArrayList<>();
-        int numPackages = input.size();
-        for (List<Integer> permutation : permutations) {
-            // Find partitions
-            for (int i = 1; i < numPackages - 2; i++) {
-                for (int j = i; j < numPackages - 1; j++) {
-                    List<Set<Integer>> grouping = new ArrayList<>();
-                    grouping.add(Set.copyOf(permutation.subList(0, i)));
-                    grouping.add(Set.copyOf(permutation.subList(i, j)));
-                    grouping.add(Set.copyOf(permutation.subList(j, numPackages - 1)));
-                    grouping.sort(Comparator.comparingInt(Set::size));
-                    if (grouping.stream()
-                        .mapToInt(s -> s.stream().reduce(0, Math::addExact))
-                        .distinct() //If there is only one distinct sum, all groups are equal
-                        .count() == 1) {
-                            allPartitionGroups.add(new Allocation(grouping, calculateQuantumEntanglement(grouping)));
-                    }
-                }
+    private long findMinQuantumEntanglementForTargetWeight(List<Integer> input, int targetWeight) {
+        List<Integer> weightsDesc = input.stream()
+            .sorted((a, b) -> Integer.compare(b, a))
+            .toList();
+        int n = weightsDesc.size();
+        int[] suffixSums = new int[n + 1];
+        for (int i = n - 1; i >= 0; i--) {
+            suffixSums[i] = Math.addExact(suffixSums[i + 1], weightsDesc.get(i));
+        }
+
+        for (int groupSize = 1; groupSize <= n; groupSize++) {
+            long[] bestQE = new long[] { Long.MAX_VALUE };
+            searchMinQE(weightsDesc, suffixSums, 0, groupSize, 0, targetWeight, 1L, bestQE);
+            if (bestQE[0] != Long.MAX_VALUE) {
+                return bestQE[0];
             }
         }
-        return allPartitionGroups;
+        return -1;
     }
 
-    private long calculateQuantumEntanglement(List<Set<Integer>> groups) {
-        int smallestSize = groups.stream()
-            .mapToInt(Set::size)
-            .min()
-            .orElseThrow();
-        return groups.stream()
-            .filter(set -> set.size() == smallestSize)
-            .mapToInt(set -> set.stream().reduce(1, Math::multiplyExact))
-            .min()
-            .orElseThrow();
-    }
-
-    record Allocation(List<Set<Integer>> groups, long quantumEntanglement) {
-        public int smallestGroupSize() {
-            return groups.stream().mapToInt(Set::size).min().orElseThrow();
+    private void searchMinQE(
+        List<Integer> weightsDesc,
+        int[] suffixSums,
+        int index,
+        int remainingCount,
+        int currentSum,
+        int targetWeight,
+        long currentQE,
+        long[] bestQE
+    ) {
+        if (currentSum > targetWeight) {
+            return;
         }
+        if (currentSum + suffixSums[index] < targetWeight) {
+            return;
+        }
+        if (remainingCount == 0) {
+            if (currentSum == targetWeight) {
+                bestQE[0] = Math.min(bestQE[0], currentQE);
+            }
+            return;
+        }
+        if (index >= weightsDesc.size()) {
+            return;
+        }
+        if (weightsDesc.size() - index < remainingCount) {
+            return;
+        }
+        if (currentQE >= bestQE[0]) {
+            return;
+        }
+
+        int w = weightsDesc.get(index);
+        searchMinQE(
+            weightsDesc,
+            suffixSums,
+            index + 1,
+            remainingCount - 1,
+            Math.addExact(currentSum, w),
+            targetWeight,
+            Math.multiplyExact(currentQE, (long) w),
+            bestQE
+        );
+        searchMinQE(
+            weightsDesc,
+            suffixSums,
+            index + 1,
+            remainingCount,
+            currentSum,
+            targetWeight,
+            currentQE,
+            bestQE
+        );
     }
 }
