@@ -1,9 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2015;
 
 import java.awt.geom.Point2D;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.jeffrpowell.adventofcode.algorithms.PointTransform;
 import com.jeffrpowell.adventofcode.inputparser.InputParser;
@@ -27,7 +25,7 @@ public class Day25 extends Solution2015<Rule>{
     protected String part1(List<Rule> input) {
         long code = 20151125;
         Point2D pt = new Point2D.Double(0, 0);
-        Point2D target = new Point2D.Double(input.get(0).getInt(0) - 1, input.get(0).getInt(1) - 1);
+        Point2D target = new Point2D.Double(input.get(0).getInt(1) - 1, input.get(0).getInt(0) - 1);
         while(!pt.equals(target)) {
             pt = nextPt(pt);
             code = (code * 252533L) % 33554393L;
