@@ -1,11 +1,7 @@
 package com.jeffrpowell.adventofcode.aoc2025;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.jeffrpowell.adventofcode.algorithms.Point2DUtils;
@@ -53,92 +49,87 @@ public class Day9 extends Solution2025<Rule>{
         List<Point2D> redPts = input.stream()
             .map(r -> r.getPoint2D(0))
             .collect(Collectors.toList());
-        // print(redPts);
-        // Massive spike runs horizontally across the middle of a large circle of points
-        // Cut the circle in half and run part 1 on both halves
-        // 94985,50114
-        // 94985,48652
-        List<Point2D> topRedPts = redPts.stream()
-            .filter(pt -> pt.getY() < 50114)
-            .collect(Collectors.toList());
-        List<Point2D> bottomRedPts = redPts.stream()
-            .filter(pt -> pt.getY() < 50114)
-            .collect(Collectors.toList());
-        // return Long.toString(Math.max(runPart1(topRedPts), runPart1(bottomRedPts)));
-        // 3000499218 TOO HIGH
-        // return Long.toString(runPart2(redPts));
-        // 1574649700 TOO LOW
-        return Long.toString(Math.max(runPart2(topRedPts), runPart2(bottomRedPts)));
+        return Long.toString(runPart2(redPts));
     }
 
     private long runPart2(List<Point2D> redPts) {
-        redPts.add(redPts.get(0));
-        List<Rectangle> rects = new ArrayList<>();
-        List<Pairing> polygonEdges = new ArrayList<>();
-        for (int i = 0; i < redPts.size() - 1; i++) {
-            Point2D pt1 = redPts.get(i);
-            Point2D nextPt = redPts.get(i + 1);
-            polygonEdges.add(new Pairing(pt1, nextPt));
-            for (int j = 0; j < redPts.size(); j++) {
-                Point2D pt2 = redPts.get(j);
-                rects.add(new Rectangle(pt1, pt2));
+        int n = redPts.size();
+        long bestArea = Long.MIN_VALUE;
+        for (int i = 0; i < n; i++) {
+            Point2D corner1 = redPts.get(i);
+            for (int j = 0; j < n; j++) {
+                Point2D corner2 = redPts.get(j);
+                long area = rectangleArea(corner1, corner2);
+                if (area <= bestArea) {
+                    continue;
+                }
+
+                Point2DUtils.BoundingBox bb = Point2DUtils.getBoundingBox(List.of(corner1, corner2));
+                double minX = bb.min().getX();
+                double maxX = bb.max().getX();
+                double minY = bb.min().getY();
+                double maxY = bb.max().getY();
+
+                if (Math.abs(minX - maxX) < 0.0001 || Math.abs(minY - maxY) < 0.0001) {
+                    continue;
+                }
+
+                boolean intersectsInterior = false;
+                for (int e = 0; e < n; e++) {
+                    Point2D a = redPts.get(e);
+                    Point2D b = redPts.get((e + 1) % n);
+                    if (segmentIntersectsOpenRectangleInterior(a, b, minX, maxX, minY, maxY)) {
+                        intersectsInterior = true;
+                        break;
+                    }
+                }
+                if (intersectsInterior) {
+                    continue;
+                }
+
+                Point2D center = Point2DUtils.midpoint(corner1, corner2);
+                if (!Point2DUtils.isPointInPolygon(center, redPts)) {
+                    continue;
+                }
+
+                bestArea = area;
             }
         }
-        rects = rects.stream()
-            .filter(rect -> polygonEdges.stream().noneMatch(edge -> rect.pathIntersectsInside(edge.pt1(), edge.pt2())))
-            .collect(Collectors.toList());
-        return rects.stream()
-            .filter(r -> Point2DUtils.isPointInPolygon(r.center(), redPts))
-            .map(Rectangle::area)
-            .sorted(Comparator.reverseOrder())
-            .findFirst().orElseThrow();
+        return bestArea;
     }
 
-    record Pairing(Point2D pt1, Point2D pt2){}
-
-    record Rectangle(Point2D corner1, Point2D corner2, Point2DUtils.BoundingBox bb){
-
-        public Rectangle(Point2D corner1, Point2D corner2) {
-            this(corner1, corner2, Point2DUtils.getBoundingBox(List.of(corner1, corner2)));
-        }
-
-        public long area() {
-            return Double.valueOf(
-                Math.abs(corner1.getX() - corner2.getX() + 1)
-                * Math.abs(corner1.getY() - corner2.getY() + 1)
-            ).longValue();
-        }
-
-        public Point2D center() {
-            return Point2DUtils.midpoint(corner1, corner2);
-        }
-
-        public boolean pathIntersectsInside(Point2D pt1, Point2D pt2) {
-            boolean pt1Inside = Point2DUtils.pointInsideBoundary(pt1, false, bb);
-            boolean pt2Inside = Point2DUtils.pointInsideBoundary(pt2, false, bb);
-            if (pt1Inside || pt2Inside) {
-                return pt1.distance(pt2) < 0.0001;
-            }
-            else {
-                return true;
-            }
-            // version 1 returned in 717954 ms
-            // return Point2DUtils.getPointsBetweenTwoPoints(pt1, pt2, false).stream()
-            //     .anyMatch(pt -> Point2DUtils.pointInsideBoundary(pt, false, bb));
-        }
+    private static long rectangleArea(Point2D corner1, Point2D corner2) {
+        long width = Double.valueOf(Math.abs(corner1.getX() - corner2.getX()) + 1).longValue();
+        long height = Double.valueOf(Math.abs(corner1.getY() - corner2.getY()) + 1).longValue();
+        return width * height;
     }
 
-    @SuppressWarnings("unused")
-    private static void print(List<Point2D> redCornerPts) {
-        Set<Point2D> allSwappableBorderPts = new HashSet<>();
-        for (int i = 0; i < redCornerPts.size() - 1; i++) {
-            Point2D corner1 = redCornerPts.get(i);
-            Point2D corner2 = redCornerPts.get(i+1);
-            allSwappableBorderPts.addAll(Point2DUtils.getPointsBetweenTwoPoints(corner1, corner2, false));
+    private static boolean segmentIntersectsOpenRectangleInterior(Point2D a, Point2D b, double minX, double maxX, double minY, double maxY) {
+        double ax = a.getX();
+        double ay = a.getY();
+        double bx = b.getX();
+        double by = b.getY();
+
+        if (Math.abs(ax - bx) < 0.0001) {
+            double x = ax;
+            if (!(x > minX && x < maxX)) {
+                return false;
+            }
+            double segMinY = Math.min(ay, by);
+            double segMaxY = Math.max(ay, by);
+            return segMinY < maxY && segMaxY > minY;
         }
-        // allSwappableBorderPts = allSwappableBorderPts.stream()
-        //     .map(pt -> new Point2D.Double(pt.getX() - 50000, pt.getY() - 50000))
-        //     .collect(Collectors.toSet());
-        Point2DUtils.printPoints(allSwappableBorderPts);
+        else if (Math.abs(ay - by) < 0.0001) {
+            double y = ay;
+            if (!(y > minY && y < maxY)) {
+                return false;
+            }
+            double segMinX = Math.min(ax, bx);
+            double segMaxX = Math.max(ax, bx);
+            return segMinX < maxX && segMaxX > minX;
+        }
+        else {
+            throw new IllegalArgumentException("Non-axis-aligned path segment: " + a + " -> " + b);
+        }
     }
 }
